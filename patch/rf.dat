@@ -1,0 +1,31 @@
+mem_lpm_config:8f 1f ca
+mem_lpm_buckcnt:0a 0b ef 07
+mem_lpm_hibernate_switch:00
+mem_gpio_wakeup_low:00 00 00 00 00 00 00 00
+mem_fcomp_mul:02
+mem_fcomp_div:24
+mem_iscan_window:20 00
+mem_iscan_interval:00 04
+mem_pscan_window:16 00
+mem_pscan_interval:00 04
+mem_inq_window:20 00
+mem_page_window:30 00
+mem_page_to:00 30
+mem_rx_window_init:80 03
+mem_rx_window_sniff:00 06
+#tx ack window:7000
+mem_24g_rx_window:58 1b
+#rx window:15000
+#mem_24g_rx_window:98 3a
+mem_lpm_xtalcnt:00 0a 1b ef 07
+#mem_lpm_xtalcnt:00 0a 1b ef 0b //cm0 ram 掉电保存
+
+mem_ef_base:30 ff 80
+mem_eeprom_block_size:80
+
+mem_le_att_rf:
+07 e2
+6e 25
+ff
+mem_rf_init_ptr:mem_le_att_rf
+

@@ -1,0 +1,1967 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"ali_socket.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.comm	L_LEV,4,4
+  20              		.comm	GPIO_FUNC,1,1
+  21              		.align	1
+  22              		.code	16
+  23              		.thumb_func
+  25              	ali_socket_bind_timer_cb:
+  26              	.LFB85:
+  27              		.file 1 "../../../mesh/app/ali_socket/ali_socket.c"
+   1:../../../mesh/app/ali_socket/ali_socket.c **** #include "ali_socket.h"
+   2:../../../mesh/app/ali_socket/ali_socket.c **** 
+   3:../../../mesh/app/ali_socket/ali_socket.c **** #include "mm_defines.h"
+   4:../../../mesh/app/ali_socket/ali_socket.c **** #include "meshTimer.h"
+   5:../../../mesh/app/ali_socket/ali_socket.c **** 
+   6:../../../mesh/app/ali_socket/ali_socket.c **** #include "bc_flash.h"
+   7:../../../mesh/app/ali_socket/ali_socket.c **** #include "bc_sys.h"
+   8:../../../mesh/app/ali_socket/ali_socket.c **** #include "bc62xx_gpio.h"
+   9:../../../mesh/app/ali_socket/ali_socket.c **** 
+  10:../../../mesh/app/ali_socket/ali_socket.c **** static ali_socket_t* p_ali_socket = NULL;
+  11:../../../mesh/app/ali_socket/ali_socket.c **** 
+  12:../../../mesh/app/ali_socket/ali_socket.c **** static void ali_socket_bind_timer_cb(void* param)
+  13:../../../mesh/app/ali_socket/ali_socket.c **** {
+  28              		.loc 1 13 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 16
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              	.LVL0:
+  33 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 20
+  36              		.cfi_offset 4, -20
+  37              		.cfi_offset 5, -16
+  38              		.cfi_offset 6, -12
+  39              		.cfi_offset 7, -8
+  40              		.cfi_offset 14, -4
+  14:../../../mesh/app/ali_socket/ali_socket.c **** 	uint16_t status;
+  15:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket->bindStatus == 1){
+  41              		.loc 1 15 0
+  42 0002 654E     		ldr	r6, .L31
+  13:../../../mesh/app/ali_socket/ali_socket.c **** 	uint16_t status;
+  43              		.loc 1 13 0
+  44 0004 89B0     		sub	sp, sp, #36
+  45              	.LCFI1:
+  46              		.cfi_def_cfa_offset 56
+  47              		.loc 1 15 0
+  48 0006 3468     		ldr	r4, [r6]
+  49 0008 6378     		ldrb	r3, [r4, #1]
+  50 000a 012B     		cmp	r3, #1
+  51 000c 00D1     		bne	.LCB20
+  52 000e C1E0     		b	.L1	@long jump
+  53              	.LCB20:
+  16:../../../mesh/app/ali_socket/ali_socket.c **** 		return;
+  17:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+  18:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->bindStatus = 1;
+  54              		.loc 1 18 0
+  55 0010 0125     		movs	r5, #1
+  19:../../../mesh/app/ali_socket/ali_socket.c **** 
+  20:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_socket, ALI_SOCKET_SAVE_LEN-1);
+  56              		.loc 1 20 0
+  57 0012 0321     		movs	r1, #3
+  18:../../../mesh/app/ali_socket/ali_socket.c **** 
+  58              		.loc 1 18 0
+  59 0014 6570     		strb	r5, [r4, #1]
+  60              		.loc 1 20 0
+  61 0016 2000     		movs	r0, r4
+  62              	.LVL1:
+  63 0018 FFF7FEFF 		bl	bc_sys_check_sum
+  64              	.LVL2:
+  21:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+  65              		.loc 1 21 0
+  66 001c 2900     		movs	r1, r5
+  20:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+  67              		.loc 1 20 0
+  68 001e E070     		strb	r0, [r4, #3]
+  69              		.loc 1 21 0
+  70 0020 0020     		movs	r0, #0
+  71 0022 FFF7FEFF 		bl	bc_flash_erase
+  72              	.LVL3:
+  22:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_SOCKET_SAVE_LEN,(uint8_t*)p_ali_socket);
+  73              		.loc 1 22 0
+  74 0026 3268     		ldr	r2, [r6]
+  75 0028 0421     		movs	r1, #4
+  76 002a 0020     		movs	r0, #0
+  77 002c FFF7FEFF 		bl	bc_flash_write
+  78              	.LVL4:
+  23:../../../mesh/app/ali_socket/ali_socket.c **** 
+  24:../../../mesh/app/ali_socket/ali_socket.c **** 	//model bind
+  25:../../../mesh/app/ali_socket/ali_socket.c **** 	m_lid_t app_key_lid = 0;
+  79              		.loc 1 25 0
+  80 0030 0020     		movs	r0, #0
+  81 0032 02AB     		add	r3, sp, #8
+  82 0034 1635     		adds	r5, r5, #22
+  83 0036 ED18     		adds	r5, r5, r3
+  26:../../../mesh/app/ali_socket/ali_socket.c **** 	status = bc_m_key_app_find(0, &app_key_lid);
+  84              		.loc 1 26 0
+  85 0038 2900     		movs	r1, r5
+  25:../../../mesh/app/ali_socket/ali_socket.c **** 	status = bc_m_key_app_find(0, &app_key_lid);
+  86              		.loc 1 25 0
+  87 003a 2870     		strb	r0, [r5]
+  88              		.loc 1 26 0
+  89 003c FFF7FEFF 		bl	bc_m_key_app_find
+  90              	.LVL5:
+  91 0040 041E     		subs	r4, r0, #0
+  27:../../../mesh/app/ali_socket/ali_socket.c **** 	if (status != M_ERR_NO_ERROR){
+  92              		.loc 1 27 0
+  93 0042 28D0     		beq	.L4
+  28:../../../mesh/app/ali_socket/ali_socket.c **** 		M_PRINTF(L_FND, "m_tb_key_app_find error");
+  94              		.loc 1 28 0
+  95 0044 554B     		ldr	r3, .L31+4
+  96 0046 1B68     		ldr	r3, [r3]
+  97 0048 1B05     		lsls	r3, r3, #20
+  98 004a 00D4     		bmi	.LCB55
+  99 004c A2E0     		b	.L1	@long jump
+ 100              	.LCB55:
+ 101              		.loc 1 28 0 is_stmt 0 discriminator 5
+ 102 004e 544C     		ldr	r4, .L31+8
+ 103 0050 2300     		movs	r3, r4
+ 104 0052 2200     		movs	r2, r4
+ 105 0054 2000     		movs	r0, r4
+ 106              	.LVL6:
+ 107 0056 4233     		adds	r3, r3, #66
+ 108 0058 2100     		movs	r1, r4
+ 109 005a 2632     		adds	r2, r2, #38
+ 110 005c 0093     		str	r3, [sp]
+ 111 005e 3330     		adds	r0, r0, #51
+ 112 0060 1C23     		movs	r3, #28
+ 113 0062 FFF7FEFF 		bl	m_print
+ 114              	.LVL7:
+ 115 0066 2000     		movs	r0, r4
+ 116 0068 5B30     		adds	r0, r0, #91
+ 117 006a FFF7FEFF 		bl	m_print
+ 118              	.LVL8:
+ 119 006e 2000     		movs	r0, r4
+ 120 0070 A11D     		adds	r1, r4, #6
+ 121 0072 7330     		adds	r0, r0, #115
+ 122 0074 FFF7FEFF 		bl	m_print
+ 123              	.LVL9:
+ 124 0078 8CE0     		b	.L1
+ 125              	.LVL10:
+ 126              	.L7:
+ 127 007a 2301     		lsls	r3, r4, #4
+ 128 007c FF18     		adds	r7, r7, r3
+ 129              	.LVL11:
+ 130              	.LBB2:
+ 131              	.LBB3:
+  29:../../../mesh/app/ali_socket/ali_socket.c **** 		return;
+  30:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+  31:../../../mesh/app/ali_socket/ali_socket.c **** 	for(uint8_t i = 0; i < p_ali_socket->model_cnt; ++i){
+  32:../../../mesh/app/ali_socket/ali_socket.c **** 		mesh_model_t* t = &p_ali_socket->model[i];
+  33:../../../mesh/app/ali_socket/ali_socket.c **** 		status = bc_m_key_model_bind(app_key_lid, t->lid);
+ 132              		.loc 1 33 0 is_stmt 1
+ 133 007e 5537     		adds	r7, r7, #85
+ 134 0080 3978     		ldrb	r1, [r7]
+ 135 0082 2878     		ldrb	r0, [r5]
+ 136 0084 FFF7FEFF 		bl	bc_m_key_model_bind
+ 137              	.LVL12:
+  34:../../../mesh/app/ali_socket/ali_socket.c **** 		if (status == M_ERR_NO_ERROR){
+ 138              		.loc 1 34 0
+ 139 0088 0028     		cmp	r0, #0
+ 140 008a 02D1     		bne	.L6
+  35:../../../mesh/app/ali_socket/ali_socket.c **** 			// Inform the Model IO manager
+  36:../../../mesh/app/ali_socket/ali_socket.c **** 			bc_m_mio_bind(t->lid);
+ 141              		.loc 1 36 0
+ 142 008c 3878     		ldrb	r0, [r7]
+ 143              	.LVL13:
+ 144 008e FFF7FEFF 		bl	bc_m_mio_bind
+ 145              	.LVL14:
+ 146              	.L6:
+ 147              	.LBE3:
+  31:../../../mesh/app/ali_socket/ali_socket.c **** 		mesh_model_t* t = &p_ali_socket->model[i];
+ 148              		.loc 1 31 0 discriminator 2
+ 149 0092 0134     		adds	r4, r4, #1
+ 150              	.LVL15:
+ 151 0094 E4B2     		uxtb	r4, r4
+ 152              	.LVL16:
+ 153              	.L4:
+  31:../../../mesh/app/ali_socket/ali_socket.c **** 		mesh_model_t* t = &p_ali_socket->model[i];
+ 154              		.loc 1 31 0 is_stmt 0 discriminator 1
+ 155 0096 3768     		ldr	r7, [r6]
+ 156 0098 3B00     		movs	r3, r7
+ 157 009a 4C33     		adds	r3, r3, #76
+ 158 009c 1B78     		ldrb	r3, [r3]
+ 159 009e A342     		cmp	r3, r4
+ 160 00a0 EBD8     		bhi	.L7
+ 161 00a2 0027     		movs	r7, #0
+ 162              	.LVL17:
+ 163              	.L8:
+ 164              	.LBE2:
+ 165              	.LBB4:
+  37:../../../mesh/app/ali_socket/ali_socket.c **** 		}
+  38:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+  39:../../../mesh/app/ali_socket/ali_socket.c **** 	
+  40:../../../mesh/app/ali_socket/ali_socket.c **** 	//model subscription
+  41:../../../mesh/app/ali_socket/ali_socket.c **** 	// Add address to the subscription list
+  42:../../../mesh/app/ali_socket/ali_socket.c **** 	//灯的所有model自行绑定组播地址0xC000，0xCFFF。
+  43:../../../mesh/app/ali_socket/ali_socket.c **** 	for(uint8_t i = 0; i < p_ali_socket->model_cnt; ++i){
+ 166              		.loc 1 43 0 is_stmt 1 discriminator 1
+ 167 00a4 3468     		ldr	r4, [r6]
+ 168 00a6 2300     		movs	r3, r4
+ 169 00a8 4C33     		adds	r3, r3, #76
+ 170 00aa 1B78     		ldrb	r3, [r3]
+ 171 00ac 9F42     		cmp	r7, r3
+ 172 00ae 0DD2     		bcs	.L30
+ 173              	.LVL18:
+ 174 00b0 3B01     		lsls	r3, r7, #4
+ 175 00b2 E418     		adds	r4, r4, r3
+ 176              	.LVL19:
+ 177              	.LBB5:
+  44:../../../mesh/app/ali_socket/ali_socket.c **** 		mesh_model_t* t = &p_ali_socket->model[i];
+  45:../../../mesh/app/ali_socket/ali_socket.c **** 		//status = bc_m_mio_add_subscription(t->lid, 0xF000);
+  46:../../../mesh/app/ali_socket/ali_socket.c **** 		bc_m_mio_add_subscription(t->lid, SOCKET_GROUP_ADDR1);
+ 178              		.loc 1 46 0 discriminator 3
+ 179 00b4 5534     		adds	r4, r4, #85
+ 180 00b6 3B49     		ldr	r1, .L31+12
+ 181 00b8 2078     		ldrb	r0, [r4]
+ 182 00ba FFF7FEFF 		bl	bc_m_mio_add_subscription
+ 183              	.LVL20:
+ 184              	.LBE5:
+  43:../../../mesh/app/ali_socket/ali_socket.c **** 		mesh_model_t* t = &p_ali_socket->model[i];
+ 185              		.loc 1 43 0 discriminator 3
+ 186 00be 0137     		adds	r7, r7, #1
+ 187              	.LVL21:
+ 188              	.LBB6:
+  47:../../../mesh/app/ali_socket/ali_socket.c **** 		bc_m_mio_add_subscription(t->lid, SOCKET_GROUP_ADDR2);
+ 189              		.loc 1 47 0 discriminator 3
+ 190 00c0 2078     		ldrb	r0, [r4]
+ 191 00c2 3949     		ldr	r1, .L31+16
+ 192 00c4 FFF7FEFF 		bl	bc_m_mio_add_subscription
+ 193              	.LVL22:
+ 194              	.LBE6:
+  43:../../../mesh/app/ali_socket/ali_socket.c **** 		mesh_model_t* t = &p_ali_socket->model[i];
+ 195              		.loc 1 43 0 discriminator 3
+ 196 00c8 FFB2     		uxtb	r7, r7
+ 197              	.LVL23:
+ 198 00ca EBE7     		b	.L8
+ 199              	.L30:
+ 200              	.LVL24:
+ 201              	.LBE4:
+  48:../../../mesh/app/ali_socket/ali_socket.c **** 		
+  49:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+  50:../../../mesh/app/ali_socket/ali_socket.c **** 
+  51:../../../mesh/app/ali_socket/ali_socket.c **** 	mesh_model_t* t = &p_ali_socket->model[p_ali_socket->model_cnt-1];
+  52:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_m_mio_add_subscription(t->lid, M_ALI_VENDER_ADDR);
+ 202              		.loc 1 52 0
+ 203 00cc F021     		movs	r1, #240
+ 204 00ce 1B01     		lsls	r3, r3, #4
+ 205              	.LVL25:
+ 206 00d0 E418     		adds	r4, r4, r3
+ 207              	.LVL26:
+ 208 00d2 4534     		adds	r4, r4, #69
+ 209 00d4 0902     		lsls	r1, r1, #8
+ 210 00d6 2078     		ldrb	r0, [r4]
+ 211 00d8 FFF7FEFF 		bl	bc_m_mio_add_subscription
+ 212              	.LVL27:
+  53:../../../mesh/app/ali_socket/ali_socket.c **** 
+  54:../../../mesh/app/ali_socket/ali_socket.c **** 	// Set publication parameters
+  55:../../../mesh/app/ali_socket/ali_socket.c ****     status = bc_m_mio_set_publi_param(t->lid, M_ALI_VENDER_ADDR, NULL,
+ 213              		.loc 1 55 0
+ 214 00dc 8221     		movs	r1, #130
+ 215 00de 2B78     		ldrb	r3, [r5]
+ 216 00e0 2078     		ldrb	r0, [r4]
+ 217 00e2 0291     		str	r1, [sp, #8]
+ 218 00e4 5A39     		subs	r1, r1, #90
+ 219 00e6 0191     		str	r1, [sp, #4]
+ 220 00e8 2239     		subs	r1, r1, #34
+ 221 00ea 0022     		movs	r2, #0
+ 222 00ec 0091     		str	r1, [sp]
+ 223 00ee F021     		movs	r1, #240
+ 224 00f0 0392     		str	r2, [sp, #12]
+ 225 00f2 0902     		lsls	r1, r1, #8
+ 226 00f4 FFF7FEFF 		bl	bc_m_mio_set_publi_param
+ 227              	.LVL28:
+  56:../../../mesh/app/ali_socket/ali_socket.c ****                                       app_key_lid, M_ALI_PUBLISH_TTL, M_ALI_PUBLISH_PERIOD,
+  57:../../../mesh/app/ali_socket/ali_socket.c ****                                       M_ALI_PUBLISH_RETX, 0);
+  58:../../../mesh/app/ali_socket/ali_socket.c **** 	M_PRINTF(L_APP, "status[%x]", status);
+ 228              		.loc 1 58 0
+ 229 00f8 284D     		ldr	r5, .L31+4
+  55:../../../mesh/app/ali_socket/ali_socket.c ****                                       app_key_lid, M_ALI_PUBLISH_TTL, M_ALI_PUBLISH_PERIOD,
+ 230              		.loc 1 55 0
+ 231 00fa 0600     		movs	r6, r0
+ 232              	.LVL29:
+ 233              		.loc 1 58 0
+ 234 00fc 2B68     		ldr	r3, [r5]
+ 235 00fe 9B04     		lsls	r3, r3, #18
+ 236 0100 15D5     		bpl	.L10
+ 237              		.loc 1 58 0 is_stmt 0 discriminator 5
+ 238 0102 274C     		ldr	r4, .L31+8
+ 239 0104 2300     		movs	r3, r4
+ 240 0106 2200     		movs	r2, r4
+ 241 0108 2000     		movs	r0, r4
+ 242 010a 4233     		adds	r3, r3, #66
+ 243 010c 2632     		adds	r2, r2, #38
+ 244 010e 0093     		str	r3, [sp]
+ 245 0110 2100     		movs	r1, r4
+ 246 0112 3A23     		movs	r3, #58
+ 247 0114 3330     		adds	r0, r0, #51
+ 248 0116 FFF7FEFF 		bl	m_print
+ 249              	.LVL30:
+ 250 011a 2000     		movs	r0, r4
+ 251 011c 3100     		movs	r1, r6
+ 252 011e 7630     		adds	r0, r0, #118
+ 253 0120 FFF7FEFF 		bl	m_print
+ 254              	.LVL31:
+ 255 0124 2000     		movs	r0, r4
+ 256 0126 A11D     		adds	r1, r4, #6
+ 257 0128 7330     		adds	r0, r0, #115
+ 258 012a FFF7FEFF 		bl	m_print
+ 259              	.LVL32:
+ 260              	.L10:
+  59:../../../mesh/app/ali_socket/ali_socket.c **** 
+  60:../../../mesh/app/ali_socket/ali_socket.c **** 
+  61:../../../mesh/app/ali_socket/ali_socket.c **** 	uint8_t i = 6;
+  62:../../../mesh/app/ali_socket/ali_socket.c **** 	uint32_t tTime = mesh_timer_get_time();
+ 261              		.loc 1 62 0 is_stmt 1
+ 262 012e FFF7FEFF 		bl	mesh_timer_get_time
+ 263              	.LVL33:
+  61:../../../mesh/app/ali_socket/ali_socket.c **** 	uint32_t tTime = mesh_timer_get_time();
+ 264              		.loc 1 61 0
+ 265 0132 0626     		movs	r6, #6
+ 266              	.LVL34:
+ 267              		.loc 1 62 0
+ 268 0134 0590     		str	r0, [sp, #20]
+ 269              	.LVL35:
+ 270              	.L11:
+  63:../../../mesh/app/ali_socket/ali_socket.c **** 	do{
+  64:../../../mesh/app/ali_socket/ali_socket.c **** 		while(mesh_timer_get_time()-tTime < SOCKET_LED_INTERVAL){//delay 1s
+ 271              		.loc 1 64 0
+ 272 0136 FFF7FEFF 		bl	mesh_timer_get_time
+ 273              	.LVL36:
+ 274 013a 059B     		ldr	r3, [sp, #20]
+ 275 013c C01A     		subs	r0, r0, r3
+ 276 013e F423     		movs	r3, #244
+ 277 0140 FF33     		adds	r3, r3, #255
+ 278 0142 9842     		cmp	r0, r3
+ 279 0144 F7D9     		bls	.L11
+  65:../../../mesh/app/ali_socket/ali_socket.c **** 			continue;
+  66:../../../mesh/app/ali_socket/ali_socket.c **** 		}
+  67:../../../mesh/app/ali_socket/ali_socket.c **** 		tTime = mesh_timer_get_time();
+  68:../../../mesh/app/ali_socket/ali_socket.c **** 		ali_socket_ind_status_set(i%2);
+ 280              		.loc 1 68 0
+ 281 0146 0127     		movs	r7, #1
+  67:../../../mesh/app/ali_socket/ali_socket.c **** 		ali_socket_ind_status_set(i%2);
+ 282              		.loc 1 67 0
+ 283 0148 FFF7FEFF 		bl	mesh_timer_get_time
+ 284              	.LVL37:
+ 285              		.loc 1 68 0
+ 286 014c 3740     		ands	r7, r6
+  67:../../../mesh/app/ali_socket/ali_socket.c **** 		ali_socket_ind_status_set(i%2);
+ 287              		.loc 1 67 0
+ 288 014e 0590     		str	r0, [sp, #20]
+ 289              	.LVL38:
+ 290              		.loc 1 68 0
+ 291 0150 3800     		movs	r0, r7
+ 292              	.LVL39:
+ 293 0152 FFF7FEFF 		bl	ali_socket_ind_status_set
+ 294              	.LVL40:
+  69:../../../mesh/app/ali_socket/ali_socket.c **** 		//flash indicator led
+  70:../../../mesh/app/ali_socket/ali_socket.c **** 		M_PRINTF(L_APP, "led status = %d", i%2);
+ 295              		.loc 1 70 0
+ 296 0156 8022     		movs	r2, #128
+ 297 0158 2B68     		ldr	r3, [r5]
+ 298 015a 9201     		lsls	r2, r2, #6
+ 299 015c 1342     		tst	r3, r2
+ 300 015e 15D0     		beq	.L12
+ 301              		.loc 1 70 0 is_stmt 0 discriminator 5
+ 302 0160 0F4C     		ldr	r4, .L31+8
+ 303 0162 2300     		movs	r3, r4
+ 304 0164 2200     		movs	r2, r4
+ 305 0166 2000     		movs	r0, r4
+ 306 0168 4233     		adds	r3, r3, #66
+ 307 016a 2632     		adds	r2, r2, #38
+ 308 016c 0093     		str	r3, [sp]
+ 309 016e 2100     		movs	r1, r4
+ 310 0170 4623     		movs	r3, #70
+ 311 0172 3330     		adds	r0, r0, #51
+ 312 0174 FFF7FEFF 		bl	m_print
+ 313              	.LVL41:
+ 314 0178 0C48     		ldr	r0, .L31+20
+ 315 017a 3900     		movs	r1, r7
+ 316 017c 0130     		adds	r0, r0, #1
+ 317 017e FFF7FEFF 		bl	m_print
+ 318              	.LVL42:
+ 319 0182 2000     		movs	r0, r4
+ 320 0184 A11D     		adds	r1, r4, #6
+ 321 0186 7330     		adds	r0, r0, #115
+ 322 0188 FFF7FEFF 		bl	m_print
+ 323              	.LVL43:
+ 324              	.L12:
+  71:../../../mesh/app/ali_socket/ali_socket.c **** 	}while(i-->0);
+ 325              		.loc 1 71 0 is_stmt 1
+ 326 018c 731E     		subs	r3, r6, #1
+ 327 018e DEB2     		uxtb	r6, r3
+ 328              	.LVL44:
+ 329 0190 FF2E     		cmp	r6, #255
+ 330 0192 D0D1     		bne	.L11
+ 331              	.LVL45:
+ 332              	.L1:
+  72:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 333              		.loc 1 72 0
+ 334 0194 09B0     		add	sp, sp, #36
+ 335              		@ sp needed
+ 336 0196 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 337              	.L32:
+ 338              		.align	2
+ 339              	.L31:
+ 340 0198 00000000 		.word	.LANCHOR0
+ 341 019c 00000000 		.word	L_LEV
+ 342 01a0 00000000 		.word	.LANCHOR1
+ 343 01a4 02C00000 		.word	49154
+ 344 01a8 FFCF0000 		.word	53247
+ 345 01ac 80000000 		.word	.LANCHOR2
+ 346              		.cfi_endproc
+ 347              	.LFE85:
+ 349              		.align	1
+ 350              		.code	16
+ 351              		.thumb_func
+ 353              	ali_socket_btn_get_timer_cb:
+ 354              	.LFB86:
+  73:../../../mesh/app/ali_socket/ali_socket.c **** 
+  74:../../../mesh/app/ali_socket/ali_socket.c **** static void ali_socket_btn_get_timer_cb(void* param)
+  75:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 355              		.loc 1 75 0
+ 356              		.cfi_startproc
+ 357              		@ args = 0, pretend = 0, frame = 0
+ 358              		@ frame_needed = 0, uses_anonymous_args = 0
+ 359              	.LVL46:
+ 360 01b0 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 361              	.LCFI2:
+ 362              		.cfi_def_cfa_offset 32
+ 363              		.cfi_offset 0, -32
+ 364              		.cfi_offset 1, -28
+ 365              		.cfi_offset 2, -24
+ 366              		.cfi_offset 4, -20
+ 367              		.cfi_offset 5, -16
+ 368              		.cfi_offset 6, -12
+ 369              		.cfi_offset 7, -8
+ 370              		.cfi_offset 14, -4
+  76:../../../mesh/app/ali_socket/ali_socket.c **** 	SYS_SetTimer(&p_ali_socket->btnGetTimer, (int)SOCKET_BTN_INTERVAL/10, 
+ 371              		.loc 1 76 0
+ 372 01b2 1E4D     		ldr	r5, .L41
+ 373 01b4 0022     		movs	r2, #0
+ 374 01b6 2B68     		ldr	r3, [r5]
+ 375 01b8 1421     		movs	r1, #20
+ 376 01ba 181D     		adds	r0, r3, #4
+ 377              	.LVL47:
+ 378 01bc 1C4B     		ldr	r3, .L41+4
+ 379 01be FFF7FEFF 		bl	SYS_SetTimer
+ 380              	.LVL48:
+  77:../../../mesh/app/ali_socket/ali_socket.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_socket_btn_get_timer_cb);
+  78:../../../mesh/app/ali_socket/ali_socket.c **** 	uint8_t val;
+  79:../../../mesh/app/ali_socket/ali_socket.c **** 	//read btn pin level
+  80:../../../mesh/app/ali_socket/ali_socket.c **** 	val = ali_socket_key_get();
+ 381              		.loc 1 80 0
+ 382 01c2 FFF7FEFF 		bl	ali_socket_key_get
+ 383              	.LVL49:
+  81:../../../mesh/app/ali_socket/ali_socket.c **** 	M_PRINTF(L_APP, "val[%x]", val);
+ 384              		.loc 1 81 0
+ 385 01c6 1B4B     		ldr	r3, .L41+8
+  80:../../../mesh/app/ali_socket/ali_socket.c **** 	M_PRINTF(L_APP, "val[%x]", val);
+ 386              		.loc 1 80 0
+ 387 01c8 0600     		movs	r6, r0
+ 388              	.LVL50:
+ 389              		.loc 1 81 0
+ 390 01ca 1B68     		ldr	r3, [r3]
+ 391 01cc 9B04     		lsls	r3, r3, #18
+ 392 01ce 16D5     		bpl	.L34
+ 393              		.loc 1 81 0 is_stmt 0 discriminator 5
+ 394 01d0 194F     		ldr	r7, .L41+12
+ 395 01d2 1A4C     		ldr	r4, .L41+16
+ 396 01d4 3B00     		movs	r3, r7
+ 397 01d6 2200     		movs	r2, r4
+ 398 01d8 2000     		movs	r0, r4
+ 399 01da 1133     		adds	r3, r3, #17
+ 400 01dc 2632     		adds	r2, r2, #38
+ 401 01de 0093     		str	r3, [sp]
+ 402 01e0 2100     		movs	r1, r4
+ 403 01e2 5123     		movs	r3, #81
+ 404 01e4 3330     		adds	r0, r0, #51
+ 405 01e6 FFF7FEFF 		bl	m_print
+ 406              	.LVL51:
+ 407 01ea 3800     		movs	r0, r7
+ 408 01ec 3100     		movs	r1, r6
+ 409 01ee 2D30     		adds	r0, r0, #45
+ 410 01f0 FFF7FEFF 		bl	m_print
+ 411              	.LVL52:
+ 412 01f4 2000     		movs	r0, r4
+ 413 01f6 A11D     		adds	r1, r4, #6
+ 414 01f8 7330     		adds	r0, r0, #115
+ 415 01fa FFF7FEFF 		bl	m_print
+ 416              	.LVL53:
+ 417              	.L34:
+  82:../../../mesh/app/ali_socket/ali_socket.c **** 	if(val == 1){
+ 418              		.loc 1 82 0 is_stmt 1
+ 419 01fe 012E     		cmp	r6, #1
+ 420 0200 0AD1     		bne	.L35
+ 421              	.LVL54:
+ 422              	.LBB9:
+ 423              	.LBB10:
+  83:../../../mesh/app/ali_socket/ali_socket.c **** 		if(p_ali_socket->btnPressedCnt > SOCKET_SWITH_TIME_CNT
+ 424              		.loc 1 83 0
+ 425 0202 2B68     		ldr	r3, [r5]
+ 426 0204 1B6F     		ldr	r3, [r3, #112]
+ 427 0206 023B     		subs	r3, r3, #2
+ 428 0208 162B     		cmp	r3, #22
+ 429 020a 01D8     		bhi	.L36
+  84:../../../mesh/app/ali_socket/ali_socket.c **** 			&& p_ali_socket->btnPressedCnt < SOCKET_RESET_TIME_CNT){
+  85:../../../mesh/app/ali_socket/ali_socket.c **** 			ali_socket_elec_relay_reverse();
+ 430              		.loc 1 85 0
+ 431 020c FFF7FEFF 		bl	ali_socket_elec_relay_reverse
+ 432              	.LVL55:
+ 433              	.L36:
+  86:../../../mesh/app/ali_socket/ali_socket.c **** 		}
+  87:../../../mesh/app/ali_socket/ali_socket.c **** 		p_ali_socket->btnPressedCnt = 0;
+ 434              		.loc 1 87 0
+ 435 0210 0022     		movs	r2, #0
+ 436 0212 2B68     		ldr	r3, [r5]
+ 437 0214 1A67     		str	r2, [r3, #112]
+ 438 0216 07E0     		b	.L33
+ 439              	.LVL56:
+ 440              	.L35:
+ 441              	.LBE10:
+ 442              	.LBE9:
+  88:../../../mesh/app/ali_socket/ali_socket.c **** 		return ;
+  89:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+  90:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->btnPressedCnt++;
+ 443              		.loc 1 90 0
+ 444 0218 2A68     		ldr	r2, [r5]
+ 445 021a 136F     		ldr	r3, [r2, #112]
+ 446 021c 0133     		adds	r3, r3, #1
+ 447 021e 1367     		str	r3, [r2, #112]
+  91:../../../mesh/app/ali_socket/ali_socket.c **** 
+  92:../../../mesh/app/ali_socket/ali_socket.c **** 	//check pressed time greater than SOCKET_RESET_TIME_CNT
+  93:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket->btnPressedCnt >= SOCKET_RESET_TIME_CNT){
+ 448              		.loc 1 93 0
+ 449 0220 182B     		cmp	r3, #24
+ 450 0222 01D9     		bls	.L33
+  94:../../../mesh/app/ali_socket/ali_socket.c **** 		//do reset function
+  95:../../../mesh/app/ali_socket/ali_socket.c **** 		ali_socket_factory_reset();
+ 451              		.loc 1 95 0
+ 452 0224 FFF7FEFF 		bl	ali_socket_factory_reset
+ 453              	.LVL57:
+ 454              	.L33:
+  96:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+  97:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 455              		.loc 1 97 0
+ 456              		@ sp needed
+ 457              	.LVL58:
+ 458 0228 F7BD     		pop	{r0, r1, r2, r4, r5, r6, r7, pc}
+ 459              	.L42:
+ 460 022a C046     		.align	2
+ 461              	.L41:
+ 462 022c 00000000 		.word	.LANCHOR0
+ 463 0230 00000000 		.word	ali_socket_btn_get_timer_cb
+ 464 0234 00000000 		.word	L_LEV
+ 465 0238 80000000 		.word	.LANCHOR2
+ 466 023c 00000000 		.word	.LANCHOR1
+ 467              		.cfi_endproc
+ 468              	.LFE86:
+ 470              		.align	1
+ 471              		.code	16
+ 472              		.thumb_func
+ 474              	ali_socket_ind_sts_timer_cb:
+ 475              	.LFB87:
+  98:../../../mesh/app/ali_socket/ali_socket.c **** 
+  99:../../../mesh/app/ali_socket/ali_socket.c **** static void ali_socket_ind_sts_timer_cb(void* param)
+ 100:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 476              		.loc 1 100 0
+ 477              		.cfi_startproc
+ 478              		@ args = 0, pretend = 0, frame = 8
+ 479              		@ frame_needed = 0, uses_anonymous_args = 0
+ 480              	.LVL59:
+ 481 0240 37B5     		push	{r0, r1, r2, r4, r5, lr}
+ 482              	.LCFI3:
+ 483              		.cfi_def_cfa_offset 24
+ 484              		.cfi_offset 0, -24
+ 485              		.cfi_offset 1, -20
+ 486              		.cfi_offset 2, -16
+ 487              		.cfi_offset 4, -12
+ 488              		.cfi_offset 5, -8
+ 489              		.cfi_offset 14, -4
+ 101:../../../mesh/app/ali_socket/ali_socket.c **** 	//reset timer
+ 102:../../../mesh/app/ali_socket/ali_socket.c **** 	SYS_SetTimer(&p_ali_socket->btnGetTimer, M_ALIS_INDICATION_PERIOD/10, 
+ 490              		.loc 1 102 0
+ 491 0242 114C     		ldr	r4, .L44
+ 492 0244 0022     		movs	r2, #0
+ 493 0246 2368     		ldr	r3, [r4]
+ 494 0248 1049     		ldr	r1, .L44+4
+ 495 024a 181D     		adds	r0, r3, #4
+ 496              	.LVL60:
+ 497 024c 104B     		ldr	r3, .L44+8
+ 498 024e FFF7FEFF 		bl	SYS_SetTimer
+ 499              	.LVL61:
+ 103:../../../mesh/app/ali_socket/ali_socket.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_socket_ind_sts_timer_cb);
+ 104:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 105:../../../mesh/app/ali_socket/ali_socket.c **** 	//send indicate
+ 106:../../../mesh/app/ali_socket/ali_socket.c **** 	uint8_t data[3];
+ 107:../../../mesh/app/ali_socket/ali_socket.c **** 	int len = 0;
+ 108:../../../mesh/app/ali_socket/ali_socket.c **** 	len += bc_mm_alis_set_onoff_status(&data[0]+len, p_ali_socket->oo_ctrl.get());
+ 500              		.loc 1 108 0
+ 501 0252 2368     		ldr	r3, [r4]
+ 109:../../../mesh/app/ali_socket/ali_socket.c **** 	m_printf_hex(L_APP, "ali_socket_ind_sts_timer_cb", data, len);
+ 110:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_mm_alis_send_indication(p_ali_socket->model[1].lid, data, len);
+ 111:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 502              		.loc 1 111 0
+ 503              		@ sp needed
+ 108:../../../mesh/app/ali_socket/ali_socket.c **** 	m_printf_hex(L_APP, "ali_socket_ind_sts_timer_cb", data, len);
+ 504              		.loc 1 108 0
+ 505 0254 9B6F     		ldr	r3, [r3, #120]
+ 506 0256 9847     		blx	r3
+ 507              	.LVL62:
+ 508 0258 411E     		subs	r1, r0, #1
+ 509 025a 8841     		sbcs	r0, r0, r1
+ 510 025c C1B2     		uxtb	r1, r0
+ 511 025e 01A8     		add	r0, sp, #4
+ 512 0260 FFF7FEFF 		bl	bc_mm_alis_set_onoff_status
+ 513              	.LVL63:
+ 514 0264 0500     		movs	r5, r0
+ 515              	.LVL64:
+ 109:../../../mesh/app/ali_socket/ali_socket.c **** 	m_printf_hex(L_APP, "ali_socket_ind_sts_timer_cb", data, len);
+ 516              		.loc 1 109 0
+ 517 0266 0300     		movs	r3, r0
+ 518 0268 8020     		movs	r0, #128
+ 519              	.LVL65:
+ 520 026a 0A49     		ldr	r1, .L44+12
+ 521 026c 01AA     		add	r2, sp, #4
+ 522 026e 3531     		adds	r1, r1, #53
+ 523 0270 8001     		lsls	r0, r0, #6
+ 524 0272 FFF7FEFF 		bl	m_printf_hex
+ 525              	.LVL66:
+ 110:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 526              		.loc 1 110 0
+ 527 0276 2368     		ldr	r3, [r4]
+ 528 0278 2A00     		movs	r2, r5
+ 529 027a 6533     		adds	r3, r3, #101
+ 530 027c 1878     		ldrb	r0, [r3]
+ 531 027e 01A9     		add	r1, sp, #4
+ 532 0280 FFF7FEFF 		bl	bc_mm_alis_send_indication
+ 533              	.LVL67:
+ 534              	.LVL68:
+ 535              		.loc 1 111 0
+ 536 0284 37BD     		pop	{r0, r1, r2, r4, r5, pc}
+ 537              	.L45:
+ 538 0286 C046     		.align	2
+ 539              	.L44:
+ 540 0288 00000000 		.word	.LANCHOR0
+ 541 028c 50460000 		.word	18000
+ 542 0290 00000000 		.word	ali_socket_ind_sts_timer_cb
+ 543 0294 80000000 		.word	.LANCHOR2
+ 544              		.cfi_endproc
+ 545              	.LFE87:
+ 547              		.align	1
+ 548              		.global	ali_socket_prov_state_cb
+ 549              		.code	16
+ 550              		.thumb_func
+ 552              	ali_socket_prov_state_cb:
+ 553              	.LFB88:
+ 112:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 113:../../../mesh/app/ali_socket/ali_socket.c **** void ali_socket_prov_state_cb(uint8_t state)
+ 114:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 554              		.loc 1 114 0
+ 555              		.cfi_startproc
+ 556              		@ args = 0, pretend = 0, frame = 0
+ 557              		@ frame_needed = 0, uses_anonymous_args = 0
+ 558              	.LVL69:
+ 559 0298 10B5     		push	{r4, lr}
+ 560              	.LCFI4:
+ 561              		.cfi_def_cfa_offset 8
+ 562              		.cfi_offset 4, -8
+ 563              		.cfi_offset 14, -4
+ 115:../../../mesh/app/ali_socket/ali_socket.c **** 	if(state == M_PROV_STARTED){
+ 564              		.loc 1 115 0
+ 565 029a 0028     		cmp	r0, #0
+ 566 029c 03D1     		bne	.L47
+ 116:../../../mesh/app/ali_socket/ali_socket.c **** 		//open indicate led
+ 117:../../../mesh/app/ali_socket/ali_socket.c **** 		ali_socket_ind_status_set(1);
+ 567              		.loc 1 117 0
+ 568 029e 0130     		adds	r0, r0, #1
+ 569              	.LVL70:
+ 570 02a0 FFF7FEFF 		bl	ali_socket_ind_status_set
+ 571              	.LVL71:
+ 572 02a4 09E0     		b	.L46
+ 573              	.LVL72:
+ 574              	.L47:
+ 118:../../../mesh/app/ali_socket/ali_socket.c **** 		//start 10 minutes timer to switch static adv
+ 119:../../../mesh/app/ali_socket/ali_socket.c **** 		
+ 120:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+ 121:../../../mesh/app/ali_socket/ali_socket.c **** #ifdef APP_FOR_ALI
+ 122:../../../mesh/app/ali_socket/ali_socket.c **** 	if(state == M_PROV_SUCCEED_APP){
+ 575              		.loc 1 122 0
+ 576 02a6 0328     		cmp	r0, #3
+ 577 02a8 07D1     		bne	.L46
+ 123:../../../mesh/app/ali_socket/ali_socket.c **** 		//flash indicate led 3 times
+ 124:../../../mesh/app/ali_socket/ali_socket.c **** 		
+ 125:../../../mesh/app/ali_socket/ali_socket.c **** 		SYS_SetTimer(&p_ali_socket->bindDelayTimer, (int)500/10, 
+ 578              		.loc 1 125 0
+ 579 02aa 044B     		ldr	r3, .L49
+ 580 02ac 0022     		movs	r2, #0
+ 581 02ae 1868     		ldr	r0, [r3]
+ 582              	.LVL73:
+ 583 02b0 3221     		movs	r1, #50
+ 584 02b2 1C30     		adds	r0, r0, #28
+ 585 02b4 024B     		ldr	r3, .L49+4
+ 586 02b6 FFF7FEFF 		bl	SYS_SetTimer
+ 587              	.LVL74:
+ 588              	.L46:
+ 126:../../../mesh/app/ali_socket/ali_socket.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_socket_bind_timer_cb);
+ 127:../../../mesh/app/ali_socket/ali_socket.c **** 		return;
+ 128:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+ 129:../../../mesh/app/ali_socket/ali_socket.c **** #endif 
+ 130:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 589              		.loc 1 130 0
+ 590              		@ sp needed
+ 591 02ba 10BD     		pop	{r4, pc}
+ 592              	.L50:
+ 593              		.align	2
+ 594              	.L49:
+ 595 02bc 00000000 		.word	.LANCHOR0
+ 596 02c0 00000000 		.word	ali_socket_bind_timer_cb
+ 597              		.cfi_endproc
+ 598              	.LFE88:
+ 600              		.align	1
+ 601              		.global	ali_socket_prov_state_get
+ 602              		.code	16
+ 603              		.thumb_func
+ 605              	ali_socket_prov_state_get:
+ 606              	.LFB89:
+ 131:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 132:../../../mesh/app/ali_socket/ali_socket.c **** uint8_t ali_socket_prov_state_get(void)
+ 133:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 607              		.loc 1 133 0
+ 608              		.cfi_startproc
+ 609              		@ args = 0, pretend = 0, frame = 0
+ 610              		@ frame_needed = 0, uses_anonymous_args = 0
+ 134:../../../mesh/app/ali_socket/ali_socket.c **** 	M_PRINTF(L_APP, "bound satus[%d]", p_ali_socket->bindStatus);
+ 611              		.loc 1 134 0
+ 612 02c4 104B     		ldr	r3, .L56
+ 133:../../../mesh/app/ali_socket/ali_socket.c **** 	M_PRINTF(L_APP, "bound satus[%d]", p_ali_socket->bindStatus);
+ 613              		.loc 1 133 0
+ 614 02c6 73B5     		push	{r0, r1, r4, r5, r6, lr}
+ 615              	.LCFI5:
+ 616              		.cfi_def_cfa_offset 24
+ 617              		.cfi_offset 0, -24
+ 618              		.cfi_offset 1, -20
+ 619              		.cfi_offset 4, -16
+ 620              		.cfi_offset 5, -12
+ 621              		.cfi_offset 6, -8
+ 622              		.cfi_offset 14, -4
+ 623              		.loc 1 134 0
+ 624 02c8 1B68     		ldr	r3, [r3]
+ 625 02ca 104E     		ldr	r6, .L56+4
+ 626 02cc 9B04     		lsls	r3, r3, #18
+ 627 02ce 17D5     		bpl	.L52
+ 628              		.loc 1 134 0 is_stmt 0 discriminator 5
+ 629 02d0 0F4D     		ldr	r5, .L56+8
+ 630 02d2 104C     		ldr	r4, .L56+12
+ 631 02d4 2B00     		movs	r3, r5
+ 632 02d6 2200     		movs	r2, r4
+ 633 02d8 2000     		movs	r0, r4
+ 634 02da 5133     		adds	r3, r3, #81
+ 635 02dc 2632     		adds	r2, r2, #38
+ 636 02de 0093     		str	r3, [sp]
+ 637 02e0 2100     		movs	r1, r4
+ 638 02e2 8623     		movs	r3, #134
+ 639 02e4 3330     		adds	r0, r0, #51
+ 640 02e6 FFF7FEFF 		bl	m_print
+ 641              	.LVL75:
+ 642 02ea 2800     		movs	r0, r5
+ 643 02ec 3368     		ldr	r3, [r6]
+ 644 02ee 6B30     		adds	r0, r0, #107
+ 645 02f0 5978     		ldrb	r1, [r3, #1]
+ 646 02f2 FFF7FEFF 		bl	m_print
+ 647              	.LVL76:
+ 648 02f6 2000     		movs	r0, r4
+ 649 02f8 A11D     		adds	r1, r4, #6
+ 650 02fa 7330     		adds	r0, r0, #115
+ 651 02fc FFF7FEFF 		bl	m_print
+ 652              	.LVL77:
+ 653              	.L52:
+ 135:../../../mesh/app/ali_socket/ali_socket.c **** 	return p_ali_socket->bindStatus;
+ 654              		.loc 1 135 0 is_stmt 1
+ 655 0300 3368     		ldr	r3, [r6]
+ 136:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 656              		.loc 1 136 0
+ 657              		@ sp needed
+ 135:../../../mesh/app/ali_socket/ali_socket.c **** 	return p_ali_socket->bindStatus;
+ 658              		.loc 1 135 0
+ 659 0302 5878     		ldrb	r0, [r3, #1]
+ 660              		.loc 1 136 0
+ 661 0304 76BD     		pop	{r1, r2, r4, r5, r6, pc}
+ 662              	.L57:
+ 663 0306 C046     		.align	2
+ 664              	.L56:
+ 665 0308 00000000 		.word	L_LEV
+ 666 030c 00000000 		.word	.LANCHOR0
+ 667 0310 80000000 		.word	.LANCHOR2
+ 668 0314 00000000 		.word	.LANCHOR1
+ 669              		.cfi_endproc
+ 670              	.LFE89:
+ 672              		.align	1
+ 673              		.global	ali_socket_factory_reset
+ 674              		.code	16
+ 675              		.thumb_func
+ 677              	ali_socket_factory_reset:
+ 678              	.LFB90:
+ 137:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 138:../../../mesh/app/ali_socket/ali_socket.c **** void ali_socket_factory_reset()
+ 139:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 679              		.loc 1 139 0
+ 680              		.cfi_startproc
+ 681              		@ args = 0, pretend = 0, frame = 8
+ 682              		@ frame_needed = 0, uses_anonymous_args = 0
+ 683 0318 F0B5     		push	{r4, r5, r6, r7, lr}
+ 684              	.LCFI6:
+ 685              		.cfi_def_cfa_offset 20
+ 686              		.cfi_offset 4, -20
+ 687              		.cfi_offset 5, -16
+ 688              		.cfi_offset 6, -12
+ 689              		.cfi_offset 7, -8
+ 690              		.cfi_offset 14, -4
+ 691 031a 85B0     		sub	sp, sp, #20
+ 692              	.LCFI7:
+ 693              		.cfi_def_cfa_offset 40
+ 140:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_m_clear_config();
+ 694              		.loc 1 140 0
+ 695 031c FFF7FEFF 		bl	bc_m_clear_config
+ 696              	.LVL78:
+ 141:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 697              		.loc 1 141 0
+ 698 0320 0121     		movs	r1, #1
+ 699 0322 0020     		movs	r0, #0
+ 700 0324 FFF7FEFF 		bl	bc_flash_erase
+ 701              	.LVL79:
+ 142:../../../mesh/app/ali_socket/ali_socket.c **** 	uint8_t i = 10;
+ 143:../../../mesh/app/ali_socket/ali_socket.c **** 	uint32_t t = mesh_timer_get_time();
+ 702              		.loc 1 143 0
+ 703 0328 FFF7FEFF 		bl	mesh_timer_get_time
+ 704              	.LVL80:
+ 142:../../../mesh/app/ali_socket/ali_socket.c **** 	uint8_t i = 10;
+ 705              		.loc 1 142 0
+ 706 032c 0A25     		movs	r5, #10
+ 707              		.loc 1 143 0
+ 708 032e 0700     		movs	r7, r0
+ 709              	.LVL81:
+ 710              	.L59:
+ 144:../../../mesh/app/ali_socket/ali_socket.c **** 	do{
+ 145:../../../mesh/app/ali_socket/ali_socket.c **** 		while(mesh_timer_get_time()-t < SOCKET_LED_INTERVAL){//delay 1s
+ 711              		.loc 1 145 0
+ 712 0330 FFF7FEFF 		bl	mesh_timer_get_time
+ 713              	.LVL82:
+ 714 0334 F423     		movs	r3, #244
+ 715 0336 FF33     		adds	r3, r3, #255
+ 716 0338 C01B     		subs	r0, r0, r7
+ 717 033a 9842     		cmp	r0, r3
+ 718 033c F8D9     		bls	.L59
+ 146:../../../mesh/app/ali_socket/ali_socket.c **** 			continue;
+ 147:../../../mesh/app/ali_socket/ali_socket.c **** 		}
+ 148:../../../mesh/app/ali_socket/ali_socket.c **** 		t = mesh_timer_get_time();
+ 719              		.loc 1 148 0
+ 720 033e FFF7FEFF 		bl	mesh_timer_get_time
+ 721              	.LVL83:
+ 149:../../../mesh/app/ali_socket/ali_socket.c **** 		ali_socket_ind_status_set(i%2);
+ 722              		.loc 1 149 0
+ 723 0342 0123     		movs	r3, #1
+ 724 0344 2B40     		ands	r3, r5
+ 148:../../../mesh/app/ali_socket/ali_socket.c **** 		ali_socket_ind_status_set(i%2);
+ 725              		.loc 1 148 0
+ 726 0346 0700     		movs	r7, r0
+ 727              	.LVL84:
+ 728              		.loc 1 149 0
+ 729 0348 1800     		movs	r0, r3
+ 730              	.LVL85:
+ 731 034a 0393     		str	r3, [sp, #12]
+ 732 034c FFF7FEFF 		bl	ali_socket_ind_status_set
+ 733              	.LVL86:
+ 150:../../../mesh/app/ali_socket/ali_socket.c **** 		//flash indicator led
+ 151:../../../mesh/app/ali_socket/ali_socket.c **** 		M_PRINTF(L_APP, "led status = %d", i%2);
+ 734              		.loc 1 151 0
+ 735 0350 8022     		movs	r2, #128
+ 736 0352 124B     		ldr	r3, .L67
+ 737 0354 9201     		lsls	r2, r2, #6
+ 738 0356 1B68     		ldr	r3, [r3]
+ 739 0358 1342     		tst	r3, r2
+ 740 035a 15D0     		beq	.L61
+ 741              		.loc 1 151 0 is_stmt 0 discriminator 5
+ 742 035c 104E     		ldr	r6, .L67+4
+ 743 035e 114C     		ldr	r4, .L67+8
+ 744 0360 3300     		movs	r3, r6
+ 745 0362 2200     		movs	r2, r4
+ 746 0364 2000     		movs	r0, r4
+ 747 0366 7B33     		adds	r3, r3, #123
+ 748 0368 2632     		adds	r2, r2, #38
+ 749 036a 0093     		str	r3, [sp]
+ 750 036c 2100     		movs	r1, r4
+ 751 036e 9723     		movs	r3, #151
+ 752 0370 3330     		adds	r0, r0, #51
+ 753 0372 FFF7FEFF 		bl	m_print
+ 754              	.LVL87:
+ 755 0376 0399     		ldr	r1, [sp, #12]
+ 756 0378 701C     		adds	r0, r6, #1
+ 757 037a FFF7FEFF 		bl	m_print
+ 758              	.LVL88:
+ 759 037e 2000     		movs	r0, r4
+ 760 0380 A11D     		adds	r1, r4, #6
+ 761 0382 7330     		adds	r0, r0, #115
+ 762 0384 FFF7FEFF 		bl	m_print
+ 763              	.LVL89:
+ 764              	.L61:
+ 152:../../../mesh/app/ali_socket/ali_socket.c **** 	}while(i-->0);
+ 765              		.loc 1 152 0 is_stmt 1
+ 766 0388 6B1E     		subs	r3, r5, #1
+ 767 038a DBB2     		uxtb	r3, r3
+ 768              	.LVL90:
+ 769 038c 002D     		cmp	r5, #0
+ 770 038e 01D0     		beq	.L66
+ 771 0390 1D00     		movs	r5, r3
+ 772 0392 CDE7     		b	.L59
+ 773              	.L66:
+ 153:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_sys_reset();
+ 774              		.loc 1 153 0
+ 775 0394 FFF7FEFF 		bl	bc_sys_reset
+ 776              	.LVL91:
+ 154:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 777              		.loc 1 154 0
+ 778 0398 05B0     		add	sp, sp, #20
+ 779              		@ sp needed
+ 780              	.LVL92:
+ 781              	.LVL93:
+ 782 039a F0BD     		pop	{r4, r5, r6, r7, pc}
+ 783              	.L68:
+ 784              		.align	2
+ 785              	.L67:
+ 786 039c 00000000 		.word	L_LEV
+ 787 03a0 80000000 		.word	.LANCHOR2
+ 788 03a4 00000000 		.word	.LANCHOR1
+ 789              		.cfi_endproc
+ 790              	.LFE90:
+ 792              		.global	__aeabi_uidiv
+ 793              		.align	1
+ 794              		.global	ali_socket_init
+ 795              		.code	16
+ 796              		.thumb_func
+ 798              	ali_socket_init:
+ 799              	.LFB91:
+ 155:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 156:../../../mesh/app/ali_socket/ali_socket.c **** uint8_t ali_socket_init(mesh_model_t** mdl, uint8_t* mcnt)
+ 157:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 800              		.loc 1 157 0
+ 801              		.cfi_startproc
+ 802              		@ args = 0, pretend = 0, frame = 8
+ 803              		@ frame_needed = 0, uses_anonymous_args = 0
+ 804              	.LVL94:
+ 805 03a8 F0B5     		push	{r4, r5, r6, r7, lr}
+ 806              	.LCFI8:
+ 807              		.cfi_def_cfa_offset 20
+ 808              		.cfi_offset 4, -20
+ 809              		.cfi_offset 5, -16
+ 810              		.cfi_offset 6, -12
+ 811              		.cfi_offset 7, -8
+ 812              		.cfi_offset 14, -4
+ 813 03aa 85B0     		sub	sp, sp, #20
+ 814              	.LCFI9:
+ 815              		.cfi_def_cfa_offset 40
+ 816              		.loc 1 157 0
+ 817 03ac 0391     		str	r1, [sp, #12]
+ 818 03ae 0700     		movs	r7, r0
+ 158:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket = ke_malloc(sizeof(ali_socket_t), 0);
+ 819              		.loc 1 158 0
+ 820 03b0 0021     		movs	r1, #0
+ 821              	.LVL95:
+ 822 03b2 7C20     		movs	r0, #124
+ 823              	.LVL96:
+ 824 03b4 FFF7FEFF 		bl	ke_malloc
+ 825              	.LVL97:
+ 826 03b8 5D4C     		ldr	r4, .L86
+ 827 03ba 0500     		movs	r5, r0
+ 828 03bc 2060     		str	r0, [r4]
+ 159:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket == NULL)
+ 160:../../../mesh/app/ali_socket/ali_socket.c **** 		return 1;
+ 829              		.loc 1 160 0
+ 830 03be 0120     		movs	r0, #1
+ 159:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket == NULL)
+ 831              		.loc 1 159 0
+ 832 03c0 002D     		cmp	r5, #0
+ 833 03c2 00D1     		bne	.LCB781
+ 834 03c4 B2E0     		b	.L70	@long jump
+ 835              	.LCB781:
+ 161:../../../mesh/app/ali_socket/ali_socket.c **** 	memset(p_ali_socket, 0, sizeof(ali_socket_t));
+ 836              		.loc 1 161 0
+ 837 03c6 7C22     		movs	r2, #124
+ 838 03c8 0021     		movs	r1, #0
+ 839 03ca 2800     		movs	r0, r5
+ 840 03cc FFF7FEFF 		bl	memset
+ 841              	.LVL98:
+ 162:../../../mesh/app/ali_socket/ali_socket.c **** 	
+ 163:../../../mesh/app/ali_socket/ali_socket.c **** 	//read saved parameter
+ 164:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_flash_read(FLASH_ALI_START_ADDRRESS, ALI_SOCKET_SAVE_LEN,(uint8_t*)p_ali_socket);
+ 842              		.loc 1 164 0
+ 843 03d0 2A00     		movs	r2, r5
+ 844 03d2 0421     		movs	r1, #4
+ 845 03d4 0020     		movs	r0, #0
+ 846 03d6 FFF7FEFF 		bl	bc_flash_read
+ 847              	.LVL99:
+ 165:../../../mesh/app/ali_socket/ali_socket.c **** 	uint8_t tCrc = bc_sys_check_sum((uint8_t*)p_ali_socket, ALI_SOCKET_SAVE_LEN-1);
+ 848              		.loc 1 165 0
+ 849 03da 0321     		movs	r1, #3
+ 850 03dc 2068     		ldr	r0, [r4]
+ 851 03de FFF7FEFF 		bl	bc_sys_check_sum
+ 852              	.LVL100:
+ 166:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket->saveCfgCrc != tCrc){
+ 853              		.loc 1 166 0
+ 854 03e2 2568     		ldr	r5, [r4]
+ 855 03e4 EB78     		ldrb	r3, [r5, #3]
+ 856 03e6 8342     		cmp	r3, r0
+ 857 03e8 04D0     		beq	.L71
+ 167:../../../mesh/app/ali_socket/ali_socket.c **** 		memset((uint8_t*)p_ali_socket, 0, ALI_SOCKET_SAVE_LEN);
+ 858              		.loc 1 167 0
+ 859 03ea 0422     		movs	r2, #4
+ 860 03ec 0021     		movs	r1, #0
+ 861 03ee 2800     		movs	r0, r5
+ 862              	.LVL101:
+ 863 03f0 FFF7FEFF 		bl	memset
+ 864              	.LVL102:
+ 865              	.L71:
+ 168:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+ 169:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 170:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket->dType != ali_config_device_type_get()){//change device type
+ 866              		.loc 1 170 0
+ 867 03f4 AD78     		ldrb	r5, [r5, #2]
+ 868 03f6 FFF7FEFF 		bl	ali_config_device_type_get
+ 869              	.LVL103:
+ 870 03fa 8542     		cmp	r5, r0
+ 871 03fc 3AD0     		beq	.L72
+ 171:../../../mesh/app/ali_socket/ali_socket.c **** 		M_PRINTF(L_APP, "device type is changed [%d] to [%d]", p_ali_socket->dType, ali_config_device_typ
+ 872              		.loc 1 171 0
+ 873 03fe 4D4B     		ldr	r3, .L86+4
+ 874 0400 1B68     		ldr	r3, [r3]
+ 875 0402 9B04     		lsls	r3, r3, #18
+ 876 0404 1CD5     		bpl	.L73
+ 877              		.loc 1 171 0 is_stmt 0 discriminator 5
+ 878 0406 4C4E     		ldr	r6, .L86+8
+ 879 0408 4C4D     		ldr	r5, .L86+12
+ 880 040a 3300     		movs	r3, r6
+ 881 040c 2A00     		movs	r2, r5
+ 882 040e 2800     		movs	r0, r5
+ 883 0410 1433     		adds	r3, r3, #20
+ 884 0412 2632     		adds	r2, r2, #38
+ 885 0414 2900     		movs	r1, r5
+ 886 0416 0093     		str	r3, [sp]
+ 887 0418 3330     		adds	r0, r0, #51
+ 888 041a AB23     		movs	r3, #171
+ 889 041c FFF7FEFF 		bl	m_print
+ 890              	.LVL104:
+ 891 0420 2368     		ldr	r3, [r4]
+ 892 0422 9B78     		ldrb	r3, [r3, #2]
+ 893 0424 0293     		str	r3, [sp, #8]
+ 894 0426 FFF7FEFF 		bl	ali_config_device_type_get
+ 895              	.LVL105:
+ 896 042a 0200     		movs	r2, r0
+ 897 042c 3000     		movs	r0, r6
+ 898 042e 0299     		ldr	r1, [sp, #8]
+ 899 0430 2430     		adds	r0, r0, #36
+ 900 0432 FFF7FEFF 		bl	m_print
+ 901              	.LVL106:
+ 902 0436 2800     		movs	r0, r5
+ 903 0438 A91D     		adds	r1, r5, #6
+ 904 043a 7330     		adds	r0, r0, #115
+ 905 043c FFF7FEFF 		bl	m_print
+ 906              	.LVL107:
+ 907              	.L73:
+ 172:../../../mesh/app/ali_socket/ali_socket.c **** 		bc_m_clear_config();
+ 908              		.loc 1 172 0 is_stmt 1
+ 909 0440 FFF7FEFF 		bl	bc_m_clear_config
+ 910              	.LVL108:
+ 173:../../../mesh/app/ali_socket/ali_socket.c **** 		memset((uint8_t*)p_ali_socket, 0,  ALI_SOCKET_SAVE_LEN);
+ 911              		.loc 1 173 0
+ 912 0444 2568     		ldr	r5, [r4]
+ 913 0446 0422     		movs	r2, #4
+ 914 0448 0021     		movs	r1, #0
+ 915 044a 2800     		movs	r0, r5
+ 916 044c FFF7FEFF 		bl	memset
+ 917              	.LVL109:
+ 174:../../../mesh/app/ali_socket/ali_socket.c **** 		p_ali_socket->dType = ali_config_device_type_get();
+ 918              		.loc 1 174 0
+ 919 0450 FFF7FEFF 		bl	ali_config_device_type_get
+ 920              	.LVL110:
+ 921 0454 A870     		strb	r0, [r5, #2]
+ 175:../../../mesh/app/ali_socket/ali_socket.c **** 		p_ali_socket->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_socket, ALI_SOCKET_SAVE_LEN-1);
+ 922              		.loc 1 175 0
+ 923 0456 2568     		ldr	r5, [r4]
+ 924 0458 0321     		movs	r1, #3
+ 925 045a 2800     		movs	r0, r5
+ 926 045c FFF7FEFF 		bl	bc_sys_check_sum
+ 927              	.LVL111:
+ 176:../../../mesh/app/ali_socket/ali_socket.c **** 		bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 928              		.loc 1 176 0
+ 929 0460 0121     		movs	r1, #1
+ 175:../../../mesh/app/ali_socket/ali_socket.c **** 		p_ali_socket->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_socket, ALI_SOCKET_SAVE_LEN-1);
+ 930              		.loc 1 175 0
+ 931 0462 E870     		strb	r0, [r5, #3]
+ 932              		.loc 1 176 0
+ 933 0464 0020     		movs	r0, #0
+ 934 0466 FFF7FEFF 		bl	bc_flash_erase
+ 935              	.LVL112:
+ 177:../../../mesh/app/ali_socket/ali_socket.c **** 		bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_SOCKET_SAVE_LEN,(uint8_t*)p_ali_socket);
+ 936              		.loc 1 177 0
+ 937 046a 2268     		ldr	r2, [r4]
+ 938 046c 0421     		movs	r1, #4
+ 939 046e 0020     		movs	r0, #0
+ 940 0470 FFF7FEFF 		bl	bc_flash_write
+ 941              	.LVL113:
+ 942              	.L72:
+ 178:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+ 179:../../../mesh/app/ali_socket/ali_socket.c **** 	
+ 180:../../../mesh/app/ali_socket/ali_socket.c **** 	M_PRINTF(L_APP, "p_ali_socket[%p] eRelayS[%p]", p_ali_socket, &p_ali_socket->eRelayS);
+ 943              		.loc 1 180 0
+ 944 0474 2F4B     		ldr	r3, .L86+4
+ 945 0476 1B68     		ldr	r3, [r3]
+ 946 0478 9B04     		lsls	r3, r3, #18
+ 947 047a 17D5     		bpl	.L74
+ 948              		.loc 1 180 0 is_stmt 0 discriminator 5
+ 949 047c 2E4E     		ldr	r6, .L86+8
+ 950 047e 2F4D     		ldr	r5, .L86+12
+ 951 0480 3300     		movs	r3, r6
+ 952 0482 2A00     		movs	r2, r5
+ 953 0484 2800     		movs	r0, r5
+ 954 0486 1433     		adds	r3, r3, #20
+ 955 0488 2632     		adds	r2, r2, #38
+ 956 048a 0093     		str	r3, [sp]
+ 957 048c 2900     		movs	r1, r5
+ 958 048e B423     		movs	r3, #180
+ 959 0490 3330     		adds	r0, r0, #51
+ 960 0492 FFF7FEFF 		bl	m_print
+ 961              	.LVL114:
+ 962 0496 3000     		movs	r0, r6
+ 963 0498 2268     		ldr	r2, [r4]
+ 964 049a 4830     		adds	r0, r0, #72
+ 965 049c 1100     		movs	r1, r2
+ 966 049e FFF7FEFF 		bl	m_print
+ 967              	.LVL115:
+ 968 04a2 2800     		movs	r0, r5
+ 969 04a4 A91D     		adds	r1, r5, #6
+ 970 04a6 7330     		adds	r0, r0, #115
+ 971 04a8 FFF7FEFF 		bl	m_print
+ 972              	.LVL116:
+ 973              	.L74:
+ 181:../../../mesh/app/ali_socket/ali_socket.c **** 	//control socket 
+ 182:../../../mesh/app/ali_socket/ali_socket.c **** 	ali_socket_elec_relay_init();
+ 974              		.loc 1 182 0 is_stmt 1
+ 975 04ac FFF7FEFF 		bl	ali_socket_elec_relay_init
+ 976              	.LVL117:
+ 183:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 184:../../../mesh/app/ali_socket/ali_socket.c **** 	//key init
+ 185:../../../mesh/app/ali_socket/ali_socket.c **** 	ali_socket_key_init();
+ 977              		.loc 1 185 0
+ 978 04b0 FFF7FEFF 		bl	ali_socket_key_init
+ 979              	.LVL118:
+ 186:../../../mesh/app/ali_socket/ali_socket.c **** 		
+ 187:../../../mesh/app/ali_socket/ali_socket.c **** 	//start timer for clear
+ 188:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 189:../../../mesh/app/ali_socket/ali_socket.c **** 	//start timer for button press;
+ 190:../../../mesh/app/ali_socket/ali_socket.c **** 	SYS_SetTimer(&p_ali_socket->btnGetTimer, (int)SOCKET_BTN_INTERVAL/10, 
+ 980              		.loc 1 190 0
+ 981 04b4 2368     		ldr	r3, [r4]
+ 982 04b6 0022     		movs	r2, #0
+ 983 04b8 181D     		adds	r0, r3, #4
+ 984 04ba 1421     		movs	r1, #20
+ 985 04bc 204B     		ldr	r3, .L86+16
+ 986 04be FFF7FEFF 		bl	SYS_SetTimer
+ 987              	.LVL119:
+ 191:../../../mesh/app/ali_socket/ali_socket.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_socket_btn_get_timer_cb);
+ 192:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 193:../../../mesh/app/ali_socket/ali_socket.c **** 	//start indicate timer
+ 194:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket->bindStatus){
+ 988              		.loc 1 194 0
+ 989 04c2 2568     		ldr	r5, [r4]
+ 990 04c4 6B78     		ldrb	r3, [r5, #1]
+ 991 04c6 002B     		cmp	r3, #0
+ 992 04c8 0AD0     		beq	.L75
+ 195:../../../mesh/app/ali_socket/ali_socket.c **** 		SYS_SetTimer(&p_ali_socket->btnGetTimer, (int)bc_mm_alis_get_random_time()/10, 
+ 993              		.loc 1 195 0
+ 994 04ca FFF7FEFF 		bl	bc_mm_alis_get_random_time
+ 995              	.LVL120:
+ 996 04ce 0A21     		movs	r1, #10
+ 997 04d0 FFF7FEFF 		bl	__aeabi_uidiv
+ 998              	.LVL121:
+ 999 04d4 1B4B     		ldr	r3, .L86+20
+ 1000 04d6 81B2     		uxth	r1, r0
+ 1001 04d8 0022     		movs	r2, #0
+ 1002 04da 281D     		adds	r0, r5, #4
+ 1003 04dc FFF7FEFF 		bl	SYS_SetTimer
+ 1004              	.LVL122:
+ 1005              	.L75:
+ 196:../../../mesh/app/ali_socket/ali_socket.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_socket_ind_sts_timer_cb);
+ 197:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+ 198:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 199:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->oo_ctrl.get = ali_socket_elec_relay_get;
+ 1006              		.loc 1 199 0
+ 1007 04e0 2068     		ldr	r0, [r4]
+ 1008 04e2 194B     		ldr	r3, .L86+24
+ 200:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->oo_ctrl.set = ali_socket_elec_relay_set;
+ 201:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_mm_gens_oo_init(&p_ali_socket->model[p_ali_socket->model_cnt++], &p_ali_socket->oo_ctrl);
+ 1009              		.loc 1 201 0
+ 1010 04e4 0200     		movs	r2, r0
+ 199:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->oo_ctrl.set = ali_socket_elec_relay_set;
+ 1011              		.loc 1 199 0
+ 1012 04e6 8367     		str	r3, [r0, #120]
+ 200:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->oo_ctrl.set = ali_socket_elec_relay_set;
+ 1013              		.loc 1 200 0
+ 1014 04e8 184B     		ldr	r3, .L86+28
+ 1015              		.loc 1 201 0
+ 1016 04ea 4C32     		adds	r2, r2, #76
+ 200:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->oo_ctrl.set = ali_socket_elec_relay_set;
+ 1017              		.loc 1 200 0
+ 1018 04ec 4367     		str	r3, [r0, #116]
+ 1019              		.loc 1 201 0
+ 1020 04ee 1378     		ldrb	r3, [r2]
+ 1021 04f0 591C     		adds	r1, r3, #1
+ 1022 04f2 1170     		strb	r1, [r2]
+ 1023 04f4 0100     		movs	r1, r0
+ 1024 04f6 0533     		adds	r3, r3, #5
+ 1025 04f8 1B01     		lsls	r3, r3, #4
+ 1026 04fa 7431     		adds	r1, r1, #116
+ 1027 04fc C018     		adds	r0, r0, r3
+ 1028 04fe FFF7FEFF 		bl	bc_mm_gens_oo_init
+ 1029              	.LVL123:
+ 202:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_mm_alis_vendor_init(&p_ali_socket->model[p_ali_socket->model_cnt++], NULL);
+ 1030              		.loc 1 202 0
+ 1031 0502 2268     		ldr	r2, [r4]
+ 1032 0504 1100     		movs	r1, r2
+ 1033 0506 4C31     		adds	r1, r1, #76
+ 1034 0508 0B78     		ldrb	r3, [r1]
+ 1035 050a 581C     		adds	r0, r3, #1
+ 1036 050c 0870     		strb	r0, [r1]
+ 1037 050e 581D     		adds	r0, r3, #5
+ 1038 0510 0001     		lsls	r0, r0, #4
+ 1039 0512 1018     		adds	r0, r2, r0
+ 1040 0514 0021     		movs	r1, #0
+ 1041 0516 FFF7FEFF 		bl	bc_mm_alis_vendor_init
+ 1042              	.LVL124:
+ 203:../../../mesh/app/ali_socket/ali_socket.c **** 	*mdl = p_ali_socket->model;
+ 1043              		.loc 1 203 0
+ 1044 051a 2368     		ldr	r3, [r4]
+ 204:../../../mesh/app/ali_socket/ali_socket.c **** 	*mcnt = p_ali_socket->model_cnt;
+ 205:../../../mesh/app/ali_socket/ali_socket.c **** 	return 0;
+ 1045              		.loc 1 205 0
+ 1046 051c 0020     		movs	r0, #0
+ 203:../../../mesh/app/ali_socket/ali_socket.c **** 	*mdl = p_ali_socket->model;
+ 1047              		.loc 1 203 0
+ 1048 051e 1A00     		movs	r2, r3
+ 1049 0520 5032     		adds	r2, r2, #80
+ 1050 0522 3A60     		str	r2, [r7]
+ 204:../../../mesh/app/ali_socket/ali_socket.c **** 	*mcnt = p_ali_socket->model_cnt;
+ 1051              		.loc 1 204 0
+ 1052 0524 4C33     		adds	r3, r3, #76
+ 1053 0526 1B78     		ldrb	r3, [r3]
+ 1054 0528 039A     		ldr	r2, [sp, #12]
+ 1055 052a 1370     		strb	r3, [r2]
+ 1056              	.L70:
+ 206:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1057              		.loc 1 206 0
+ 1058 052c 05B0     		add	sp, sp, #20
+ 1059              		@ sp needed
+ 1060              	.LVL125:
+ 1061 052e F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1062              	.L87:
+ 1063              		.align	2
+ 1064              	.L86:
+ 1065 0530 00000000 		.word	.LANCHOR0
+ 1066 0534 00000000 		.word	L_LEV
+ 1067 0538 00010000 		.word	.LANCHOR3
+ 1068 053c 00000000 		.word	.LANCHOR1
+ 1069 0540 00000000 		.word	ali_socket_btn_get_timer_cb
+ 1070 0544 00000000 		.word	ali_socket_ind_sts_timer_cb
+ 1071 0548 00000000 		.word	ali_socket_elec_relay_get
+ 1072 054c 00000000 		.word	ali_socket_elec_relay_set
+ 1073              		.cfi_endproc
+ 1074              	.LFE91:
+ 1076              		.align	1
+ 1077              		.global	ali_socket_deinit
+ 1078              		.code	16
+ 1079              		.thumb_func
+ 1081              	ali_socket_deinit:
+ 1082              	.LFB92:
+ 207:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 208:../../../mesh/app/ali_socket/ali_socket.c **** uint8_t ali_socket_deinit(mesh_model_t** mdl)
+ 209:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 1083              		.loc 1 209 0
+ 1084              		.cfi_startproc
+ 1085              		@ args = 0, pretend = 0, frame = 0
+ 1086              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1087              	.LVL126:
+ 1088 0550 70B5     		push	{r4, r5, r6, lr}
+ 1089              	.LCFI10:
+ 1090              		.cfi_def_cfa_offset 16
+ 1091              		.cfi_offset 4, -16
+ 1092              		.cfi_offset 5, -12
+ 1093              		.cfi_offset 6, -8
+ 1094              		.cfi_offset 14, -4
+ 210:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_mm_alis_vendor_deinit(&p_ali_socket->model[--p_ali_socket->model_cnt]);
+ 1095              		.loc 1 210 0
+ 1096 0552 124C     		ldr	r4, .L93
+ 209:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_mm_alis_vendor_deinit(&p_ali_socket->model[--p_ali_socket->model_cnt]);
+ 1097              		.loc 1 209 0
+ 1098 0554 0500     		movs	r5, r0
+ 1099              		.loc 1 210 0
+ 1100 0556 2268     		ldr	r2, [r4]
+ 1101 0558 1100     		movs	r1, r2
+ 1102 055a 4C31     		adds	r1, r1, #76
+ 1103 055c 0B78     		ldrb	r3, [r1]
+ 1104 055e 013B     		subs	r3, r3, #1
+ 1105 0560 DBB2     		uxtb	r3, r3
+ 1106 0562 581D     		adds	r0, r3, #5
+ 1107              	.LVL127:
+ 1108 0564 0001     		lsls	r0, r0, #4
+ 1109 0566 0B70     		strb	r3, [r1]
+ 1110 0568 1018     		adds	r0, r2, r0
+ 1111 056a FFF7FEFF 		bl	bc_mm_alis_vendor_deinit
+ 1112              	.LVL128:
+ 211:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_mm_gens_oo_deinit(&p_ali_socket->model[--p_ali_socket->model_cnt]);
+ 1113              		.loc 1 211 0
+ 1114 056e 2268     		ldr	r2, [r4]
+ 1115 0570 1100     		movs	r1, r2
+ 1116 0572 4C31     		adds	r1, r1, #76
+ 1117 0574 0B78     		ldrb	r3, [r1]
+ 1118 0576 013B     		subs	r3, r3, #1
+ 1119 0578 DBB2     		uxtb	r3, r3
+ 1120 057a 581D     		adds	r0, r3, #5
+ 1121 057c 0001     		lsls	r0, r0, #4
+ 1122 057e 0B70     		strb	r3, [r1]
+ 1123 0580 1018     		adds	r0, r2, r0
+ 1124 0582 FFF7FEFF 		bl	bc_mm_gens_oo_deinit
+ 1125              	.LVL129:
+ 212:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket){
+ 1126              		.loc 1 212 0
+ 1127 0586 2068     		ldr	r0, [r4]
+ 1128 0588 0028     		cmp	r0, #0
+ 1129 058a 03D0     		beq	.L89
+ 213:../../../mesh/app/ali_socket/ali_socket.c **** 		ke_free(p_ali_socket);
+ 1130              		.loc 1 213 0
+ 1131 058c FFF7FEFF 		bl	ke_free
+ 1132              	.LVL130:
+ 214:../../../mesh/app/ali_socket/ali_socket.c **** 		p_ali_socket = NULL;
+ 1133              		.loc 1 214 0
+ 1134 0590 0023     		movs	r3, #0
+ 1135 0592 2360     		str	r3, [r4]
+ 1136              	.L89:
+ 215:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+ 216:../../../mesh/app/ali_socket/ali_socket.c **** 	*mdl = NULL;
+ 1137              		.loc 1 216 0
+ 1138 0594 0020     		movs	r0, #0
+ 1139 0596 2860     		str	r0, [r5]
+ 217:../../../mesh/app/ali_socket/ali_socket.c **** 	return 0;
+ 218:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1140              		.loc 1 218 0
+ 1141              		@ sp needed
+ 1142              	.LVL131:
+ 1143 0598 70BD     		pop	{r4, r5, r6, pc}
+ 1144              	.L94:
+ 1145 059a C046     		.align	2
+ 1146              	.L93:
+ 1147 059c 00000000 		.word	.LANCHOR0
+ 1148              		.cfi_endproc
+ 1149              	.LFE92:
+ 1151              		.align	1
+ 1152              		.global	ali_socket_ind_status_set
+ 1153              		.code	16
+ 1154              		.thumb_func
+ 1156              	ali_socket_ind_status_set:
+ 1157              	.LFB93:
+ 219:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 220:../../../mesh/app/ali_socket/ali_socket.c **** void ali_socket_ind_status_set(uint8_t on)
+ 221:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 1158              		.loc 1 221 0
+ 1159              		.cfi_startproc
+ 1160              		@ args = 0, pretend = 0, frame = 0
+ 1161              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1162              	.LVL132:
+ 1163 05a0 10B5     		push	{r4, lr}
+ 1164              	.LCFI11:
+ 1165              		.cfi_def_cfa_offset 8
+ 1166              		.cfi_offset 4, -8
+ 1167              		.cfi_offset 14, -4
+ 222:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_gpio_set(GPIO_PWM1, on);
+ 1168              		.loc 1 222 0
+ 1169 05a2 441E     		subs	r4, r0, #1
+ 1170 05a4 A041     		sbcs	r0, r0, r4
+ 1171              	.LVL133:
+ 1172 05a6 C4B2     		uxtb	r4, r0
+ 1173 05a8 2100     		movs	r1, r4
+ 1174 05aa 0620     		movs	r0, #6
+ 1175 05ac FFF7FEFF 		bl	bc_gpio_set
+ 1176              	.LVL134:
+ 223:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_gpio_set(GPIO_PWM5, on);
+ 1177              		.loc 1 223 0
+ 1178 05b0 2100     		movs	r1, r4
+ 1179 05b2 1820     		movs	r0, #24
+ 1180 05b4 FFF7FEFF 		bl	bc_gpio_set
+ 1181              	.LVL135:
+ 224:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1182              		.loc 1 224 0
+ 1183              		@ sp needed
+ 1184 05b8 10BD     		pop	{r4, pc}
+ 1185              		.cfi_endproc
+ 1186              	.LFE93:
+ 1188              		.align	1
+ 1189              		.global	ali_socket_ind_onoff_set
+ 1190              		.code	16
+ 1191              		.thumb_func
+ 1193              	ali_socket_ind_onoff_set:
+ 1194              	.LFB94:
+ 225:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 226:../../../mesh/app/ali_socket/ali_socket.c **** void ali_socket_ind_onoff_set(uint8_t on)
+ 227:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 1195              		.loc 1 227 0
+ 1196              		.cfi_startproc
+ 1197              		@ args = 0, pretend = 0, frame = 0
+ 1198              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1199              	.LVL136:
+ 228:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_gpio_set(GPIO_PWM1, !on);
+ 1200              		.loc 1 228 0
+ 1201 05ba 4142     		rsbs	r1, r0, #0
+ 1202 05bc 4141     		adcs	r1, r1, r0
+ 227:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_gpio_set(GPIO_PWM1, !on);
+ 1203              		.loc 1 227 0
+ 1204 05be 10B5     		push	{r4, lr}
+ 1205              	.LCFI12:
+ 1206              		.cfi_def_cfa_offset 8
+ 1207              		.cfi_offset 4, -8
+ 1208              		.cfi_offset 14, -4
+ 227:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_gpio_set(GPIO_PWM1, !on);
+ 1209              		.loc 1 227 0
+ 1210 05c0 0400     		movs	r4, r0
+ 1211              		.loc 1 228 0
+ 1212 05c2 C9B2     		uxtb	r1, r1
+ 1213 05c4 0620     		movs	r0, #6
+ 1214              	.LVL137:
+ 1215 05c6 FFF7FEFF 		bl	bc_gpio_set
+ 1216              	.LVL138:
+ 229:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_gpio_set(GPIO_PWM5, on);
+ 1217              		.loc 1 229 0
+ 1218 05ca 611E     		subs	r1, r4, #1
+ 1219 05cc 8C41     		sbcs	r4, r4, r1
+ 1220 05ce 1820     		movs	r0, #24
+ 1221 05d0 E1B2     		uxtb	r1, r4
+ 1222 05d2 FFF7FEFF 		bl	bc_gpio_set
+ 1223              	.LVL139:
+ 230:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1224              		.loc 1 230 0
+ 1225              		@ sp needed
+ 1226 05d6 10BD     		pop	{r4, pc}
+ 1227              		.cfi_endproc
+ 1228              	.LFE94:
+ 1230              		.align	1
+ 1231              		.global	ali_socket_elec_relay_set
+ 1232              		.code	16
+ 1233              		.thumb_func
+ 1235              	ali_socket_elec_relay_set:
+ 1236              	.LFB95:
+ 231:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 232:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 233:../../../mesh/app/ali_socket/ali_socket.c **** void ali_socket_elec_relay_set(uint8_t on)
+ 234:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 1237              		.loc 1 234 0
+ 1238              		.cfi_startproc
+ 1239              		@ args = 0, pretend = 0, frame = 0
+ 1240              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1241              	.LVL140:
+ 235:../../../mesh/app/ali_socket/ali_socket.c **** 	M_PRINTF(L_APP, "ctrl to [%x]", on);
+ 1242              		.loc 1 235 0
+ 1243 05d8 274B     		ldr	r3, .L106
+ 234:../../../mesh/app/ali_socket/ali_socket.c **** 	M_PRINTF(L_APP, "ctrl to [%x]", on);
+ 1244              		.loc 1 234 0
+ 1245 05da 73B5     		push	{r0, r1, r4, r5, r6, lr}
+ 1246              	.LCFI13:
+ 1247              		.cfi_def_cfa_offset 24
+ 1248              		.cfi_offset 0, -24
+ 1249              		.cfi_offset 1, -20
+ 1250              		.cfi_offset 4, -16
+ 1251              		.cfi_offset 5, -12
+ 1252              		.cfi_offset 6, -8
+ 1253              		.cfi_offset 14, -4
+ 1254              		.loc 1 235 0
+ 1255 05dc 1B68     		ldr	r3, [r3]
+ 234:../../../mesh/app/ali_socket/ali_socket.c **** 	M_PRINTF(L_APP, "ctrl to [%x]", on);
+ 1256              		.loc 1 234 0
+ 1257 05de 0600     		movs	r6, r0
+ 1258              		.loc 1 235 0
+ 1259 05e0 9B04     		lsls	r3, r3, #18
+ 1260 05e2 16D5     		bpl	.L98
+ 1261              		.loc 1 235 0 is_stmt 0 discriminator 5
+ 1262 05e4 254D     		ldr	r5, .L106+4
+ 1263 05e6 264C     		ldr	r4, .L106+8
+ 1264 05e8 2B00     		movs	r3, r5
+ 1265 05ea 2200     		movs	r2, r4
+ 1266 05ec 2000     		movs	r0, r4
+ 1267              	.LVL141:
+ 1268 05ee 6533     		adds	r3, r3, #101
+ 1269 05f0 2632     		adds	r2, r2, #38
+ 1270 05f2 0093     		str	r3, [sp]
+ 1271 05f4 2100     		movs	r1, r4
+ 1272 05f6 EB23     		movs	r3, #235
+ 1273 05f8 3330     		adds	r0, r0, #51
+ 1274 05fa FFF7FEFF 		bl	m_print
+ 1275              	.LVL142:
+ 1276 05fe 2800     		movs	r0, r5
+ 1277 0600 3100     		movs	r1, r6
+ 1278 0602 7F30     		adds	r0, r0, #127
+ 1279 0604 FFF7FEFF 		bl	m_print
+ 1280              	.LVL143:
+ 1281 0608 2000     		movs	r0, r4
+ 1282 060a A11D     		adds	r1, r4, #6
+ 1283 060c 7330     		adds	r0, r0, #115
+ 1284 060e FFF7FEFF 		bl	m_print
+ 1285              	.LVL144:
+ 1286              	.L98:
+ 236:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_gpio_set(GPIO_PWM2, on);
+ 1287              		.loc 1 236 0 is_stmt 1
+ 1288 0612 3100     		movs	r1, r6
+ 1289 0614 4B1E     		subs	r3, r1, #1
+ 1290 0616 9941     		sbcs	r1, r1, r3
+ 1291 0618 0E20     		movs	r0, #14
+ 1292 061a C9B2     		uxtb	r1, r1
+ 1293 061c FFF7FEFF 		bl	bc_gpio_set
+ 1294              	.LVL145:
+ 237:../../../mesh/app/ali_socket/ali_socket.c **** 	ali_socket_ind_onoff_set(on);
+ 1295              		.loc 1 237 0
+ 1296 0620 3000     		movs	r0, r6
+ 1297 0622 FFF7FEFF 		bl	ali_socket_ind_onoff_set
+ 1298              	.LVL146:
+ 238:../../../mesh/app/ali_socket/ali_socket.c **** 	
+ 239:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->eRelayS = on;
+ 1299              		.loc 1 239 0
+ 1300 0626 174C     		ldr	r4, .L106+12
+ 1301 0628 2568     		ldr	r5, [r4]
+ 240:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 241:../../../mesh/app/ali_socket/ali_socket.c **** 	//indicate status
+ 242:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket->bindStatus){
+ 1302              		.loc 1 242 0
+ 1303 062a 6B78     		ldrb	r3, [r5, #1]
+ 239:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 1304              		.loc 1 239 0
+ 1305 062c 2E70     		strb	r6, [r5]
+ 1306              		.loc 1 242 0
+ 1307 062e 002B     		cmp	r3, #0
+ 1308 0630 0AD0     		beq	.L99
+ 243:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 244:../../../mesh/app/ali_socket/ali_socket.c **** 		SYS_SetTimer(&p_ali_socket->btnGetTimer, (int)bc_mm_alis_get_random_time()/10, 
+ 1309              		.loc 1 244 0
+ 1310 0632 FFF7FEFF 		bl	bc_mm_alis_get_random_time
+ 1311              	.LVL147:
+ 1312 0636 0A21     		movs	r1, #10
+ 1313 0638 FFF7FEFF 		bl	__aeabi_uidiv
+ 1314              	.LVL148:
+ 1315 063c 124B     		ldr	r3, .L106+16
+ 1316 063e 81B2     		uxth	r1, r0
+ 1317 0640 0022     		movs	r2, #0
+ 1318 0642 281D     		adds	r0, r5, #4
+ 1319 0644 FFF7FEFF 		bl	SYS_SetTimer
+ 1320              	.LVL149:
+ 1321              	.L99:
+ 245:../../../mesh/app/ali_socket/ali_socket.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_socket_ind_sts_timer_cb);
+ 246:../../../mesh/app/ali_socket/ali_socket.c **** 	}
+ 247:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 248:../../../mesh/app/ali_socket/ali_socket.c **** 	//save status
+ 249:../../../mesh/app/ali_socket/ali_socket.c **** 	p_ali_socket->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_socket, ALI_SOCKET_SAVE_LEN-1);
+ 1322              		.loc 1 249 0
+ 1323 0648 2568     		ldr	r5, [r4]
+ 1324 064a 0321     		movs	r1, #3
+ 1325 064c 2800     		movs	r0, r5
+ 1326 064e FFF7FEFF 		bl	bc_sys_check_sum
+ 1327              	.LVL150:
+ 1328 0652 E870     		strb	r0, [r5, #3]
+ 250:../../../mesh/app/ali_socket/ali_socket.c **** 	m_printf_hex(L_APP, "ali_socket_elec_relay_set save data", (uint8_t*)p_ali_socket, ALI_SOCKET_SAVE
+ 1329              		.loc 1 250 0
+ 1330 0654 8020     		movs	r0, #128
+ 1331 0656 0D49     		ldr	r1, .L106+20
+ 1332 0658 0423     		movs	r3, #4
+ 1333 065a 2268     		ldr	r2, [r4]
+ 1334 065c 0C31     		adds	r1, r1, #12
+ 1335 065e 8001     		lsls	r0, r0, #6
+ 1336 0660 FFF7FEFF 		bl	m_printf_hex
+ 1337              	.LVL151:
+ 251:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 1338              		.loc 1 251 0
+ 1339 0664 0121     		movs	r1, #1
+ 1340 0666 0020     		movs	r0, #0
+ 1341 0668 FFF7FEFF 		bl	bc_flash_erase
+ 1342              	.LVL152:
+ 252:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_SOCKET_SAVE_LEN,(uint8_t*)p_ali_socket);
+ 1343              		.loc 1 252 0
+ 1344 066c 2268     		ldr	r2, [r4]
+ 1345 066e 0421     		movs	r1, #4
+ 1346 0670 0020     		movs	r0, #0
+ 1347 0672 FFF7FEFF 		bl	bc_flash_write
+ 1348              	.LVL153:
+ 253:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1349              		.loc 1 253 0
+ 1350              		@ sp needed
+ 1351 0676 73BD     		pop	{r0, r1, r4, r5, r6, pc}
+ 1352              	.L107:
+ 1353              		.align	2
+ 1354              	.L106:
+ 1355 0678 00000000 		.word	L_LEV
+ 1356 067c 00010000 		.word	.LANCHOR3
+ 1357 0680 00000000 		.word	.LANCHOR1
+ 1358 0684 00000000 		.word	.LANCHOR0
+ 1359 0688 00000000 		.word	ali_socket_ind_sts_timer_cb
+ 1360 068c 80010000 		.word	.LANCHOR4
+ 1361              		.cfi_endproc
+ 1362              	.LFE95:
+ 1364              		.align	1
+ 1365              		.global	ali_socket_elec_relay_reverse
+ 1366              		.code	16
+ 1367              		.thumb_func
+ 1369              	ali_socket_elec_relay_reverse:
+ 1370              	.LFB96:
+ 254:../../../mesh/app/ali_socket/ali_socket.c **** void ali_socket_elec_relay_reverse(void)
+ 255:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 1371              		.loc 1 255 0
+ 1372              		.cfi_startproc
+ 1373              		@ args = 0, pretend = 0, frame = 0
+ 1374              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1375              	.LVL154:
+ 1376 0690 10B5     		push	{r4, lr}
+ 1377              	.LCFI14:
+ 1378              		.cfi_def_cfa_offset 8
+ 1379              		.cfi_offset 4, -8
+ 1380              		.cfi_offset 14, -4
+ 256:../../../mesh/app/ali_socket/ali_socket.c **** 	uint8_t on = p_ali_socket->eRelayS;
+ 1381              		.loc 1 256 0
+ 1382 0692 044B     		ldr	r3, .L109
+ 257:../../../mesh/app/ali_socket/ali_socket.c **** 	on = !on;
+ 258:../../../mesh/app/ali_socket/ali_socket.c **** 	ali_socket_elec_relay_set(on);
+ 259:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1383              		.loc 1 259 0
+ 1384              		@ sp needed
+ 256:../../../mesh/app/ali_socket/ali_socket.c **** 	uint8_t on = p_ali_socket->eRelayS;
+ 1385              		.loc 1 256 0
+ 1386 0694 1B68     		ldr	r3, [r3]
+ 257:../../../mesh/app/ali_socket/ali_socket.c **** 	on = !on;
+ 1387              		.loc 1 257 0
+ 1388 0696 1878     		ldrb	r0, [r3]
+ 1389 0698 4342     		rsbs	r3, r0, #0
+ 1390 069a 5841     		adcs	r0, r0, r3
+ 1391 069c C0B2     		uxtb	r0, r0
+ 1392              	.LVL155:
+ 258:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1393              		.loc 1 258 0
+ 1394 069e FFF7FEFF 		bl	ali_socket_elec_relay_set
+ 1395              	.LVL156:
+ 1396              		.loc 1 259 0
+ 1397 06a2 10BD     		pop	{r4, pc}
+ 1398              	.L110:
+ 1399              		.align	2
+ 1400              	.L109:
+ 1401 06a4 00000000 		.word	.LANCHOR0
+ 1402              		.cfi_endproc
+ 1403              	.LFE96:
+ 1405              		.align	1
+ 1406              		.global	ali_socket_elec_relay_get
+ 1407              		.code	16
+ 1408              		.thumb_func
+ 1410              	ali_socket_elec_relay_get:
+ 1411              	.LFB97:
+ 260:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 261:../../../mesh/app/ali_socket/ali_socket.c **** uint8_t ali_socket_elec_relay_get(void)
+ 262:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 1412              		.loc 1 262 0
+ 1413              		.cfi_startproc
+ 1414              		@ args = 0, pretend = 0, frame = 0
+ 1415              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1416              		@ link register save eliminated.
+ 263:../../../mesh/app/ali_socket/ali_socket.c **** 	return p_ali_socket->eRelayS;
+ 1417              		.loc 1 263 0
+ 1418 06a8 014B     		ldr	r3, .L112
+ 264:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1419              		.loc 1 264 0
+ 1420              		@ sp needed
+ 263:../../../mesh/app/ali_socket/ali_socket.c **** 	return p_ali_socket->eRelayS;
+ 1421              		.loc 1 263 0
+ 1422 06aa 1B68     		ldr	r3, [r3]
+ 1423 06ac 1878     		ldrb	r0, [r3]
+ 1424              		.loc 1 264 0
+ 1425 06ae 7047     		bx	lr
+ 1426              	.L113:
+ 1427              		.align	2
+ 1428              	.L112:
+ 1429 06b0 00000000 		.word	.LANCHOR0
+ 1430              		.cfi_endproc
+ 1431              	.LFE97:
+ 1433              		.align	1
+ 1434              		.global	ali_socket_elec_relay_init
+ 1435              		.code	16
+ 1436              		.thumb_func
+ 1438              	ali_socket_elec_relay_init:
+ 1439              	.LFB98:
+ 265:../../../mesh/app/ali_socket/ali_socket.c **** uint8_t ali_socket_elec_relay_init()
+ 266:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 1440              		.loc 1 266 0
+ 1441              		.cfi_startproc
+ 1442              		@ args = 0, pretend = 0, frame = 0
+ 1443              		@ frame_needed = 0, uses_anonymous_args = 0
+ 267:../../../mesh/app/ali_socket/ali_socket.c **** 	
+ 268:../../../mesh/app/ali_socket/ali_socket.c **** 	if(p_ali_socket == NULL)
+ 1444              		.loc 1 268 0
+ 1445 06b4 054B     		ldr	r3, .L118
+ 266:../../../mesh/app/ali_socket/ali_socket.c **** 	
+ 1446              		.loc 1 266 0
+ 1447 06b6 10B5     		push	{r4, lr}
+ 1448              	.LCFI15:
+ 1449              		.cfi_def_cfa_offset 8
+ 1450              		.cfi_offset 4, -8
+ 1451              		.cfi_offset 14, -4
+ 1452              		.loc 1 268 0
+ 1453 06b8 1B68     		ldr	r3, [r3]
+ 269:../../../mesh/app/ali_socket/ali_socket.c **** 		return 2;
+ 1454              		.loc 1 269 0
+ 1455 06ba 0220     		movs	r0, #2
+ 268:../../../mesh/app/ali_socket/ali_socket.c **** 		return 2;
+ 1456              		.loc 1 268 0
+ 1457 06bc 002B     		cmp	r3, #0
+ 1458 06be 03D0     		beq	.L115
+ 270:../../../mesh/app/ali_socket/ali_socket.c **** 	ali_socket_elec_relay_set(p_ali_socket->eRelayS);
+ 1459              		.loc 1 270 0
+ 1460 06c0 1878     		ldrb	r0, [r3]
+ 1461 06c2 FFF7FEFF 		bl	ali_socket_elec_relay_set
+ 1462              	.LVL157:
+ 271:../../../mesh/app/ali_socket/ali_socket.c **** 	return 0;
+ 1463              		.loc 1 271 0
+ 1464 06c6 0020     		movs	r0, #0
+ 1465              	.L115:
+ 272:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1466              		.loc 1 272 0
+ 1467              		@ sp needed
+ 1468 06c8 10BD     		pop	{r4, pc}
+ 1469              	.L119:
+ 1470 06ca C046     		.align	2
+ 1471              	.L118:
+ 1472 06cc 00000000 		.word	.LANCHOR0
+ 1473              		.cfi_endproc
+ 1474              	.LFE98:
+ 1476              		.align	1
+ 1477              		.global	ali_socket_key_init
+ 1478              		.code	16
+ 1479              		.thumb_func
+ 1481              	ali_socket_key_init:
+ 1482              	.LFB99:
+ 273:../../../mesh/app/ali_socket/ali_socket.c **** 
+ 274:../../../mesh/app/ali_socket/ali_socket.c **** void ali_socket_key_init(void)
+ 275:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 1483              		.loc 1 275 0
+ 1484              		.cfi_startproc
+ 1485              		@ args = 0, pretend = 0, frame = 8
+ 1486              		@ frame_needed = 0, uses_anonymous_args = 0
+ 276:../../../mesh/app/ali_socket/ali_socket.c **** 	GPIO_CFG cfg;
+ 277:../../../mesh/app/ali_socket/ali_socket.c **** 	cfg.pin_func = FUNC_INPUT;
+ 278:../../../mesh/app/ali_socket/ali_socket.c **** 	cfg.pin_cfg = GFG_PULLUP;
+ 1487              		.loc 1 278 0
+ 1488 06d0 4023     		movs	r3, #64
+ 275:../../../mesh/app/ali_socket/ali_socket.c **** 	GPIO_CFG cfg;
+ 1489              		.loc 1 275 0
+ 1490 06d2 07B5     		push	{r0, r1, r2, lr}
+ 1491              	.LCFI16:
+ 1492              		.cfi_def_cfa_offset 16
+ 1493              		.cfi_offset 0, -16
+ 1494              		.cfi_offset 1, -12
+ 1495              		.cfi_offset 2, -8
+ 1496              		.cfi_offset 14, -4
+ 279:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_gpio_init(GPIO_PWM4, &cfg);
+ 1497              		.loc 1 279 0
+ 1498 06d4 1720     		movs	r0, #23
+ 277:../../../mesh/app/ali_socket/ali_socket.c **** 	cfg.pin_cfg = GFG_PULLUP;
+ 1499              		.loc 1 277 0
+ 1500 06d6 01A9     		add	r1, sp, #4
+ 278:../../../mesh/app/ali_socket/ali_socket.c **** 	bc_gpio_init(GPIO_PWM4, &cfg);
+ 1501              		.loc 1 278 0
+ 1502 06d8 0B70     		strb	r3, [r1]
+ 280:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1503              		.loc 1 280 0
+ 1504              		@ sp needed
+ 279:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1505              		.loc 1 279 0
+ 1506 06da FFF7FEFF 		bl	bc_gpio_init
+ 1507              	.LVL158:
+ 1508              		.loc 1 280 0
+ 1509 06de 07BD     		pop	{r0, r1, r2, pc}
+ 1510              		.cfi_endproc
+ 1511              	.LFE99:
+ 1513              		.align	1
+ 1514              		.global	ali_socket_key_get
+ 1515              		.code	16
+ 1516              		.thumb_func
+ 1518              	ali_socket_key_get:
+ 1519              	.LFB100:
+ 281:../../../mesh/app/ali_socket/ali_socket.c **** uint8_t ali_socket_key_get(void)
+ 282:../../../mesh/app/ali_socket/ali_socket.c **** {
+ 1520              		.loc 1 282 0
+ 1521              		.cfi_startproc
+ 1522              		@ args = 0, pretend = 0, frame = 0
+ 1523              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1524 06e0 10B5     		push	{r4, lr}
+ 1525              	.LCFI17:
+ 1526              		.cfi_def_cfa_offset 8
+ 1527              		.cfi_offset 4, -8
+ 1528              		.cfi_offset 14, -4
+ 283:../../../mesh/app/ali_socket/ali_socket.c **** 	return (uint8_t)bc_gpio_get(GPIO_PWM4);
+ 1529              		.loc 1 283 0
+ 1530 06e2 1720     		movs	r0, #23
+ 1531 06e4 FFF7FEFF 		bl	bc_gpio_get
+ 1532              	.LVL159:
+ 284:../../../mesh/app/ali_socket/ali_socket.c **** }
+ 1533              		.loc 1 284 0
+ 1534              		@ sp needed
+ 1535 06e8 10BD     		pop	{r4, pc}
+ 1536              		.cfi_endproc
+ 1537              	.LFE100:
+ 1539              		.section	.rodata
+ 1540              		.set	.LANCHOR1,. + 0
+ 1541              		.set	.LANCHOR2,. + 128
+ 1542              		.set	.LANCHOR3,. + 256
+ 1543              		.set	.LANCHOR4,. + 384
+ 1546              	lgs:
+ 1547 0000 5B4D4C47 		.ascii	"[MLG]\000"
+ 1547      5D00
+ 1550              	lge:
+ 1551 0006 0D0A00   		.ascii	"\015\012\000"
+ 1552              	.LC2:
+ 1553 0009 2E2E2F2E 		.ascii	"../../../mesh/app/ali_socket/ali_socket.c\000"
+ 1553      2E2F2E2E 
+ 1553      2F6D6573 
+ 1553      682F6170 
+ 1553      702F616C 
+ 1554              	.LC4:
+ 1555 0033 25735B25 		.ascii	"%s[%10s:%d]%s:\000"
+ 1555      3130733A 
+ 1555      25645D25 
+ 1555      733A00
+ 1558              	__FUNCTION__.9202:
+ 1559 0042 616C695F 		.ascii	"ali_socket_bind_timer_cb\000"
+ 1559      736F636B 
+ 1559      65745F62 
+ 1559      696E645F 
+ 1559      74696D65 
+ 1560              	.LC5:
+ 1561 005b 6D5F7462 		.ascii	"m_tb_key_app_find error\000"
+ 1561      5F6B6579 
+ 1561      5F617070 
+ 1561      5F66696E 
+ 1561      64206572 
+ 1562              	.LC6:
+ 1563 0073 257300   		.ascii	"%s\000"
+ 1564              	.LC7:
+ 1565 0076 73746174 		.ascii	"status[%x]\000"
+ 1565      75735B25 
+ 1565      785D00
+ 1566              	.LC8:
+ 1567 0081 6C656420 		.ascii	"led status = %d\000"
+ 1567      73746174 
+ 1567      7573203D 
+ 1567      20256400 
+ 1570              	__FUNCTION__.9228:
+ 1571 0091 616C695F 		.ascii	"ali_socket_btn_get_timer_cb\000"
+ 1571      736F636B 
+ 1571      65745F62 
+ 1571      746E5F67 
+ 1571      65745F74 
+ 1572              	.LC22:
+ 1573 00ad 76616C5B 		.ascii	"val[%x]\000"
+ 1573      25785D00 
+ 1574              	.LC31:
+ 1575 00b5 616C695F 		.ascii	"ali_socket_ind_sts_timer_cb\000"
+ 1575      736F636B 
+ 1575      65745F69 
+ 1575      6E645F73 
+ 1575      74735F74 
+ 1578              	__FUNCTION__.9241:
+ 1579 00d1 616C695F 		.ascii	"ali_socket_prov_state_get\000"
+ 1579      736F636B 
+ 1579      65745F70 
+ 1579      726F765F 
+ 1579      73746174 
+ 1580              	.LC39:
+ 1581 00eb 626F756E 		.ascii	"bound satus[%d]\000"
+ 1581      64207361 
+ 1581      7475735B 
+ 1581      25645D00 
+ 1584              	__FUNCTION__.9250:
+ 1585 00fb 616C695F 		.ascii	"ali_socket_factory_reset\000"
+ 1585      736F636B 
+ 1585      65745F66 
+ 1585      6163746F 
+ 1585      72795F72 
+ 1588              	__FUNCTION__.9259:
+ 1589 0114 616C695F 		.ascii	"ali_socket_init\000"
+ 1589      736F636B 
+ 1589      65745F69 
+ 1589      6E697400 
+ 1590              	.LC59:
+ 1591 0124 64657669 		.ascii	"device type is changed [%d] to [%d]\000"
+ 1591      63652074 
+ 1591      79706520 
+ 1591      69732063 
+ 1591      68616E67 
+ 1592              	.LC60:
+ 1593 0148 705F616C 		.ascii	"p_ali_socket[%p] eRelayS[%p]\000"
+ 1593      695F736F 
+ 1593      636B6574 
+ 1593      5B25705D 
+ 1593      20655265 
+ 1596              	__FUNCTION__.9274:
+ 1597 0165 616C695F 		.ascii	"ali_socket_elec_relay_set\000"
+ 1597      736F636B 
+ 1597      65745F65 
+ 1597      6C65635F 
+ 1597      72656C61 
+ 1598              	.LC76:
+ 1599 017f 6374726C 		.ascii	"ctrl to [%x]\000"
+ 1599      20746F20 
+ 1599      5B25785D 
+ 1599      00
+ 1600              	.LC79:
+ 1601 018c 616C695F 		.ascii	"ali_socket_elec_relay_set save data\000"
+ 1601      736F636B 
+ 1601      65745F65 
+ 1601      6C65635F 
+ 1601      72656C61 
+ 1602              		.bss
+ 1603              		.align	2
+ 1604              		.set	.LANCHOR0,. + 0
+ 1607              	p_ali_socket:
+ 1608 0000 00000000 		.space	4
+ 1609              		.text
+ 1610              	.Letext0:
+ 1611              		.file 2 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1612              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1613              		.file 4 "../../../drivers/hal/inc/bc62xx_timer.h"
+ 1614              		.file 5 "../../../mesh/api/m_defines.h"
+ 1615              		.file 6 "../../../mesh/api/m_api_msg.h"
+ 1616              		.file 7 "../../../mesh/models/inc/mm_com.h"
+ 1617              		.file 8 "../../../mesh/models/inc/bc_mm_gen_oo.h"
+ 1618              		.file 9 "../../../mesh/app/ali_socket/ali_socket.h"
+ 1619              		.file 10 "../../../drivers/hal/inc/bc62xx_gpio.h"
+ 1620              		.file 11 "../../../mesh/common/api/co_log.h"
+ 1621              		.file 12 "../../../mesh/api/m_api.h"
+ 1622              		.file 13 "../../../device/inc/bc_sys.h"
+ 1623              		.file 14 "../../../drivers/hal/inc/bc_flash.h"
+ 1624              		.file 15 "../../../mesh/port/meshTimer.h"
+ 1625              		.file 16 "../../../mesh/models/inc/mm_ali.h"
+ 1626              		.file 17 "../../../mesh/port/port.h"
+ 1627              		.file 18 "../../../mesh/app/ali_config.h"

@@ -1,0 +1,124 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"bc_sys.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.align	1
+  20              		.global	bc_sys_reset
+  21              		.code	16
+  22              		.thumb_func
+  24              	bc_sys_reset:
+  25              	.LFB38:
+  26              		.file 1 "../../../device/bc_sys.c"
+   1:../../../device/bc_sys.c **** #ifndef __BC_SYS_H_
+   2:../../../device/bc_sys.c **** #define __BC_SYS_H_
+   3:../../../device/bc_sys.c **** 
+   4:../../../device/bc_sys.c **** #include "bc62xx.h"
+   5:../../../device/bc_sys.c **** 
+   6:../../../device/bc_sys.c **** /**
+   7:../../../device/bc_sys.c ****  ****************************************************************************************
+   8:../../../device/bc_sys.c ****  * @brief system reset
+   9:../../../device/bc_sys.c ****  ****************************************************************************************
+  10:../../../device/bc_sys.c ****  */
+  11:../../../device/bc_sys.c **** uint32_t bc_sys_reset(void)
+  12:../../../device/bc_sys.c **** {
+  27              		.loc 1 12 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  13:../../../device/bc_sys.c **** 	//HWRITE(CORE_RESET, 1);
+  14:../../../device/bc_sys.c **** 	HWRITE(CORE_RESET,0x03);
+  32              		.loc 1 14 0
+  33 0000 0322     		movs	r2, #3
+  34 0002 024B     		ldr	r3, .L2
+  15:../../../device/bc_sys.c **** 	return 0;
+  16:../../../device/bc_sys.c **** }
+  35              		.loc 1 16 0
+  36 0004 0020     		movs	r0, #0
+  14:../../../device/bc_sys.c **** 	return 0;
+  37              		.loc 1 14 0
+  38 0006 1A70     		strb	r2, [r3]
+  39              		.loc 1 16 0
+  40              		@ sp needed
+  41 0008 7047     		bx	lr
+  42              	.L3:
+  43 000a C046     		.align	2
+  44              	.L2:
+  45 000c 10800010 		.word	268468240
+  46              		.cfi_endproc
+  47              	.LFE38:
+  49              		.align	1
+  50              		.global	bc_sys_check_sum
+  51              		.code	16
+  52              		.thumb_func
+  54              	bc_sys_check_sum:
+  55              	.LFB39:
+  17:../../../device/bc_sys.c **** 
+  18:../../../device/bc_sys.c **** uint8_t bc_sys_check_sum(uint8_t* data, int len)
+  19:../../../device/bc_sys.c **** {
+  56              		.loc 1 19 0
+  57              		.cfi_startproc
+  58              		@ args = 0, pretend = 0, frame = 0
+  59              		@ frame_needed = 0, uses_anonymous_args = 0
+  60              		@ link register save eliminated.
+  61              	.LVL0:
+  20:../../../device/bc_sys.c **** 	uint8_t crc = 0x00;/* init crc value*/
+  21:../../../device/bc_sys.c **** 	if(data == NULL || len == 0){
+  22:../../../device/bc_sys.c **** 		return crc;
+  62              		.loc 1 22 0
+  63 0010 031E     		subs	r3, r0, #0
+  21:../../../device/bc_sys.c **** 		return crc;
+  64              		.loc 1 21 0
+  65 0012 08D0     		beq	.L5
+  66              		.loc 1 22 0 discriminator 1
+  67 0014 0023     		movs	r3, #0
+  21:../../../device/bc_sys.c **** 		return crc;
+  68              		.loc 1 21 0 discriminator 1
+  69 0016 9942     		cmp	r1, r3
+  70 0018 05D0     		beq	.L5
+  71              	.LVL1:
+  72              	.L6:
+  23:../../../device/bc_sys.c **** 	}
+  24:../../../device/bc_sys.c **** 	do{
+  25:../../../device/bc_sys.c **** 		crc += data[--len];
+  73              		.loc 1 25 0 discriminator 1
+  74 001a 0139     		subs	r1, r1, #1
+  75              	.LVL2:
+  76 001c 425C     		ldrb	r2, [r0, r1]
+  77 001e 9B18     		adds	r3, r3, r2
+  78              	.LVL3:
+  79 0020 DBB2     		uxtb	r3, r3
+  80              	.LVL4:
+  26:../../../device/bc_sys.c **** 	}while(len);
+  81              		.loc 1 26 0 discriminator 1
+  82 0022 0029     		cmp	r1, #0
+  83 0024 F9D1     		bne	.L6
+  84              	.LVL5:
+  85              	.L5:
+  27:../../../device/bc_sys.c **** 	return crc;
+  28:../../../device/bc_sys.c **** }
+  86              		.loc 1 28 0
+  87 0026 1800     		movs	r0, r3
+  88              	.LVL6:
+  89              		@ sp needed
+  90 0028 7047     		bx	lr
+  91              		.cfi_endproc
+  92              	.LFE39:
+  94              	.Letext0:
+  95              		.file 2 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+  96              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+  97              		.file 4 "../../../device/inc/bc62xx.h"

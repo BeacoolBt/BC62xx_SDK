@@ -1,0 +1,180 @@
+
+##############NVRAM CONFIG##############
+mem_nv_data_ptr:mem_nv_le_data
+mem_nv_data_number:05
+#####################################
+
+##############BLUETOOTH CONFIG##############
+###commom###
+mem_device_option:10
+
+###ble###
+mem_le_lap:11 30 34 55 66 98
+
+mem_le_adv_data_len:1f
+mem_le_adv_data:
+02 01 05 07 09 5a 58 2d 4f 54 41
+
+mem_le_scan_data_len:00
+mem_le_scan_data:
+00 00
+
+mem_lpm_mode:00
+mem_le_adv_enable:00
+mem_le_scan_type:00
+mem_le_adv_type:00
+mem_le_adv_direct_addr_type:00
+mem_le_scan_own_addr_type:00
+mem_le_scan_filter_policy:00
+mem_le_scan_interval:28
+mem_le_scan_window:0c 00
+mem_le_transmit_window:50
+mem_le_adv_interval_max:60 01 
+mem_le_adv_own_addr_type:00
+
+mem_le_pairing_mode:01
+mem_le_secure_connect_enable:00
+mem_le_pres:02 03 00 01 10 02 03 #justwork
+
+mem_le_pairing_handle:00 00
+
+mem_le_interal_min:
+50 00 #interval max
+50 00 #interval min
+00 00 #latency
+00 02 #supervision timeout
+
+###3.0###
+mem_scan_mode:00
+
+mem_sniff_param_interval:0e 00
+mem_sniff_param_attempt:01
+mem_sniff_param_timeout:01
+mem_unsniff2sniff_timer:0a
+mem_ssp_enable:00
+mem_ui_profile_supported:48
+mem_app_connection_options:13
+
+
+# dual read, dual bits address
+mem_xip_option:5d 40 bb
+
+#attribute list: handle 2bytes, uuid 2bytes, length 1bytes, attribute Nbytes
+mem_rc_att_list:
+#Primary Service: GAP
+01 00 02 00 28 02 00 18 
+#Characteristic: Device Name
+02 00 02 03 28 01 02 
+03 00 02 00 2a 06 5a 58 2d 4f 54 41
+
+#Primary service yichip transmit ------Device information
+04 00 02 00 28 02 0a 18
+#Characteristic -- Manufacturer Name String
+05 00 02 03 28 01 02
+06 00 02 29 2A 06 00 00 00 00 00 00
+
+#Characteristic -- Module Number String
+07 00 02 03 28 01 02
+08 00 02 24 2A 07 00 00 00 00 00 00 00
+
+#Characteristic -- Serial Number String
+09 00 02 03 28 01 02
+0a 00 02 25 2A 04 00 00 00 00
+
+#Characteristic -- Hardware Revision String
+0b 00 02 03 28 01 02
+0c 00 02 27 2A 04 00 00 00 00
+
+#Characteristic -- Firmware Revision String
+0d 00 02 03 28 01 02
+0e 00 02 26 2A 04 00 00 00 00
+
+#Characteristic -- Software Revision String
+0f 00 02 03 28 01 02
+10 00 02 28 2A 04 00 00 00 00
+
+#Characteristic -- PnP ID
+11 00 02 03 28 01 02
+12 00 02 50 2A 07 00 00 00 00 00 00 00
+
+
+#Primary service yichip transmit ------
+13 00 02 00 28 02 e7 fe
+
+#Characteristic --write
+14 00 02 03 28 01 04
+15 00 02 c7 fe 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+#Characteristic --Read
+16 00 02 03 28 01 02
+17 00 02 c9 fe 06 00 00 00 00 00 00
+
+#Characteristic --indicate
+18 00 02 03 28 01 20
+19 00 02 c8 fe 03 00 00 00
+#Client Characteristic Configuration
+1a 00 02 02 29 02 00 00
+
+#							uuid	perm ext_perm max_size
+#Mesh Provisioning Service Declaration
+#[M_IDX_PROV_SVC]			0x2800 0x0200 0x0000 0x0000
+#Primary service yichip transmit ------
+1b 00 02 00 28 02 27 18
+#Mesh Provisioning Data In Characteristic Declaration
+#[M_IDX_PROV_DATA_IN_CHAR]	0x2803 0x0200 0x0000 0x0000
+#Mesh Provisioning Data In Characteristic Value
+#[M_IDX_PROV_DATA_IN_VAL]	0x2ADD 0x0400 0x8000 0x0021
+#Characteristic --write with out response
+1c 00 02 03 28 01 04
+1d 00 02 DB 2A 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+#Mesh Provisioning Data Out Characteristic Declaration
+#[M_IDX_PROV_DATA_OUT_CHAR]	0x2803 0x0200 0x0000 0x0000
+#Mesh Provisioning Data Out Characteristic Value
+#[M_IDX_PROV_DATA_OUT_VAL]	0x2ADE 0x1000 0x8000 0x0021
+#Mesh Provisioning Data Out Client Characteristic Configuration
+#[M_IDX_PROV_DATA_OUT_CCC]	0x2902 0x0A00 0x0000 0x0000
+#Characteristic --notify
+1e 00 02 03 28 01 10
+1f 00 02 DC 2A 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+#Client Characteristic Configuration
+20 00 02 02 29 02 00 00
+
+#Mesh Proxy Service Declaration
+#[M_IDX_PROXY_SVC] 		  0x2800 0x0200 0x0000 0x0000
+#Primary service yichip transmit ------
+21 00 02 00 28 02 28 18
+#Mesh Proxy Data In Characteristic Declaration
+#[M_IDX_PROXY_DATA_IN_CHAR]  0x2803 0x0200 0x0000 0x0000
+#Mesh Proxy Data In Characteristic Value
+#[M_IDX_PROXY_DATA_IN_VAL]   0x2ADD 0x0400 0x8000 0x0021
+#Characteristic --write without response
+22 00 02 03 28 01 04
+23 00 02 DD 2A 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+#Mesh Proxy Data Out Characteristic Declaration
+#[M_IDX_PROXY_DATA_OUT_CHAR] 0x2803 0x0200 0x0000 0x0000
+#Mesh Proxy Data Out Characteristic Value
+#[M_IDX_PROXY_DATA_OUT_VAL]  0x2ADE 0x1000 0x8000 0x0021
+#Mesh Proxy Data Out Client Characteristic Configuration
+#[M_IDX_PROXY_DATA_OUT_CCC]	0x2902 0x0A00 0x0000 0x0000
+#Characteristic --notify
+24 00 02 03 28 01 10
+25 00 02 DE 2A 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+#Client Characteristic Configuration
+26 00 02 02 29 02 00 00
+
+#End of Attribute list
+00 00
+
+mem_ui_le_uuid_table:mem_rc_att_list
+
+mem_seqi:7f
+
+mem_le_connection_updata_param:
+09 00
+09 00
+00 00
+b0 04
+mem_le_more_data:01
+mem_ipc_enable:00
+
+

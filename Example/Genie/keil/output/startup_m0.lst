@@ -1,0 +1,287 @@
+   1              		.syntax	unified
+   2              		.arch	armv6-m
+   3              		
+   4              		 .extern main
+   5              	
+   6              		.section .stack
+   7              		.align	3
+   8              	
+   9              		.equ	Stack_Size, 0x1000
+  10              	
+  11              		.globl	__StackTop
+  12              		.globl	__StackLimit
+  13              	__StackLimit:
+  14 0000 00000000 		.space	Stack_Size
+  14      00000000 
+  14      00000000 
+  14      00000000 
+  14      00000000 
+  16              	__StackTop:
+  18              	
+  19              		.section .heap
+  20              		.align	3
+  21              	
+  22              		.equ	Heap_Size, 0
+  23              	
+  24              		.globl	__HeapBase
+  25              		.globl	__HeapLimit
+  26              	__HeapBase:
+  27              		.if	Heap_Size
+  29              		.endif
+  31              	__HeapLimit:
+  33              	
+  34              		.section .isr_vector
+  35              		.align 2
+  36              		.globl	__isr_vector
+  37              	__isr_vector:
+  38 0000 00400110 			.long	0x10014000
+  39 0004 00000000 			.long	Reset_Handler	
+  40 0008 00000000 			.long	NMI_Handler
+  41 000c 00000000 			.long	HardFault_Handler
+  42 0010 00000000 			.long 0
+  43 0014 00000000 			.long	0
+  44 0018 00000000 			.long	0
+  45 001c 00000000 			.long	0
+  46 0020 00000000 			.long	0
+  47 0024 00000000 			.long	0
+  48 0028 00000000 			.long	0
+  49 002c 00000000 			.long	0
+  50 0030 00000000 			.long	0
+  51 0034 00000000 			.long	0
+  52 0038 00000000 			.long	0
+  53 003c 00000000 			.long 	SysTick_Handler
+  54 0040 00000000 			.long	usb_handler
+  55 0044 00000000 			.long	iicd_handler
+  56 0048 00000000 			.long	qspi_handler
+  57 004c 00000000 			.long	spid_handler
+  58 0050 00000000 			.long	uart_handler
+  59 0054 00000000 			.long	uartb_handler
+  60 0058 00000000 			.long	adcd_handler
+  61 005c 00000000 			.long	i2s_handler
+  62 0060 00000000 			.long	bt_handler
+  63 0064 00000000 			.long 	gpio0_handler
+  64 0068 00000000 			.long 	gpio1_handler
+  65 006c 00000000 			.long 	gpi02_handler
+  66 0070 00000000 			.long 	gpio3_handler
+  67 0074 00000000 			.long 	gpio4_handler
+  68 0078 00000000 			.long 	gpio5_handler
+  69 007c 00000000 			.long 	gpio6_handler
+  70 0080 00000000 			.long 	gpio7_handler
+  71 0084 00000000 			.long 	gpio8_handler
+  72 0088 00000000 			.long 	gpio9_handler
+  73 008c 00000000 			.long 	gpio10_handler
+  74 0090 00000000 			.long 	gpio11_handler
+  75 0094 00000000 			.long 	gpio12_handler
+  76              			
+  78              	
+  79              		.text
+  80              	
+  81              		
+  82              		
+  83              		.thumb
+  84              		.thumb_func
+  85              		.align	1
+  86              		.globl	Reset_Handler
+  88              	Reset_Handler:
+  89 0000 0A49     		ldr	r1, =__etext
+  90 0002 0B4A     		ldr	r2, =__data_start__
+  91 0004 0B4B     		ldr	r3, =__data_end__
+  92              	
+  93 0006 9B1A     		subs	r3, r2
+  94 0008 03DD     		ble	.L_loop1_done
+  95              	
+  96              	.L_loop1:
+  97 000a 043B     		subs	r3, #4
+  98 000c C858     		ldr	r0, [r1,r3]
+  99 000e D050     		str	r0, [r2,r3]
+ 100 0010 FBDC     		bgt	.L_loop1
+ 101              	
+ 102              	.L_loop1_done:
+ 103              	
+ 104              	
+ 105              	
+ 106              	/*  Single BSS section scheme.
+ 107              	 *
+ 108              	 *  The BSS section is specified by following symbols
+ 109              	 *    __bss_start__: start of the BSS section.
+ 110              	 *    __bss_end__: end of the BSS section.
+ 111              	 *
+ 112              	 *  Both addresses must be aligned to 4 bytes boundary.
+ 113              	 */
+ 114 0012 0949     		ldr	r1, =__bss_start__
+ 115 0014 094A     		ldr	r2, =__bss_end__
+ 116              	
+ 117 0016 0020     		movs	r0, 0
+ 118              	
+ 119 0018 521A     		subs	r2, r1
+ 120 001a 02DD     		ble	.L_loop3_done
+ 121              	
+ 122              	.L_loop3:
+ 123 001c 043A     		subs	r2, #4
+ 124 001e 8850     		str	r0, [r1, r2]
+ 125 0020 FCDC     		bgt	.L_loop3
+ 126              	.L_loop3_done:
+ 127              	
+ 128 0022 0748     		ldr	r0,=0x12345
+ 129 0024 074B     		ldr	r3,=0x1111
+ 130 0026 FFF7FEFF 		bl	main
+ 131              	
+ 132 002a 00000000 		.pool
+ 132      00000000 
+ 132      00000000 
+ 132      00000000 
+ 132      00000000 
+ 134              	
+ 135              		.align	1
+ 136              		.thumb_func
+ 137              		.weak	Default_Handler
+ 139              	Default_Handler:
+ 140 0048 FEE7     		b	.
+ 142              	
+ 143              	/*    Macro to define default handlers. Default handler
+ 144              	 *    will be weak symbol and just dead loops. They can be
+ 145              	 *    overwritten by other handlers */
+ 146              		.macro	def_irq_handler	handler_name
+ 147              		.weak	\handler_name
+ 148              		.set	\handler_name, Default_Handler
+ 149              		.endm
+ 150              	
+ 151              		def_irq_handler	NMI_Handler
+ 152              		def_irq_handler	HardFault_Handler
+ 153              		def_irq_handler	SVC_Handler
+ 154              		def_irq_handler	PendSV_Handler
+ 155              		def_irq_handler	SysTick_Handler
+ 156              		def_irq_handler	DEF_IRQHandler
+ 157              		def_irq_handler	usb_handler
+ 158              		def_irq_handler 	iicd_handler
+ 159              		def_irq_handler 	qspi_handler
+ 160              		def_irq_handler 	spid_handler
+ 161              		def_irq_handler 	uart_handler
+ 162              		def_irq_handler 	uartb_handler 
+ 163              		def_irq_handler 	adcd_handler
+ 164              		def_irq_handler 	i2s_handler
+ 165              		def_irq_handler 	bt_handler
+ 166              		def_irq_handler 	gpio0_handler
+ 167              		def_irq_handler 	gpio1_handler
+ 168              		def_irq_handler 	gpi02_handler
+ 169              		def_irq_handler 	gpio3_handler
+ 170              		def_irq_handler 	gpio4_handler
+ 171              		def_irq_handler 	gpio5_handler
+ 172              		def_irq_handler 	gpio6_handler
+ 173              		def_irq_handler 	gpio7_handler
+ 174              		def_irq_handler 	gpio8_handler
+ 175              		def_irq_handler 	gpio9_handler
+ 176              		def_irq_handler 	gpio10_handler
+ 177              		def_irq_handler 	gpio11_handler
+ 178              		def_irq_handler 	gpio12_handler
+ 179              			
+ 180              		
+ 181              	@ int __aeabi_idiv(int num:r0, int denom:r1)
+ 182              	@
+ 183              	@ Divide r0 by r1 and return quotient in r0 (all signed).
+ 184              	@ Use __aeabi_uidivmod() but check signs before and change signs afterwards.
+ 185              	@
+ 186              	
+ 187              		.syntax unified				@should be here
+ 188              		.thumb_func
+ 189              		.global __aeabi_idiv
+ 190              	__aeabi_idiv:
+ 191 004a 0028     		cmp	r0, #0
+ 192 004c 04DA     		bge	L_num_pos
+ 193 004e 4042     		rsbs r0, #0
+ 194 0050 0029     		cmp	r1, #0
+ 195 0052 04DA     		bge	L_neg_result
+ 196 0054 4942     		rsbs r1, #0		@ den = -den
+ 197 0056 FEE7     		b	__aeabi_uidivmod
+ 198              	L_num_pos:
+ 199 0058 0029     		cmp	r1, #0
+ 200 005a FEDA     		bge	__aeabi_uidivmod
+ 201 005c 4942     		rsbs r1, #0		@ den = -den
+ 202              	L_neg_result:
+ 203 005e 00B5     		push	{lr}
+ 204 0060 FFF7FEFF 		bl	__aeabi_uidivmod
+ 205 0064 4042     		rsbs r0, #0		@ quot = -quot
+ 206 0066 00BD     		pop	{pc}
+ 207              	
+ 208              	@ {int quotient:r0, int remainder:r1}
+ 209              	@ __aeabi_idivmod(int numerator:r0, int denominator:r1)
+ 210              	@
+ 211              	@ Divide r0 by r1 and return the quotient in r0 and the remainder in r1
+ 212              	@
+ 213              		.thumb_func
+ 214              		.global __aeabi_idivmod
+ 215              	__aeabi_idivmod:
+ 216 0068 0028     		cmp	r0, #0
+ 217 006a 0EDA     		bge	L_num_pos_bis
+ 218 006c 4042     		rsbs r0, #0		@ num = -num
+ 219 006e 0029     		cmp	r1, #0
+ 220 0070 05DA     		bge	L_neg_both
+ 221 0072 4942     		rsbs r1, #0		@ den = -den
+ 222 0074 00B5     		push	{lr}
+ 223 0076 FFF7FEFF 		bl	__aeabi_uidivmod
+ 224 007a 4942     		rsbs r1, #0		@ rem = -rem
+ 225 007c 00BD     		pop	{pc}
+ 226              	L_neg_both:
+ 227 007e 00B5     		push	{lr}
+ 228 0080 FFF7FEFF 		bl	__aeabi_uidivmod
+ 229 0084 4042     		rsbs r0, #0		@ quot = -quot
+ 230 0086 4942     		rsbs r1, #0		@ rem = -rem
+ 231 0088 00BD     		pop	{pc}
+ 232              	L_num_pos_bis:
+ 233 008a 0029     		cmp	r1, #0
+ 234 008c FEDA     		bge	__aeabi_uidivmod
+ 235 008e 4942     		rsbs r1, #0		@ den = -den
+ 236 0090 00B5     		push	{lr}
+ 237 0092 FFF7FEFF 		bl	__aeabi_uidivmod
+ 238 0096 4042     		rsbs r0, #0		@ quot = -quot
+ 239 0098 00BD     		pop	{pc}
+ 240              	
+ 241              	@ unsigned __aeabi_uidiv(unsigned num, unsigned denom)
+ 242              	@
+ 243              	@ Just an alias for __aeabi_uidivmod(), the remainder is ignored
+ 244              	@
+ 245              		.thumb_func
+ 246              		.global __aeabi_uidiv
+ 247              	__aeabi_uidiv:
+ 248              	
+ 249              	@ {unsigned quotient:r0, unsigned remainder:r1}
+ 250              	@  __aeabi_uidivmod(unsigned numerator:r0, unsigned denominator:r1)
+ 251              	@
+ 252              	@ Divide r0 by r1 and return the quotient in r0 and the remainder in r1
+ 253              	@
+ 254              		.thumb_func
+ 255              		.global __aeabi_uidivmod
+ 256              	__aeabi_uidivmod:
+ 257              	
+ 258 009a 0029     		cmp	r1, #0
+ 259 009c 00D1     		bne	L_no_div0
+ 260 009e 14E0     		b	__aeabi_idiv0
+ 261              	L_no_div0:
+ 262              		@ Shift left the denominator until it is greater than the numerator
+ 263 00a0 0122     		movs	r2, #1		@ counter
+ 264 00a2 0023     		movs	r3, #0		@ result
+ 265 00a4 8842     		cmp	r0, r1
+ 266 00a6 06D9     		bls	L_sub_loop0
+ 267 00a8 0031     		adds	r1, #0		@ dont shift if denominator would overflow
+ 268 00aa 04D4     		bmi	L_sub_loop0
+ 269              	L_denom_shift_loop:
+ 270 00ac 5200     		lsls	r2, #1
+ 271 00ae 4900     		lsls	r1, #1
+ 272 00b0 01D4     		bmi	L_sub_loop0
+ 273 00b2 8842     		cmp	r0, r1
+ 274 00b4 FAD8     		bhi	L_denom_shift_loop
+ 275              	L_sub_loop0:
+ 276 00b6 8842     		cmp	r0, r1
+ 277 00b8 01D3     		bcc	L_dont_sub0	@ if (num&gt;denom)
+ 278 00ba 401A     		subs	r0, r1		@ numerator -= denom
+ 279 00bc 1343     		orrs	r3, r2		@ result(r3) |= bitmask(r2)
+ 280              	L_dont_sub0:
+ 281 00be 4908     		lsrs	r1, #1		@ denom(r1) &gt;&gt;= 1
+ 282 00c0 5208     		lsrs	r2, #1		@ bitmask(r2) &gt;&gt;= 1
+ 283 00c2 F8D1     		bne	L_sub_loop0
+ 284 00c4 0146     		mov	r1, r0		@ remainder(r1) = numerator(r0)
+ 285 00c6 1846     		mov	r0, r3		@ quotient(r0) = result(r3)
+ 286 00c8 7047     		bx	lr
+ 287              	__aeabi_idiv0:
+ 288 00ca FEE7     		b	__aeabi_idiv0
+ 289              		.end

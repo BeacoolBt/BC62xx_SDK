@@ -1,0 +1,2523 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"led.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.comm	GPIO_FUNC,1,1
+  20              		.align	1
+  21              		.code	16
+  22              		.thumb_func
+  24              	_breath_timer_start:
+  25              	.LFB41:
+  26              		.file 1 "../../../drivers/led/led.c"
+   1:../../../drivers/led/led.c **** #include "led.h"
+   2:../../../drivers/led/led.c **** #include "bc62xx_pwm.h"
+   3:../../../drivers/led/led.c **** #include "systick.h" 
+   4:../../../drivers/led/led.c **** 
+   5:../../../drivers/led/led.c **** #ifndef RELEASE
+   6:../../../drivers/led/led.c **** #define RELEASE
+   7:../../../drivers/led/led.c **** #endif
+   8:../../../drivers/led/led.c **** 
+   9:../../../drivers/led/led.c **** #ifndef BREATH_CTL_PEROID
+  10:../../../drivers/led/led.c **** #define BREATH_CTL_PEROID	(10)//10ms
+  11:../../../drivers/led/led.c **** #endif
+  12:../../../drivers/led/led.c **** 
+  13:../../../drivers/led/led.c **** 
+  14:../../../drivers/led/led.c **** //for gpio control:GPIO_SetOut(6, (bool)val);
+  15:../../../drivers/led/led.c **** static light_cw_t lcw;
+  16:../../../drivers/led/led.c **** static light_ltn_t ltn;
+  17:../../../drivers/led/led.c **** 
+  18:../../../drivers/led/led.c **** static uint16_t ucPeriodCnt;
+  19:../../../drivers/led/led.c **** static uint16_t deltaLn;
+  20:../../../drivers/led/led.c **** static uint16_t deltaTp;
+  21:../../../drivers/led/led.c **** 
+  22:../../../drivers/led/led.c **** static float kScale;
+  23:../../../drivers/led/led.c **** 
+  24:../../../drivers/led/led.c **** 
+  25:../../../drivers/led/led.c **** /***********************************************************
+  26:../../../drivers/led/led.c **** MIN	800
+  27:../../../drivers/led/led.c **** 
+  28:../../../drivers/led/led.c **** MAX	20000
+  29:../../../drivers/led/led.c **** ***********************************************************/
+  30:../../../drivers/led/led.c **** 
+  31:../../../drivers/led/led.c **** static void _cw_ctrl(light_cw_t* t);
+  32:../../../drivers/led/led.c **** 
+  33:../../../drivers/led/led.c **** static void _breath_timer_start(void)
+  34:../../../drivers/led/led.c **** {
+  27              		.loc 1 34 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  35:../../../drivers/led/led.c **** 	ucPeriodCnt = 0;
+  31              		.loc 1 35 0
+  32 0000 0022     		movs	r2, #0
+  33 0002 0A4B     		ldr	r3, .L9
+  34:../../../drivers/led/led.c **** 	ucPeriodCnt = 0;
+  34              		.loc 1 34 0
+  35 0004 10B5     		push	{r4, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 4, -8
+  39              		.cfi_offset 14, -4
+  40              		.loc 1 35 0
+  41 0006 9A83     		strh	r2, [r3, #28]
+  36:../../../drivers/led/led.c **** 	uint32_t _time = systick_get_ms();
+  42              		.loc 1 36 0
+  43 0008 FFF7FEFF 		bl	systick_get_ms
+  44              	.LVL0:
+  45 000c 0400     		movs	r4, r0
+  46              	.LVL1:
+  47              	.L2:
+  37:../../../drivers/led/led.c **** 	while(1 == led_cw_do_breath()){
+  48              		.loc 1 37 0
+  49 000e FFF7FEFF 		bl	led_cw_do_breath
+  50              	.LVL2:
+  51 0012 0128     		cmp	r0, #1
+  52 0014 08D1     		bne	.L8
+  53              	.L3:
+  38:../../../drivers/led/led.c **** 		while(systick_get_ms() - _time < BREATH_CTL_PEROID);
+  54              		.loc 1 38 0 discriminator 1
+  55 0016 FFF7FEFF 		bl	systick_get_ms
+  56              	.LVL3:
+  57 001a 001B     		subs	r0, r0, r4
+  58 001c 0928     		cmp	r0, #9
+  59 001e FAD9     		bls	.L3
+  39:../../../drivers/led/led.c **** 		_time = systick_get_ms();
+  60              		.loc 1 39 0
+  61 0020 FFF7FEFF 		bl	systick_get_ms
+  62              	.LVL4:
+  63 0024 0400     		movs	r4, r0
+  64              	.LVL5:
+  65 0026 F2E7     		b	.L2
+  66              	.LVL6:
+  67              	.L8:
+  40:../../../drivers/led/led.c **** 	}
+  41:../../../drivers/led/led.c **** }
+  68              		.loc 1 41 0
+  69              		@ sp needed
+  70              	.LVL7:
+  71 0028 10BD     		pop	{r4, pc}
+  72              	.L10:
+  73 002a C046     		.align	2
+  74              	.L9:
+  75 002c 00000000 		.word	.LANCHOR0
+  76              		.cfi_endproc
+  77              	.LFE41:
+  79              		.global	__aeabi_uidiv
+  80              		.align	1
+  81              		.global	led_cw_set_temperature
+  82              		.code	16
+  83              		.thumb_func
+  85              	led_cw_set_temperature:
+  86              	.LFB42:
+  42:../../../drivers/led/led.c **** 
+  43:../../../drivers/led/led.c **** void led_cw_set_temperature(uint16_t tp, breath_t* breath)
+  44:../../../drivers/led/led.c **** {
+  87              		.loc 1 44 0
+  88              		.cfi_startproc
+  89              		@ args = 0, pretend = 0, frame = 0
+  90              		@ frame_needed = 0, uses_anonymous_args = 0
+  91              	.LVL8:
+  92 0030 70B5     		push	{r4, r5, r6, lr}
+  93              	.LCFI1:
+  94              		.cfi_def_cfa_offset 16
+  95              		.cfi_offset 4, -16
+  96              		.cfi_offset 5, -12
+  97              		.cfi_offset 6, -8
+  98              		.cfi_offset 14, -4
+  99              		.loc 1 44 0
+ 100 0032 0500     		movs	r5, r0
+ 101 0034 0E1E     		subs	r6, r1, #0
+ 102 0036 0D4C     		ldr	r4, .L22
+  45:../../../drivers/led/led.c **** 	if(breath){
+ 103              		.loc 1 45 0
+ 104 0038 13D0     		beq	.L12
+  46:../../../drivers/led/led.c **** 		deltaTp = (tp > lcw.tp)?(tp - lcw.tp):(lcw.tp - tp);
+ 105              		.loc 1 46 0
+ 106 003a E089     		ldrh	r0, [r4, #14]
+ 107              	.LVL9:
+ 108 003c A842     		cmp	r0, r5
+ 109 003e 02D2     		bcs	.L13
+ 110              		.loc 1 46 0 is_stmt 0 discriminator 1
+ 111 0040 281A     		subs	r0, r5, r0
+ 112 0042 80B2     		uxth	r0, r0
+ 113 0044 01E0     		b	.L14
+ 114              	.L13:
+ 115              		.loc 1 46 0 discriminator 2
+ 116 0046 401B     		subs	r0, r0, r5
+ 117 0048 80B2     		uxth	r0, r0
+ 118              	.L14:
+  47:../../../drivers/led/led.c **** 		deltaTp= deltaTp/breath->pCnt;
+ 119              		.loc 1 47 0 is_stmt 1 discriminator 4
+ 120 004a 7188     		ldrh	r1, [r6, #2]
+ 121              	.LVL10:
+ 122 004c FFF7FEFF 		bl	__aeabi_uidiv
+ 123              	.LVL11:
+ 124 0050 80B2     		uxth	r0, r0
+ 125 0052 2084     		strh	r0, [r4, #32]
+  48:../../../drivers/led/led.c **** 		if(deltaTp){
+ 126              		.loc 1 48 0 discriminator 4
+ 127 0054 0028     		cmp	r0, #0
+ 128 0056 04D0     		beq	.L12
+  49:../../../drivers/led/led.c **** 			lcw.breath = breath;
+ 129              		.loc 1 49 0
+ 130 0058 2660     		str	r6, [r4]
+  50:../../../drivers/led/led.c **** 			lcw.tpTarget = tp;
+ 131              		.loc 1 50 0
+ 132 005a 2582     		strh	r5, [r4, #16]
+  51:../../../drivers/led/led.c **** 			_breath_timer_start();
+ 133              		.loc 1 51 0
+ 134 005c FFF7D0FF 		bl	_breath_timer_start
+ 135              	.LVL12:
+  52:../../../drivers/led/led.c **** 			return;
+ 136              		.loc 1 52 0
+ 137 0060 03E0     		b	.L11
+ 138              	.L12:
+  53:../../../drivers/led/led.c **** 		}
+  54:../../../drivers/led/led.c **** 	}
+  55:../../../drivers/led/led.c **** 	lcw.tp = tp;
+ 139              		.loc 1 55 0
+ 140 0062 E581     		strh	r5, [r4, #14]
+  56:../../../drivers/led/led.c **** 	lcw.tpTarget = lcw.tp;
+ 141              		.loc 1 56 0
+ 142 0064 2582     		strh	r5, [r4, #16]
+  57:../../../drivers/led/led.c **** 	_cw_ctrl(&lcw);
+ 143              		.loc 1 57 0
+ 144 0066 00F0CDFA 		bl	_cw_ctrl.constprop.2
+ 145              	.LVL13:
+ 146              	.L11:
+  58:../../../drivers/led/led.c **** }
+ 147              		.loc 1 58 0
+ 148              		@ sp needed
+ 149              	.LVL14:
+ 150 006a 70BD     		pop	{r4, r5, r6, pc}
+ 151              	.L23:
+ 152              		.align	2
+ 153              	.L22:
+ 154 006c 00000000 		.word	.LANCHOR0
+ 155              		.cfi_endproc
+ 156              	.LFE42:
+ 158              		.align	1
+ 159              		.global	led_cw_get_temperature
+ 160              		.code	16
+ 161              		.thumb_func
+ 163              	led_cw_get_temperature:
+ 164              	.LFB43:
+  59:../../../drivers/led/led.c **** 
+  60:../../../drivers/led/led.c **** uint16_t led_cw_get_temperature(void)
+  61:../../../drivers/led/led.c **** {
+ 165              		.loc 1 61 0
+ 166              		.cfi_startproc
+ 167              		@ args = 0, pretend = 0, frame = 0
+ 168              		@ frame_needed = 0, uses_anonymous_args = 0
+ 169              		@ link register save eliminated.
+  62:../../../drivers/led/led.c **** 	return lcw.tpTarget;
+ 170              		.loc 1 62 0
+ 171 0070 014B     		ldr	r3, .L25
+  63:../../../drivers/led/led.c **** }
+ 172              		.loc 1 63 0
+ 173              		@ sp needed
+  62:../../../drivers/led/led.c **** 	return lcw.tpTarget;
+ 174              		.loc 1 62 0
+ 175 0072 188A     		ldrh	r0, [r3, #16]
+ 176              		.loc 1 63 0
+ 177 0074 7047     		bx	lr
+ 178              	.L26:
+ 179 0076 C046     		.align	2
+ 180              	.L25:
+ 181 0078 00000000 		.word	.LANCHOR0
+ 182              		.cfi_endproc
+ 183              	.LFE43:
+ 185              		.align	1
+ 186              		.global	led_cw_set_lightness
+ 187              		.code	16
+ 188              		.thumb_func
+ 190              	led_cw_set_lightness:
+ 191              	.LFB44:
+  64:../../../drivers/led/led.c **** 
+  65:../../../drivers/led/led.c **** void led_cw_set_lightness(uint16_t ln, breath_t* breath)
+  66:../../../drivers/led/led.c **** {
+ 192              		.loc 1 66 0
+ 193              		.cfi_startproc
+ 194              		@ args = 0, pretend = 0, frame = 0
+ 195              		@ frame_needed = 0, uses_anonymous_args = 0
+ 196              	.LVL15:
+ 197 007c 70B5     		push	{r4, r5, r6, lr}
+ 198              	.LCFI2:
+ 199              		.cfi_def_cfa_offset 16
+ 200              		.cfi_offset 4, -16
+ 201              		.cfi_offset 5, -12
+ 202              		.cfi_offset 6, -8
+ 203              		.cfi_offset 14, -4
+ 204              		.loc 1 66 0
+ 205 007e 0500     		movs	r5, r0
+ 206 0080 0E1E     		subs	r6, r1, #0
+ 207 0082 0D4C     		ldr	r4, .L38
+  67:../../../drivers/led/led.c **** 	if(breath){
+ 208              		.loc 1 67 0
+ 209 0084 13D0     		beq	.L28
+  68:../../../drivers/led/led.c **** 		deltaLn = (ln > lcw.ln)?(ln - lcw.ln):(lcw.ln - ln);
+ 210              		.loc 1 68 0
+ 211 0086 6089     		ldrh	r0, [r4, #10]
+ 212              	.LVL16:
+ 213 0088 A842     		cmp	r0, r5
+ 214 008a 02D2     		bcs	.L29
+ 215              		.loc 1 68 0 is_stmt 0 discriminator 1
+ 216 008c 281A     		subs	r0, r5, r0
+ 217 008e 80B2     		uxth	r0, r0
+ 218 0090 01E0     		b	.L30
+ 219              	.L29:
+ 220              		.loc 1 68 0 discriminator 2
+ 221 0092 401B     		subs	r0, r0, r5
+ 222 0094 80B2     		uxth	r0, r0
+ 223              	.L30:
+  69:../../../drivers/led/led.c **** 		deltaLn = deltaLn/breath->pCnt;
+ 224              		.loc 1 69 0 is_stmt 1 discriminator 4
+ 225 0096 7188     		ldrh	r1, [r6, #2]
+ 226              	.LVL17:
+ 227 0098 FFF7FEFF 		bl	__aeabi_uidiv
+ 228              	.LVL18:
+ 229 009c 80B2     		uxth	r0, r0
+ 230 009e E083     		strh	r0, [r4, #30]
+  70:../../../drivers/led/led.c **** 		if(deltaLn){
+ 231              		.loc 1 70 0 discriminator 4
+ 232 00a0 0028     		cmp	r0, #0
+ 233 00a2 04D0     		beq	.L28
+  71:../../../drivers/led/led.c **** 			lcw.breath = breath;
+ 234              		.loc 1 71 0
+ 235 00a4 2660     		str	r6, [r4]
+  72:../../../drivers/led/led.c **** 			lcw.lnTarget = ln;
+ 236              		.loc 1 72 0
+ 237 00a6 A581     		strh	r5, [r4, #12]
+  73:../../../drivers/led/led.c **** 			_breath_timer_start();
+ 238              		.loc 1 73 0
+ 239 00a8 FFF7AAFF 		bl	_breath_timer_start
+ 240              	.LVL19:
+  74:../../../drivers/led/led.c **** 			return;
+ 241              		.loc 1 74 0
+ 242 00ac 03E0     		b	.L27
+ 243              	.L28:
+  75:../../../drivers/led/led.c **** 		}
+  76:../../../drivers/led/led.c **** 	}
+  77:../../../drivers/led/led.c **** 	lcw.ln = ln;
+ 244              		.loc 1 77 0
+ 245 00ae 6581     		strh	r5, [r4, #10]
+  78:../../../drivers/led/led.c **** 	lcw.lnTarget = lcw.ln;
+ 246              		.loc 1 78 0
+ 247 00b0 A581     		strh	r5, [r4, #12]
+  79:../../../drivers/led/led.c **** 	_cw_ctrl(&lcw);
+ 248              		.loc 1 79 0
+ 249 00b2 00F0A7FA 		bl	_cw_ctrl.constprop.2
+ 250              	.LVL20:
+ 251              	.L27:
+  80:../../../drivers/led/led.c **** }
+ 252              		.loc 1 80 0
+ 253              		@ sp needed
+ 254              	.LVL21:
+ 255 00b6 70BD     		pop	{r4, r5, r6, pc}
+ 256              	.L39:
+ 257              		.align	2
+ 258              	.L38:
+ 259 00b8 00000000 		.word	.LANCHOR0
+ 260              		.cfi_endproc
+ 261              	.LFE44:
+ 263              		.align	1
+ 264              		.global	led_cw_get_lightness
+ 265              		.code	16
+ 266              		.thumb_func
+ 268              	led_cw_get_lightness:
+ 269              	.LFB45:
+  81:../../../drivers/led/led.c **** uint16_t led_cw_get_lightness(void)
+  82:../../../drivers/led/led.c **** {
+ 270              		.loc 1 82 0
+ 271              		.cfi_startproc
+ 272              		@ args = 0, pretend = 0, frame = 0
+ 273              		@ frame_needed = 0, uses_anonymous_args = 0
+ 274              		@ link register save eliminated.
+  83:../../../drivers/led/led.c **** 	return lcw.lnTarget;
+ 275              		.loc 1 83 0
+ 276 00bc 014B     		ldr	r3, .L41
+  84:../../../drivers/led/led.c **** }
+ 277              		.loc 1 84 0
+ 278              		@ sp needed
+  83:../../../drivers/led/led.c **** 	return lcw.lnTarget;
+ 279              		.loc 1 83 0
+ 280 00be 9889     		ldrh	r0, [r3, #12]
+ 281              		.loc 1 84 0
+ 282 00c0 7047     		bx	lr
+ 283              	.L42:
+ 284 00c2 C046     		.align	2
+ 285              	.L41:
+ 286 00c4 00000000 		.word	.LANCHOR0
+ 287              		.cfi_endproc
+ 288              	.LFE45:
+ 290              		.align	1
+ 291              		.global	led_cw_set_on_off
+ 292              		.code	16
+ 293              		.thumb_func
+ 295              	led_cw_set_on_off:
+ 296              	.LFB46:
+  85:../../../drivers/led/led.c **** 
+  86:../../../drivers/led/led.c **** void led_cw_set_on_off(uint8_t on, breath_t* breath)
+  87:../../../drivers/led/led.c **** {
+ 297              		.loc 1 87 0
+ 298              		.cfi_startproc
+ 299              		@ args = 0, pretend = 0, frame = 0
+ 300              		@ frame_needed = 0, uses_anonymous_args = 0
+ 301              	.LVL22:
+ 302 00c8 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 303              	.LCFI3:
+ 304              		.cfi_def_cfa_offset 24
+ 305              		.cfi_offset 3, -24
+ 306              		.cfi_offset 4, -20
+ 307              		.cfi_offset 5, -16
+ 308              		.cfi_offset 6, -12
+ 309              		.cfi_offset 7, -8
+ 310              		.cfi_offset 14, -4
+ 311              		.loc 1 87 0
+ 312 00ca 0500     		movs	r5, r0
+ 313 00cc 0E1E     		subs	r6, r1, #0
+ 314 00ce 114C     		ldr	r4, .L58
+  88:../../../drivers/led/led.c **** 	if(breath && (on != lcw.on)){//the target lightness need to be restore
+ 315              		.loc 1 88 0
+ 316 00d0 1BD0     		beq	.L44
+ 317              		.loc 1 88 0 is_stmt 0 discriminator 1
+ 318 00d2 237A     		ldrb	r3, [r4, #8]
+ 319 00d4 8342     		cmp	r3, r0
+ 320 00d6 18D0     		beq	.L44
+  89:../../../drivers/led/led.c **** 		deltaLn = lcw.ln>=ALI_MIN_LN_VAL?lcw.ln-ALI_MIN_LN_VAL:0;
+ 321              		.loc 1 89 0 is_stmt 1
+ 322 00d8 6789     		ldrh	r7, [r4, #10]
+ 323 00da 0F4B     		ldr	r3, .L58+4
+ 324 00dc 0020     		movs	r0, #0
+ 325              	.LVL23:
+ 326 00de 9F42     		cmp	r7, r3
+ 327 00e0 02D9     		bls	.L45
+ 328              		.loc 1 89 0 is_stmt 0 discriminator 1
+ 329 00e2 0E4B     		ldr	r3, .L58+8
+ 330 00e4 F818     		adds	r0, r7, r3
+ 331 00e6 80B2     		uxth	r0, r0
+ 332              	.L45:
+  90:../../../drivers/led/led.c **** 		deltaLn = deltaLn/breath->pCnt;
+ 333              		.loc 1 90 0 is_stmt 1 discriminator 4
+ 334 00e8 7188     		ldrh	r1, [r6, #2]
+ 335              	.LVL24:
+ 336 00ea FFF7FEFF 		bl	__aeabi_uidiv
+ 337              	.LVL25:
+ 338 00ee 80B2     		uxth	r0, r0
+ 339 00f0 E083     		strh	r0, [r4, #30]
+  91:../../../drivers/led/led.c **** 		if(deltaLn){
+ 340              		.loc 1 91 0 discriminator 4
+ 341 00f2 0028     		cmp	r0, #0
+ 342 00f4 09D0     		beq	.L44
+  92:../../../drivers/led/led.c **** 			lcw.lnTarget = lcw.ln;
+ 343              		.loc 1 92 0
+ 344 00f6 A781     		strh	r7, [r4, #12]
+  93:../../../drivers/led/led.c **** 			if(on){
+ 345              		.loc 1 93 0
+ 346 00f8 002D     		cmp	r5, #0
+ 347 00fa 01D0     		beq	.L46
+  94:../../../drivers/led/led.c **** 				lcw.ln = ALI_MIN_LN_VAL;
+ 348              		.loc 1 94 0
+ 349 00fc 084B     		ldr	r3, .L58+12
+ 350 00fe 6381     		strh	r3, [r4, #10]
+ 351              	.L46:
+  95:../../../drivers/led/led.c **** 			}
+  96:../../../drivers/led/led.c **** 			lcw.breath = breath;
+ 352              		.loc 1 96 0
+ 353 0100 2660     		str	r6, [r4]
+  97:../../../drivers/led/led.c **** 			lcw.onTarget = on;
+ 354              		.loc 1 97 0
+ 355 0102 6572     		strb	r5, [r4, #9]
+  98:../../../drivers/led/led.c **** 			_breath_timer_start();
+ 356              		.loc 1 98 0
+ 357 0104 FFF77CFF 		bl	_breath_timer_start
+ 358              	.LVL26:
+  99:../../../drivers/led/led.c **** 			return;
+ 359              		.loc 1 99 0
+ 360 0108 03E0     		b	.L43
+ 361              	.L44:
+ 100:../../../drivers/led/led.c **** 			}
+ 101:../../../drivers/led/led.c **** 	}
+ 102:../../../drivers/led/led.c **** 	lcw.on = on;
+ 362              		.loc 1 102 0
+ 363 010a 2572     		strb	r5, [r4, #8]
+ 103:../../../drivers/led/led.c **** 	lcw.onTarget = lcw.on;
+ 364              		.loc 1 103 0
+ 365 010c 6572     		strb	r5, [r4, #9]
+ 104:../../../drivers/led/led.c **** 	_cw_ctrl(&lcw);
+ 366              		.loc 1 104 0
+ 367 010e 00F079FA 		bl	_cw_ctrl.constprop.2
+ 368              	.LVL27:
+ 369              	.L43:
+ 105:../../../drivers/led/led.c **** }
+ 370              		.loc 1 105 0
+ 371              		@ sp needed
+ 372              	.LVL28:
+ 373 0112 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 374              	.L59:
+ 375              		.align	2
+ 376              	.L58:
+ 377 0114 00000000 		.word	.LANCHOR0
+ 378 0118 8E020000 		.word	654
+ 379 011c 71FDFFFF 		.word	-655
+ 380 0120 8F020000 		.word	655
+ 381              		.cfi_endproc
+ 382              	.LFE46:
+ 384              		.align	1
+ 385              		.global	led_cw_get_on_off
+ 386              		.code	16
+ 387              		.thumb_func
+ 389              	led_cw_get_on_off:
+ 390              	.LFB47:
+ 106:../../../drivers/led/led.c **** uint8_t led_cw_get_on_off(void)
+ 107:../../../drivers/led/led.c **** {
+ 391              		.loc 1 107 0
+ 392              		.cfi_startproc
+ 393              		@ args = 0, pretend = 0, frame = 0
+ 394              		@ frame_needed = 0, uses_anonymous_args = 0
+ 395              		@ link register save eliminated.
+ 108:../../../drivers/led/led.c **** 	return lcw.onTarget;
+ 396              		.loc 1 108 0
+ 397 0124 014B     		ldr	r3, .L61
+ 109:../../../drivers/led/led.c **** }
+ 398              		.loc 1 109 0
+ 399              		@ sp needed
+ 108:../../../drivers/led/led.c **** 	return lcw.onTarget;
+ 400              		.loc 1 108 0
+ 401 0126 587A     		ldrb	r0, [r3, #9]
+ 402              		.loc 1 109 0
+ 403 0128 7047     		bx	lr
+ 404              	.L62:
+ 405 012a C046     		.align	2
+ 406              	.L61:
+ 407 012c 00000000 		.word	.LANCHOR0
+ 408              		.cfi_endproc
+ 409              	.LFE47:
+ 411              		.global	__aeabi_ui2f
+ 412              		.global	__aeabi_fmul
+ 413              		.global	__aeabi_fdiv
+ 414              		.align	1
+ 415              		.global	led_cw_init
+ 416              		.code	16
+ 417              		.thumb_func
+ 419              	led_cw_init:
+ 420              	.LFB48:
+ 110:../../../drivers/led/led.c **** #if (LIGHT_CW_WITH_RGB)
+ 111:../../../drivers/led/led.c **** int led_cwrgb_set_color(uint16_t r, uint16_t g, uint16_t b, breath_t* breath)
+ 112:../../../drivers/led/led.c **** {
+ 113:../../../drivers/led/led.c **** #if 0
+ 114:../../../drivers/led/led.c **** 	if(breath && (on != lcw.on)){//the target lightness need to be restore
+ 115:../../../drivers/led/led.c **** 		deltaLn = lcw.ln>=ALI_MIN_LN_VAL?lcw.ln-ALI_MIN_LN_VAL:0;
+ 116:../../../drivers/led/led.c **** 		deltaLn = deltaLn/breath->pCnt;
+ 117:../../../drivers/led/led.c **** 		if(deltaLn){
+ 118:../../../drivers/led/led.c **** 			lcw.lnTarget = lcw.ln;
+ 119:../../../drivers/led/led.c **** 			if(on){
+ 120:../../../drivers/led/led.c **** 				lcw.ln = ALI_MIN_LN_VAL;
+ 121:../../../drivers/led/led.c **** 			}
+ 122:../../../drivers/led/led.c **** 			lcw.breath = breath;
+ 123:../../../drivers/led/led.c **** 			lcw.onTarget = on;
+ 124:../../../drivers/led/led.c **** 			_breath_timer_start();
+ 125:../../../drivers/led/led.c **** 			return;
+ 126:../../../drivers/led/led.c **** 			}
+ 127:../../../drivers/led/led.c **** 	}
+ 128:../../../drivers/led/led.c **** #endif
+ 129:../../../drivers/led/led.c **** 	lcw.rVal = r;
+ 130:../../../drivers/led/led.c **** 	lcw.rValTarg = lcw.rVal;
+ 131:../../../drivers/led/led.c **** 	lcw.gVal = g;
+ 132:../../../drivers/led/led.c **** 	lcw.gValTarg = lcw.gVal;
+ 133:../../../drivers/led/led.c **** 	lcw.bVal = b;
+ 134:../../../drivers/led/led.c **** 	lcw.bValTarg = lcw.bVal;
+ 135:../../../drivers/led/led.c **** 	_cw_ctrl(&lcw);
+ 136:../../../drivers/led/led.c **** 	return 0;
+ 137:../../../drivers/led/led.c **** }
+ 138:../../../drivers/led/led.c **** 
+ 139:../../../drivers/led/led.c **** int led_cwrgb_get_color(uint16_t* r, uint16_t* g, uint16_t* b)
+ 140:../../../drivers/led/led.c **** {
+ 141:../../../drivers/led/led.c **** 	*r = lcw.rValTarg;
+ 142:../../../drivers/led/led.c **** 	*g = lcw.gValTarg;
+ 143:../../../drivers/led/led.c **** 	*b = lcw.bValTarg;
+ 144:../../../drivers/led/led.c **** 	return 0;
+ 145:../../../drivers/led/led.c **** }
+ 146:../../../drivers/led/led.c **** #endif
+ 147:../../../drivers/led/led.c **** 
+ 148:../../../drivers/led/led.c **** void led_cw_init(light_cw_t* t)
+ 149:../../../drivers/led/led.c **** {
+ 421              		.loc 1 149 0
+ 422              		.cfi_startproc
+ 423              		@ args = 0, pretend = 0, frame = 16
+ 424              		@ frame_needed = 0, uses_anonymous_args = 0
+ 425              	.LVL29:
+ 426 0130 30B5     		push	{r4, r5, lr}
+ 427              	.LCFI4:
+ 428              		.cfi_def_cfa_offset 12
+ 429              		.cfi_offset 4, -12
+ 430              		.cfi_offset 5, -8
+ 431              		.cfi_offset 14, -4
+ 150:../../../drivers/led/led.c **** 	/*init gpio*/	
+ 151:../../../drivers/led/led.c **** 	GPIO_CFG cfg4 ={FUNC_PWM_OUT4, GFG_PULLUP};
+ 432              		.loc 1 151 0
+ 433 0132 204C     		ldr	r4, .L66
+ 149:../../../drivers/led/led.c **** 	/*init gpio*/	
+ 434              		.loc 1 149 0
+ 435 0134 85B0     		sub	sp, sp, #20
+ 436              	.LCFI5:
+ 437              		.cfi_def_cfa_offset 32
+ 438              		.loc 1 151 0
+ 439 0136 2378     		ldrb	r3, [r4]
+ 440 0138 01A9     		add	r1, sp, #4
+ 149:../../../drivers/led/led.c **** 	/*init gpio*/	
+ 441              		.loc 1 149 0
+ 442 013a 0500     		movs	r5, r0
+ 152:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM4_C, &cfg4);
+ 443              		.loc 1 152 0
+ 444 013c 1720     		movs	r0, #23
+ 445              	.LVL30:
+ 151:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM4_C, &cfg4);
+ 446              		.loc 1 151 0
+ 447 013e 0B70     		strb	r3, [r1]
+ 448              		.loc 1 152 0
+ 449 0140 FFF7FEFF 		bl	bc_gpio_init
+ 450              	.LVL31:
+ 153:../../../drivers/led/led.c **** 	
+ 154:../../../drivers/led/led.c **** 	GPIO_CFG cfg5 ={FUNC_PWM_OUT5, GFG_PULLUP};
+ 451              		.loc 1 154 0
+ 452 0144 6378     		ldrb	r3, [r4, #1]
+ 453 0146 02A9     		add	r1, sp, #8
+ 155:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM5_W, &cfg5);
+ 454              		.loc 1 155 0
+ 455 0148 1820     		movs	r0, #24
+ 154:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM5_W, &cfg5);
+ 456              		.loc 1 154 0
+ 457 014a 0B70     		strb	r3, [r1]
+ 458              		.loc 1 155 0
+ 459 014c FFF7FEFF 		bl	bc_gpio_init
+ 460              	.LVL32:
+ 156:../../../drivers/led/led.c **** #if (LIGHT_CW_WITH_RGB)
+ 157:../../../drivers/led/led.c **** 	GPIO_CFG cfg1 ={FUNC_PWM_OUT1, GFG_PULLUP};
+ 158:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM1_R, &cfg1);
+ 159:../../../drivers/led/led.c **** 	
+ 160:../../../drivers/led/led.c **** 	GPIO_CFG cfg2 ={FUNC_PWM_OUT2, GFG_PULLUP};
+ 161:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM2_G, &cfg2);
+ 162:../../../drivers/led/led.c **** 	
+ 163:../../../drivers/led/led.c **** 	GPIO_CFG cfg3 ={FUNC_PWM_OUT3, GFG_PULLUP};
+ 164:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM3_B, &cfg3);
+ 165:../../../drivers/led/led.c **** #endif
+ 166:../../../drivers/led/led.c **** 	
+ 167:../../../drivers/led/led.c **** 	struct PWM_CTRL_BITS bits = {0};
+ 461              		.loc 1 167 0
+ 462 0150 0023     		movs	r3, #0
+ 463 0152 03AC     		add	r4, sp, #12
+ 168:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH4, &bits);
+ 464              		.loc 1 168 0
+ 465 0154 2100     		movs	r1, r4
+ 466 0156 1020     		movs	r0, #16
+ 167:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH4, &bits);
+ 467              		.loc 1 167 0
+ 468 0158 2370     		strb	r3, [r4]
+ 469              		.loc 1 168 0
+ 470 015a FFF7FEFF 		bl	PWM_Init
+ 471              	.LVL33:
+ 169:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH5, &bits);
+ 472              		.loc 1 169 0
+ 473 015e 2100     		movs	r1, r4
+ 474 0160 2020     		movs	r0, #32
+ 475 0162 FFF7FEFF 		bl	PWM_Init
+ 476              	.LVL34:
+ 477 0166 144C     		ldr	r4, .L66+4
+ 170:../../../drivers/led/led.c **** #if (LIGHT_CW_WITH_RGB)
+ 171:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH1, &bits);
+ 172:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH2, &bits);
+ 173:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH3, &bits);
+ 174:../../../drivers/led/led.c **** #endif
+ 175:../../../drivers/led/led.c **** 	if(t==NULL){
+ 478              		.loc 1 175 0
+ 479 0168 002D     		cmp	r5, #0
+ 480 016a 09D1     		bne	.L64
+ 176:../../../drivers/led/led.c **** 		lcw.ln = ALI_DEFAULT_LN_VAL;
+ 481              		.loc 1 176 0
+ 482 016c 2423     		movs	r3, #36
+ 483 016e 5B42     		rsbs	r3, r3, #0
+ 484 0170 6381     		strh	r3, [r4, #10]
+ 177:../../../drivers/led/led.c **** 		lcw.tp = ALI_DEFAULT_TP_VAL;
+ 485              		.loc 1 177 0
+ 486 0172 124B     		ldr	r3, .L66+8
+ 487 0174 E381     		strh	r3, [r4, #14]
+ 178:../../../drivers/led/led.c **** 		lcw.on = ALI_DEFAULT_ON_VAL;
+ 488              		.loc 1 178 0
+ 489 0176 0123     		movs	r3, #1
+ 490 0178 2372     		strb	r3, [r4, #8]
+ 179:../../../drivers/led/led.c **** 		lcw.freq = ALI_FREQUENCY_16K;
+ 491              		.loc 1 179 0
+ 492 017a 114B     		ldr	r3, .L66+12
+ 493 017c A380     		strh	r3, [r4, #4]
+ 494 017e 04E0     		b	.L65
+ 495              	.L64:
+ 180:../../../drivers/led/led.c **** #if (LIGHT_CW_WITH_RGB)
+ 181:../../../drivers/led/led.c **** 		lcw.rVal = ALI_DEFAULT_R_VAL;
+ 182:../../../drivers/led/led.c **** 		lcw.gVal = ALI_DEFAULT_G_VAL;
+ 183:../../../drivers/led/led.c **** 		lcw.bVal = ALI_DEFAULT_B_VAL;
+ 184:../../../drivers/led/led.c **** #endif
+ 185:../../../drivers/led/led.c **** 	}
+ 186:../../../drivers/led/led.c **** 	else{
+ 187:../../../drivers/led/led.c **** 		lcw = *t;
+ 496              		.loc 1 187 0
+ 497 0180 2300     		movs	r3, r4
+ 498 0182 07CD     		ldmia	r5!, {r0, r1, r2}
+ 499 0184 07C3     		stmia	r3!, {r0, r1, r2}
+ 500              	.LVL35:
+ 501 0186 06CD     		ldmia	r5!, {r1, r2}
+ 502 0188 06C3     		stmia	r3!, {r1, r2}
+ 503              	.LVL36:
+ 504              	.L65:
+ 188:../../../drivers/led/led.c **** 	}
+ 189:../../../drivers/led/led.c **** 	lcw.lnTarget = lcw.ln;
+ 505              		.loc 1 189 0
+ 506 018a 6389     		ldrh	r3, [r4, #10]
+ 190:../../../drivers/led/led.c **** 	lcw.tpTarget = lcw.tp;
+ 191:../../../drivers/led/led.c **** 	lcw.onTarget = lcw.on;
+ 192:../../../drivers/led/led.c **** #if (LIGHT_CW_WITH_RGB)
+ 193:../../../drivers/led/led.c **** 	lcw.rValTarg = lcw.rVal;
+ 194:../../../drivers/led/led.c **** 	lcw.gValTarg = lcw.gVal;
+ 195:../../../drivers/led/led.c **** 	lcw.bValTarg = lcw.bVal;
+ 196:../../../drivers/led/led.c **** #endif
+ 197:../../../drivers/led/led.c **** 	kScale = (float)lcw.freq/65536/1920;
+ 507              		.loc 1 197 0
+ 508 018c A088     		ldrh	r0, [r4, #4]
+ 189:../../../drivers/led/led.c **** 	lcw.tpTarget = lcw.tp;
+ 509              		.loc 1 189 0
+ 510 018e A381     		strh	r3, [r4, #12]
+ 190:../../../drivers/led/led.c **** 	lcw.tpTarget = lcw.tp;
+ 511              		.loc 1 190 0
+ 512 0190 E389     		ldrh	r3, [r4, #14]
+ 513 0192 2382     		strh	r3, [r4, #16]
+ 191:../../../drivers/led/led.c **** #if (LIGHT_CW_WITH_RGB)
+ 514              		.loc 1 191 0
+ 515 0194 237A     		ldrb	r3, [r4, #8]
+ 516 0196 6372     		strb	r3, [r4, #9]
+ 517              		.loc 1 197 0
+ 518 0198 FFF7FEFF 		bl	__aeabi_ui2f
+ 519              	.LVL37:
+ 520 019c DE21     		movs	r1, #222
+ 521 019e 8905     		lsls	r1, r1, #22
+ 522 01a0 FFF7FEFF 		bl	__aeabi_fmul
+ 523              	.LVL38:
+ 524 01a4 0749     		ldr	r1, .L66+16
+ 525 01a6 FFF7FEFF 		bl	__aeabi_fdiv
+ 526              	.LVL39:
+ 527 01aa 6062     		str	r0, [r4, #36]
+ 198:../../../drivers/led/led.c **** #ifndef RELEASE
+ 199:../../../drivers/led/led.c **** 	printf("kScale[%f]\r\n", kScale);
+ 200:../../../drivers/led/led.c **** #endif
+ 201:../../../drivers/led/led.c **** 	_cw_ctrl(&lcw);
+ 528              		.loc 1 201 0
+ 529 01ac 00F02AFA 		bl	_cw_ctrl.constprop.2
+ 530              	.LVL40:
+ 202:../../../drivers/led/led.c **** }
+ 531              		.loc 1 202 0
+ 532 01b0 05B0     		add	sp, sp, #20
+ 533              		@ sp needed
+ 534 01b2 30BD     		pop	{r4, r5, pc}
+ 535              	.L67:
+ 536              		.align	2
+ 537              	.L66:
+ 538 01b4 00000000 		.word	.LANCHOR1
+ 539 01b8 00000000 		.word	.LANCHOR0
+ 540 01bc A0280000 		.word	10400
+ 541 01c0 DC050000 		.word	1500
+ 542 01c4 0000F044 		.word	1156579328
+ 543              		.cfi_endproc
+ 544              	.LFE48:
+ 546              		.align	1
+ 547              		.global	led_cw_set_breath
+ 548              		.code	16
+ 549              		.thumb_func
+ 551              	led_cw_set_breath:
+ 552              	.LFB50:
+ 203:../../../drivers/led/led.c **** 
+ 204:../../../drivers/led/led.c **** static void _cw_ctrl(light_cw_t* t)
+ 205:../../../drivers/led/led.c **** {
+ 206:../../../drivers/led/led.c **** 	if(lcw.tp<800 || lcw.tp>20000){
+ 207:../../../drivers/led/led.c **** 		return;
+ 208:../../../drivers/led/led.c **** 	}
+ 209:../../../drivers/led/led.c **** 	if(t->on || t->onTarget){
+ 210:../../../drivers/led/led.c **** 		uint16_t c,w;
+ 211:../../../drivers/led/led.c **** 		c = kScale*(lcw.tp-800)*lcw.ln/10;
+ 212:../../../drivers/led/led.c **** 		w = kScale*(20000 -lcw.tp)*lcw.ln/10;
+ 213:../../../drivers/led/led.c **** #ifndef RELEASE
+ 214:../../../drivers/led/led.c **** 		printf("on[%d] ln[%d] tp[%d] c[%d] w[%d]\r\n", t->on||t->onTarget, t->ln, t->tp, c, w);
+ 215:../../../drivers/led/led.c **** #endif
+ 216:../../../drivers/led/led.c **** 		if(c){
+ 217:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH4, c, lcw.freq-c);//cold
+ 218:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH4);
+ 219:../../../drivers/led/led.c **** 		}
+ 220:../../../drivers/led/led.c **** 		else{
+ 221:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH4, 0, 0);
+ 222:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH4);
+ 223:../../../drivers/led/led.c **** 		}
+ 224:../../../drivers/led/led.c **** 		if(w){
+ 225:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH5, w, lcw.freq-w);//warm
+ 226:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH5);
+ 227:../../../drivers/led/led.c **** 		}
+ 228:../../../drivers/led/led.c **** 		else{
+ 229:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH5, 0, 0);
+ 230:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH5);
+ 231:../../../drivers/led/led.c **** 		}
+ 232:../../../drivers/led/led.c **** #if (LIGHT_CW_WITH_RGB)
+ 233:../../../drivers/led/led.c **** #ifndef RELEASE
+ 234:../../../drivers/led/led.c **** 		printf("r[%x] g[%x] b[%x]\r\n", t->rVal, t->gVal, t->bVal);
+ 235:../../../drivers/led/led.c **** #endif
+ 236:../../../drivers/led/led.c **** 		if(t->rVal){
+ 237:../../../drivers/led/led.c **** 			uint16_t r = t->rVal*t->ln*kScale/10;
+ 238:../../../drivers/led/led.c **** #ifndef RELEASE
+ 239:../../../drivers/led/led.c **** 			printf(" r[%x]\r\n", r);
+ 240:../../../drivers/led/led.c **** #endif
+ 241:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH1, r, t->freq-r);//cold
+ 242:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH1);
+ 243:../../../drivers/led/led.c **** 		}
+ 244:../../../drivers/led/led.c **** 		else{
+ 245:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH1, 0, 0);
+ 246:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH1);
+ 247:../../../drivers/led/led.c **** 		}
+ 248:../../../drivers/led/led.c **** 		if(t->gVal){
+ 249:../../../drivers/led/led.c **** 			uint16_t g = t->gVal*t->ln*kScale/10;
+ 250:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH2, g, t->freq-g);//warm
+ 251:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH2);
+ 252:../../../drivers/led/led.c **** 		}
+ 253:../../../drivers/led/led.c **** 		else{
+ 254:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH2, 0, 0);
+ 255:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH2);
+ 256:../../../drivers/led/led.c **** 		}
+ 257:../../../drivers/led/led.c **** 		if(t->bVal){
+ 258:../../../drivers/led/led.c **** 			uint16_t b = t->bVal*t->ln*kScale/10;
+ 259:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH3, b, t->freq-b);//warm
+ 260:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH3);
+ 261:../../../drivers/led/led.c **** 		}
+ 262:../../../drivers/led/led.c **** 		else{
+ 263:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH3, 0, 0);
+ 264:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH3);
+ 265:../../../drivers/led/led.c **** 		}
+ 266:../../../drivers/led/led.c **** #endif
+ 267:../../../drivers/led/led.c **** 		return;
+ 268:../../../drivers/led/led.c **** 	}
+ 269:../../../drivers/led/led.c **** 	
+ 270:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH4, 0, 0);
+ 271:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH5, 0, 0);
+ 272:../../../drivers/led/led.c **** #if (LIGHT_CW_WITH_RGB)
+ 273:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH1, 0, 0);
+ 274:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH2, 0, 0);
+ 275:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH3, 0, 0);
+ 276:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH1);
+ 277:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH2);
+ 278:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH3);
+ 279:../../../drivers/led/led.c **** #endif
+ 280:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH4);
+ 281:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH5);
+ 282:../../../drivers/led/led.c **** }
+ 283:../../../drivers/led/led.c **** 
+ 284:../../../drivers/led/led.c **** void led_cw_set_breath(breath_t* t)
+ 285:../../../drivers/led/led.c **** {
+ 553              		.loc 1 285 0
+ 554              		.cfi_startproc
+ 555              		@ args = 0, pretend = 0, frame = 0
+ 556              		@ frame_needed = 0, uses_anonymous_args = 0
+ 557              	.LVL41:
+ 286:../../../drivers/led/led.c **** 	switch(t->mode){
+ 558              		.loc 1 286 0
+ 559 01c8 0378     		ldrb	r3, [r0]
+ 285:../../../drivers/led/led.c **** 	switch(t->mode){
+ 560              		.loc 1 285 0
+ 561 01ca 70B5     		push	{r4, r5, r6, lr}
+ 562              	.LCFI6:
+ 563              		.cfi_def_cfa_offset 16
+ 564              		.cfi_offset 4, -16
+ 565              		.cfi_offset 5, -12
+ 566              		.cfi_offset 6, -8
+ 567              		.cfi_offset 14, -4
+ 568              		.loc 1 286 0
+ 569 01cc 5B07     		lsls	r3, r3, #29
+ 570 01ce 5B0F     		lsrs	r3, r3, #29
+ 571 01d0 DAB2     		uxtb	r2, r3
+ 285:../../../drivers/led/led.c **** 	switch(t->mode){
+ 572              		.loc 1 285 0
+ 573 01d2 0400     		movs	r4, r0
+ 574              		.loc 1 286 0
+ 575 01d4 002A     		cmp	r2, #0
+ 576 01d6 0CD0     		beq	.L70
+ 577 01d8 012A     		cmp	r2, #1
+ 578 01da 0ED1     		bne	.L68
+ 287:../../../drivers/led/led.c **** 		case BREATH_MODE_FLOW:{
+ 288:../../../drivers/led/led.c **** 		}break;
+ 289:../../../drivers/led/led.c **** 		case BREATH_MODE_H2L2H:{
+ 290:../../../drivers/led/led.c **** 			lcw.onTarget = 1;
+ 579              		.loc 1 290 0
+ 580 01dc 074D     		ldr	r5, .L78
+ 291:../../../drivers/led/led.c **** 			lcw.lnTarget = lcw.ln;
+ 581              		.loc 1 291 0
+ 582 01de 6889     		ldrh	r0, [r5, #10]
+ 583              	.LVL42:
+ 290:../../../drivers/led/led.c **** 			lcw.lnTarget = lcw.ln;
+ 584              		.loc 1 290 0
+ 585 01e0 6B72     		strb	r3, [r5, #9]
+ 586              		.loc 1 291 0
+ 587 01e2 A881     		strh	r0, [r5, #12]
+ 292:../../../drivers/led/led.c **** 			deltaLn = lcw.lnTarget/t->pCnt;
+ 588              		.loc 1 292 0
+ 589 01e4 6188     		ldrh	r1, [r4, #2]
+ 590 01e6 FFF7FEFF 		bl	__aeabi_uidiv
+ 591              	.LVL43:
+ 592 01ea 80B2     		uxth	r0, r0
+ 593 01ec E883     		strh	r0, [r5, #30]
+ 293:../../../drivers/led/led.c **** 			if(deltaLn == 0)
+ 594              		.loc 1 293 0
+ 595 01ee 0028     		cmp	r0, #0
+ 596 01f0 03D0     		beq	.L68
+ 597              	.L70:
+ 294:../../../drivers/led/led.c **** 				return;
+ 295:../../../drivers/led/led.c **** 		}break;
+ 296:../../../drivers/led/led.c **** 		default:{
+ 297:../../../drivers/led/led.c **** 			return;
+ 298:../../../drivers/led/led.c **** 		}break;
+ 299:../../../drivers/led/led.c **** 	}
+ 300:../../../drivers/led/led.c **** 	lcw.breath = t;
+ 598              		.loc 1 300 0
+ 599 01f2 024B     		ldr	r3, .L78
+ 600 01f4 1C60     		str	r4, [r3]
+ 301:../../../drivers/led/led.c **** #ifndef RELEASE
+ 302:../../../drivers/led/led.c **** 	printf("mode[%x] rCnt[%x] pCnt[%x]", lcw.breath->mode, lcw.breath->rCnt,
+ 303:../../../drivers/led/led.c **** 											lcw.breath->pCnt);
+ 304:../../../drivers/led/led.c **** #endif
+ 305:../../../drivers/led/led.c **** 	_breath_timer_start();
+ 601              		.loc 1 305 0
+ 602 01f6 FFF703FF 		bl	_breath_timer_start
+ 603              	.LVL44:
+ 604              	.L68:
+ 306:../../../drivers/led/led.c **** }
+ 605              		.loc 1 306 0
+ 606              		@ sp needed
+ 607              	.LVL45:
+ 608 01fa 70BD     		pop	{r4, r5, r6, pc}
+ 609              	.L79:
+ 610              		.align	2
+ 611              	.L78:
+ 612 01fc 00000000 		.word	.LANCHOR0
+ 613              		.cfi_endproc
+ 614              	.LFE50:
+ 616              		.align	1
+ 617              		.global	led_cw_do_breath
+ 618              		.code	16
+ 619              		.thumb_func
+ 621              	led_cw_do_breath:
+ 622              	.LFB51:
+ 307:../../../drivers/led/led.c **** 
+ 308:../../../drivers/led/led.c **** /**
+ 309:../../../drivers/led/led.c ****  ****************************************************************************************
+ 310:../../../drivers/led/led.c ****  * @brief led cw do breath function
+ 311:../../../drivers/led/led.c ****  * @param None
+ 312:../../../drivers/led/led.c ****  * @return 0 success
+ 313:../../../drivers/led/led.c ****  			1 need continue do
+ 314:../../../drivers/led/led.c ****  			2 failed
+ 315:../../../drivers/led/led.c ****  ****************************************************************************************
+ 316:../../../drivers/led/led.c ****  */
+ 317:../../../drivers/led/led.c **** uint8_t  led_cw_do_breath(void)
+ 318:../../../drivers/led/led.c **** {
+ 623              		.loc 1 318 0
+ 624              		.cfi_startproc
+ 625              		@ args = 0, pretend = 0, frame = 0
+ 626              		@ frame_needed = 0, uses_anonymous_args = 0
+ 627 0200 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 628              	.LCFI7:
+ 629              		.cfi_def_cfa_offset 24
+ 630              		.cfi_offset 3, -24
+ 631              		.cfi_offset 4, -20
+ 632              		.cfi_offset 5, -16
+ 633              		.cfi_offset 6, -12
+ 634              		.cfi_offset 7, -8
+ 635              		.cfi_offset 14, -4
+ 319:../../../drivers/led/led.c **** 	if(lcw.breath == NULL || (deltaLn == 0 && deltaTp == 0)){
+ 636              		.loc 1 319 0
+ 637 0202 3E4B     		ldr	r3, .L109
+ 320:../../../drivers/led/led.c **** 		//use target ctl
+ 321:../../../drivers/led/led.c **** 		return 2;
+ 638              		.loc 1 321 0
+ 639 0204 0220     		movs	r0, #2
+ 319:../../../drivers/led/led.c **** 	if(lcw.breath == NULL || (deltaLn == 0 && deltaTp == 0)){
+ 640              		.loc 1 319 0
+ 641 0206 1968     		ldr	r1, [r3]
+ 642 0208 0029     		cmp	r1, #0
+ 643 020a 00D1     		bne	.LCB512
+ 644 020c 75E0     		b	.L102	@long jump
+ 645              	.LCB512:
+ 319:../../../drivers/led/led.c **** 	if(lcw.breath == NULL || (deltaLn == 0 && deltaTp == 0)){
+ 646              		.loc 1 319 0 is_stmt 0 discriminator 1
+ 647 020e DA8B     		ldrh	r2, [r3, #30]
+ 648 0210 002A     		cmp	r2, #0
+ 649 0212 03D1     		bne	.L82
+ 319:../../../drivers/led/led.c **** 	if(lcw.breath == NULL || (deltaLn == 0 && deltaTp == 0)){
+ 650              		.loc 1 319 0 discriminator 2
+ 651 0214 1C8C     		ldrh	r4, [r3, #32]
+ 652 0216 002C     		cmp	r4, #0
+ 653 0218 00D1     		bne	.LCB518
+ 654 021a 6EE0     		b	.L102	@long jump
+ 655              	.LCB518:
+ 656              	.L82:
+ 657              	.LVL46:
+ 322:../../../drivers/led/led.c **** 	}
+ 323:../../../drivers/led/led.c **** 	uint8_t _sts = 1;
+ 324:../../../drivers/led/led.c **** #ifndef RELEASE
+ 325:../../../drivers/led/led.c **** 	printf("deltaLn[%x]deltaTp[%x]ucPeriodCnt[%x] mode[%x]\r\n", deltaLn, deltaTp, ucPeriodCnt, lcw.br
+ 326:../../../drivers/led/led.c **** #endif
+ 327:../../../drivers/led/led.c **** 	
+ 328:../../../drivers/led/led.c **** 	switch(lcw.breath->mode){
+ 658              		.loc 1 328 0 is_stmt 1
+ 659 021c 0D78     		ldrb	r5, [r1]
+ 660 021e 6C07     		lsls	r4, r5, #29
+ 661 0220 640F     		lsrs	r4, r4, #29
+ 662 0222 02D0     		beq	.L84
+ 663 0224 012C     		cmp	r4, #1
+ 664 0226 33D0     		beq	.L85
+ 665 0228 62E0     		b	.L108
+ 666              	.L84:
+ 329:../../../drivers/led/led.c **** 		case BREATH_MODE_FLOW:{
+ 330:../../../drivers/led/led.c **** 			if(ucPeriodCnt < lcw.breath->pCnt){
+ 667              		.loc 1 330 0
+ 668 022a 4E88     		ldrh	r6, [r1, #2]
+ 669 022c 988B     		ldrh	r0, [r3, #28]
+ 670 022e 8642     		cmp	r6, r0
+ 671 0230 1CD9     		bls	.L86
+ 331:../../../drivers/led/led.c **** 				if(lcw.onTarget > lcw.on 
+ 672              		.loc 1 331 0
+ 673 0232 587A     		ldrb	r0, [r3, #9]
+ 674 0234 197A     		ldrb	r1, [r3, #8]
+ 675 0236 8842     		cmp	r0, r1
+ 676 0238 04D8     		bhi	.L87
+ 332:../../../drivers/led/led.c **** 					|| ((lcw.onTarget == lcw.on) 
+ 677              		.loc 1 332 0
+ 678 023a 07D1     		bne	.L88
+ 333:../../../drivers/led/led.c **** 					&& lcw.lnTarget > lcw.ln))
+ 679              		.loc 1 333 0
+ 680 023c 9889     		ldrh	r0, [r3, #12]
+ 681 023e 5989     		ldrh	r1, [r3, #10]
+ 682 0240 8842     		cmp	r0, r1
+ 683 0242 03D9     		bls	.L88
+ 684              	.L87:
+ 334:../../../drivers/led/led.c **** 					lcw.ln += deltaLn;
+ 685              		.loc 1 334 0
+ 686 0244 5989     		ldrh	r1, [r3, #10]
+ 687 0246 5218     		adds	r2, r2, r1
+ 688 0248 5A81     		strh	r2, [r3, #10]
+ 689 024a 02E0     		b	.L89
+ 690              	.L88:
+ 335:../../../drivers/led/led.c **** 				else 
+ 336:../../../drivers/led/led.c **** 					lcw.ln -= deltaLn;
+ 691              		.loc 1 336 0
+ 692 024c 5989     		ldrh	r1, [r3, #10]
+ 693 024e 8A1A     		subs	r2, r1, r2
+ 694 0250 5A81     		strh	r2, [r3, #10]
+ 695              	.L89:
+ 337:../../../drivers/led/led.c **** 				
+ 338:../../../drivers/led/led.c **** 				if(lcw.tpTarget > lcw.tp)
+ 696              		.loc 1 338 0
+ 697 0252 DA89     		ldrh	r2, [r3, #14]
+ 698 0254 188A     		ldrh	r0, [r3, #16]
+ 699 0256 198C     		ldrh	r1, [r3, #32]
+ 700 0258 9042     		cmp	r0, r2
+ 701 025a 03D9     		bls	.L90
+ 339:../../../drivers/led/led.c **** 					lcw.tp += deltaTp;
+ 702              		.loc 1 339 0
+ 703 025c 5218     		adds	r2, r2, r1
+ 704 025e DA81     		strh	r2, [r3, #14]
+ 323:../../../drivers/led/led.c **** #ifndef RELEASE
+ 705              		.loc 1 323 0
+ 706 0260 0124     		movs	r4, #1
+ 707 0262 46E0     		b	.L83
+ 708              	.L90:
+ 340:../../../drivers/led/led.c **** 				else
+ 341:../../../drivers/led/led.c **** 					lcw.tp -= deltaTp;
+ 709              		.loc 1 341 0
+ 710 0264 521A     		subs	r2, r2, r1
+ 711 0266 DA81     		strh	r2, [r3, #14]
+ 323:../../../drivers/led/led.c **** #ifndef RELEASE
+ 712              		.loc 1 323 0
+ 713 0268 0124     		movs	r4, #1
+ 714 026a 42E0     		b	.L83
+ 715              	.L86:
+ 342:../../../drivers/led/led.c **** 			}
+ 343:../../../drivers/led/led.c **** 			else{
+ 344:../../../drivers/led/led.c **** 				if(--lcw.breath->rCnt == 0){
+ 716              		.loc 1 344 0
+ 717 026c 1F20     		movs	r0, #31
+ 718 026e 0726     		movs	r6, #7
+ 719 0270 EA08     		lsrs	r2, r5, #3
+ 720 0272 1F32     		adds	r2, r2, #31
+ 721 0274 0240     		ands	r2, r0
+ 722 0276 D000     		lsls	r0, r2, #3
+ 723 0278 3540     		ands	r5, r6
+ 724 027a 0543     		orrs	r5, r0
+ 725 027c 0D70     		strb	r5, [r1]
+ 726 027e 002A     		cmp	r2, #0
+ 727 0280 2AD0     		beq	.L91
+ 345:../../../drivers/led/led.c **** 					_sts = 0;
+ 346:../../../drivers/led/led.c **** 				}
+ 347:../../../drivers/led/led.c **** 				else{
+ 348:../../../drivers/led/led.c **** 					ucPeriodCnt = 0;
+ 349:../../../drivers/led/led.c **** 					lcw.ln = lcw.lnTarget;
+ 728              		.loc 1 349 0
+ 729 0282 9A89     		ldrh	r2, [r3, #12]
+ 348:../../../drivers/led/led.c **** 					lcw.ln = lcw.lnTarget;
+ 730              		.loc 1 348 0
+ 731 0284 9C83     		strh	r4, [r3, #28]
+ 732              		.loc 1 349 0
+ 733 0286 5A81     		strh	r2, [r3, #10]
+ 350:../../../drivers/led/led.c **** 					lcw.tp = lcw.tpTarget;
+ 734              		.loc 1 350 0
+ 735 0288 1A8A     		ldrh	r2, [r3, #16]
+ 323:../../../drivers/led/led.c **** #ifndef RELEASE
+ 736              		.loc 1 323 0
+ 737 028a 0124     		movs	r4, #1
+ 738              		.loc 1 350 0
+ 739 028c DA81     		strh	r2, [r3, #14]
+ 740 028e 30E0     		b	.L83
+ 741              	.L85:
+ 351:../../../drivers/led/led.c **** 				}
+ 352:../../../drivers/led/led.c **** 			}
+ 353:../../../drivers/led/led.c **** 		}break;
+ 354:../../../drivers/led/led.c **** 		case BREATH_MODE_H2L2H:{
+ 355:../../../drivers/led/led.c **** 			if(ucPeriodCnt < lcw.breath->pCnt){
+ 742              		.loc 1 355 0
+ 743 0290 4888     		ldrh	r0, [r1, #2]
+ 744 0292 9E8B     		ldrh	r6, [r3, #28]
+ 745 0294 B042     		cmp	r0, r6
+ 746 0296 17D8     		bhi	.L107
+ 356:../../../drivers/led/led.c **** 				lcw.ln -= deltaLn;
+ 357:../../../drivers/led/led.c **** 				lcw.tp -= deltaTp;
+ 358:../../../drivers/led/led.c **** 			}
+ 359:../../../drivers/led/led.c **** 			else if(ucPeriodCnt < (lcw.breath->pCnt<<1)){
+ 747              		.loc 1 359 0
+ 748 0298 4000     		lsls	r0, r0, #1
+ 749 029a 8642     		cmp	r6, r0
+ 750 029c 07DA     		bge	.L93
+ 360:../../../drivers/led/led.c **** 				
+ 361:../../../drivers/led/led.c **** 				lcw.ln += deltaLn;
+ 751              		.loc 1 361 0
+ 752 029e 5989     		ldrh	r1, [r3, #10]
+ 753 02a0 5218     		adds	r2, r2, r1
+ 754 02a2 5A81     		strh	r2, [r3, #10]
+ 362:../../../drivers/led/led.c **** 				lcw.tp += deltaTp;
+ 755              		.loc 1 362 0
+ 756 02a4 D989     		ldrh	r1, [r3, #14]
+ 757 02a6 1A8C     		ldrh	r2, [r3, #32]
+ 758 02a8 8A18     		adds	r2, r1, r2
+ 759 02aa DA81     		strh	r2, [r3, #14]
+ 760 02ac 21E0     		b	.L83
+ 761              	.L93:
+ 363:../../../drivers/led/led.c **** 			}
+ 364:../../../drivers/led/led.c **** 			else{
+ 365:../../../drivers/led/led.c **** 				if(--lcw.breath->rCnt == 0){
+ 762              		.loc 1 365 0
+ 763 02ae 1F26     		movs	r6, #31
+ 764 02b0 0727     		movs	r7, #7
+ 765 02b2 E808     		lsrs	r0, r5, #3
+ 766 02b4 1F30     		adds	r0, r0, #31
+ 767 02b6 3040     		ands	r0, r6
+ 768 02b8 C600     		lsls	r6, r0, #3
+ 769 02ba 3D40     		ands	r5, r7
+ 770 02bc 3543     		orrs	r5, r6
+ 771 02be 0D70     		strb	r5, [r1]
+ 772 02c0 0028     		cmp	r0, #0
+ 773 02c2 09D0     		beq	.L91
+ 366:../../../drivers/led/led.c **** 					_sts = 0;
+ 367:../../../drivers/led/led.c **** 				}
+ 368:../../../drivers/led/led.c **** 				else{
+ 369:../../../drivers/led/led.c **** 					ucPeriodCnt = 0;
+ 774              		.loc 1 369 0
+ 775 02c4 0021     		movs	r1, #0
+ 776 02c6 9983     		strh	r1, [r3, #28]
+ 777              	.L107:
+ 370:../../../drivers/led/led.c **** 					lcw.ln -= deltaLn;
+ 778              		.loc 1 370 0
+ 779 02c8 5989     		ldrh	r1, [r3, #10]
+ 780 02ca 8A1A     		subs	r2, r1, r2
+ 781 02cc 5A81     		strh	r2, [r3, #10]
+ 371:../../../drivers/led/led.c **** 					lcw.tp -= deltaTp;
+ 782              		.loc 1 371 0
+ 783 02ce 198C     		ldrh	r1, [r3, #32]
+ 784 02d0 DA89     		ldrh	r2, [r3, #14]
+ 785 02d2 521A     		subs	r2, r2, r1
+ 786 02d4 DA81     		strh	r2, [r3, #14]
+ 787 02d6 0CE0     		b	.L83
+ 788              	.L91:
+ 789              	.LVL47:
+ 372:../../../drivers/led/led.c **** 				}
+ 373:../../../drivers/led/led.c **** 			}
+ 374:../../../drivers/led/led.c **** 		}break;
+ 375:../../../drivers/led/led.c **** 		default:{
+ 376:../../../drivers/led/led.c **** 			_sts = 2;
+ 377:../../../drivers/led/led.c **** 		}break;
+ 378:../../../drivers/led/led.c **** 	}
+ 379:../../../drivers/led/led.c **** 
+ 380:../../../drivers/led/led.c **** 	if(_sts == 0){
+ 381:../../../drivers/led/led.c **** 		lcw.on = lcw.onTarget;
+ 382:../../../drivers/led/led.c **** 		lcw.ln = lcw.lnTarget;
+ 383:../../../drivers/led/led.c **** 		lcw.ln = lcw.lnTarget;
+ 384:../../../drivers/led/led.c **** 		lcw.breath = NULL;
+ 790              		.loc 1 384 0
+ 791 02d8 0024     		movs	r4, #0
+ 381:../../../drivers/led/led.c **** 		lcw.ln = lcw.lnTarget;
+ 792              		.loc 1 381 0
+ 793 02da 5A7A     		ldrb	r2, [r3, #9]
+ 794              		.loc 1 384 0
+ 795 02dc 1C60     		str	r4, [r3]
+ 381:../../../drivers/led/led.c **** 		lcw.ln = lcw.lnTarget;
+ 796              		.loc 1 381 0
+ 797 02de 1A72     		strb	r2, [r3, #8]
+ 382:../../../drivers/led/led.c **** 		lcw.ln = lcw.lnTarget;
+ 798              		.loc 1 382 0
+ 799 02e0 9A89     		ldrh	r2, [r3, #12]
+ 385:../../../drivers/led/led.c **** 		deltaTp = 0;
+ 800              		.loc 1 385 0
+ 801 02e2 1C84     		strh	r4, [r3, #32]
+ 382:../../../drivers/led/led.c **** 		lcw.ln = lcw.lnTarget;
+ 802              		.loc 1 382 0
+ 803 02e4 5A81     		strh	r2, [r3, #10]
+ 386:../../../drivers/led/led.c **** 		deltaLn = 0;
+ 804              		.loc 1 386 0
+ 805 02e6 DC83     		strh	r4, [r3, #30]
+ 806              	.LVL48:
+ 807              	.L94:
+ 387:../../../drivers/led/led.c **** 	}
+ 388:../../../drivers/led/led.c **** 	else{
+ 389:../../../drivers/led/led.c **** 		ucPeriodCnt++;
+ 390:../../../drivers/led/led.c **** 	}
+ 391:../../../drivers/led/led.c **** 	_cw_ctrl(&lcw);
+ 808              		.loc 1 391 0
+ 809 02e8 00F08CF9 		bl	_cw_ctrl.constprop.2
+ 810              	.LVL49:
+ 392:../../../drivers/led/led.c **** 	return _sts;
+ 811              		.loc 1 392 0
+ 812 02ec 2000     		movs	r0, r4
+ 813 02ee 04E0     		b	.L102
+ 814              	.LVL50:
+ 815              	.L108:
+ 376:../../../drivers/led/led.c **** 		}break;
+ 816              		.loc 1 376 0
+ 817 02f0 0224     		movs	r4, #2
+ 818              	.L83:
+ 819              	.LVL51:
+ 389:../../../drivers/led/led.c **** 	}
+ 820              		.loc 1 389 0
+ 821 02f2 9A8B     		ldrh	r2, [r3, #28]
+ 822 02f4 0132     		adds	r2, r2, #1
+ 823 02f6 9A83     		strh	r2, [r3, #28]
+ 824 02f8 F6E7     		b	.L94
+ 825              	.LVL52:
+ 826              	.L102:
+ 393:../../../drivers/led/led.c **** }
+ 827              		.loc 1 393 0
+ 828              		@ sp needed
+ 829 02fa F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 830              	.L110:
+ 831              		.align	2
+ 832              	.L109:
+ 833 02fc 00000000 		.word	.LANCHOR0
+ 834              		.cfi_endproc
+ 835              	.LFE51:
+ 837              		.align	1
+ 838              		.global	led_ltn_ctrl
+ 839              		.code	16
+ 840              		.thumb_func
+ 842              	led_ltn_ctrl:
+ 843              	.LFB52:
+ 394:../../../drivers/led/led.c **** 
+ 395:../../../drivers/led/led.c **** void led_ltn_ctrl(light_ltn_t* t)
+ 396:../../../drivers/led/led.c **** {
+ 844              		.loc 1 396 0
+ 845              		.cfi_startproc
+ 846              		@ args = 0, pretend = 0, frame = 0
+ 847              		@ frame_needed = 0, uses_anonymous_args = 0
+ 848              	.LVL53:
+ 849 0300 10B5     		push	{r4, lr}
+ 850              	.LCFI8:
+ 851              		.cfi_def_cfa_offset 8
+ 852              		.cfi_offset 4, -8
+ 853              		.cfi_offset 14, -4
+ 397:../../../drivers/led/led.c **** #ifndef RELEASE
+ 398:../../../drivers/led/led.c **** 	printf("------ln[%x]",ltn.ln);
+ 399:../../../drivers/led/led.c **** #endif
+ 400:../../../drivers/led/led.c **** 	uint16_t ln = ltn.ln/0x28f * (ALI_FREQUENCY_16K/100);//[1,100]
+ 854              		.loc 1 400 0
+ 855 0302 0E4B     		ldr	r3, .L114
+ 856 0304 0E49     		ldr	r1, .L114+4
+ 857 0306 588B     		ldrh	r0, [r3, #26]
+ 858              	.LVL54:
+ 859 0308 FFF7FEFF 		bl	__aeabi_uidiv
+ 860              	.LVL55:
+ 861 030c 0F23     		movs	r3, #15
+ 862 030e 5843     		muls	r0, r3
+ 863 0310 81B2     		uxth	r1, r0
+ 864              	.LVL56:
+ 401:../../../drivers/led/led.c **** 	if(ln){
+ 865              		.loc 1 401 0
+ 866 0312 0029     		cmp	r1, #0
+ 867 0314 09D0     		beq	.L112
+ 402:../../../drivers/led/led.c **** 		PWM_SetPnCnt(PWM_CH5, ln, ALI_FREQUENCY_16K-ln);
+ 868              		.loc 1 402 0
+ 869 0316 0B4A     		ldr	r2, .L114+8
+ 870 0318 2020     		movs	r0, #32
+ 871 031a 521A     		subs	r2, r2, r1
+ 872 031c 92B2     		uxth	r2, r2
+ 873 031e FFF7FEFF 		bl	PWM_SetPnCnt
+ 874              	.LVL57:
+ 403:../../../drivers/led/led.c **** 		PWM_Start(PWM_CH5);
+ 875              		.loc 1 403 0
+ 876 0322 2020     		movs	r0, #32
+ 877 0324 FFF7FEFF 		bl	PWM_Start
+ 878              	.LVL58:
+ 404:../../../drivers/led/led.c **** 		return;
+ 879              		.loc 1 404 0
+ 880 0328 06E0     		b	.L111
+ 881              	.LVL59:
+ 882              	.L112:
+ 883              	.LBB8:
+ 884              	.LBB9:
+ 405:../../../drivers/led/led.c **** 	}
+ 406:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH5, 0, 0);
+ 885              		.loc 1 406 0
+ 886 032a 2020     		movs	r0, #32
+ 887 032c 0A00     		movs	r2, r1
+ 888 032e FFF7FEFF 		bl	PWM_SetPnCnt
+ 889              	.LVL60:
+ 407:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH5);
+ 890              		.loc 1 407 0
+ 891 0332 2020     		movs	r0, #32
+ 892 0334 FFF7FEFF 		bl	PWM_DeInit
+ 893              	.LVL61:
+ 894              	.L111:
+ 895              	.LBE9:
+ 896              	.LBE8:
+ 408:../../../drivers/led/led.c **** }
+ 897              		.loc 1 408 0
+ 898              		@ sp needed
+ 899 0338 10BD     		pop	{r4, pc}
+ 900              	.L115:
+ 901 033a C046     		.align	2
+ 902              	.L114:
+ 903 033c 00000000 		.word	.LANCHOR0
+ 904 0340 8F020000 		.word	655
+ 905 0344 DC050000 		.word	1500
+ 906              		.cfi_endproc
+ 907              	.LFE52:
+ 909              		.align	1
+ 910              		.global	led_ltn_set_lightness
+ 911              		.code	16
+ 912              		.thumb_func
+ 914              	led_ltn_set_lightness:
+ 915              	.LFB53:
+ 409:../../../drivers/led/led.c **** 
+ 410:../../../drivers/led/led.c **** 
+ 411:../../../drivers/led/led.c **** void led_ltn_set_lightness(uint16_t ln)
+ 412:../../../drivers/led/led.c **** {
+ 916              		.loc 1 412 0
+ 917              		.cfi_startproc
+ 918              		@ args = 0, pretend = 0, frame = 0
+ 919              		@ frame_needed = 0, uses_anonymous_args = 0
+ 920              	.LVL62:
+ 921 0348 10B5     		push	{r4, lr}
+ 922              	.LCFI9:
+ 923              		.cfi_def_cfa_offset 8
+ 924              		.cfi_offset 4, -8
+ 925              		.cfi_offset 14, -4
+ 413:../../../drivers/led/led.c **** 	ltn.ln = ln;
+ 926              		.loc 1 413 0
+ 927 034a 034B     		ldr	r3, .L117
+ 414:../../../drivers/led/led.c **** 	led_ltn_ctrl(&ltn);
+ 415:../../../drivers/led/led.c **** }
+ 928              		.loc 1 415 0
+ 929              		@ sp needed
+ 413:../../../drivers/led/led.c **** 	ltn.ln = ln;
+ 930              		.loc 1 413 0
+ 931 034c 5883     		strh	r0, [r3, #26]
+ 414:../../../drivers/led/led.c **** 	led_ltn_ctrl(&ltn);
+ 932              		.loc 1 414 0
+ 933 034e 1433     		adds	r3, r3, #20
+ 934 0350 1800     		movs	r0, r3
+ 935              	.LVL63:
+ 936 0352 FFF7FEFF 		bl	led_ltn_ctrl
+ 937              	.LVL64:
+ 938              		.loc 1 415 0
+ 939 0356 10BD     		pop	{r4, pc}
+ 940              	.L118:
+ 941              		.align	2
+ 942              	.L117:
+ 943 0358 00000000 		.word	.LANCHOR0
+ 944              		.cfi_endproc
+ 945              	.LFE53:
+ 947              		.align	1
+ 948              		.global	led_ltn_get_lightness
+ 949              		.code	16
+ 950              		.thumb_func
+ 952              	led_ltn_get_lightness:
+ 953              	.LFB54:
+ 416:../../../drivers/led/led.c **** 
+ 417:../../../drivers/led/led.c **** uint16_t led_ltn_get_lightness(void)
+ 418:../../../drivers/led/led.c **** {
+ 954              		.loc 1 418 0
+ 955              		.cfi_startproc
+ 956              		@ args = 0, pretend = 0, frame = 0
+ 957              		@ frame_needed = 0, uses_anonymous_args = 0
+ 958              		@ link register save eliminated.
+ 419:../../../drivers/led/led.c **** 	return ltn.ln;
+ 959              		.loc 1 419 0
+ 960 035c 014B     		ldr	r3, .L120
+ 420:../../../drivers/led/led.c **** }
+ 961              		.loc 1 420 0
+ 962              		@ sp needed
+ 419:../../../drivers/led/led.c **** 	return ltn.ln;
+ 963              		.loc 1 419 0
+ 964 035e 588B     		ldrh	r0, [r3, #26]
+ 965              		.loc 1 420 0
+ 966 0360 7047     		bx	lr
+ 967              	.L121:
+ 968 0362 C046     		.align	2
+ 969              	.L120:
+ 970 0364 00000000 		.word	.LANCHOR0
+ 971              		.cfi_endproc
+ 972              	.LFE54:
+ 974              		.align	1
+ 975              		.global	led_ltn_set_on_off
+ 976              		.code	16
+ 977              		.thumb_func
+ 979              	led_ltn_set_on_off:
+ 980              	.LFB55:
+ 421:../../../drivers/led/led.c **** 
+ 422:../../../drivers/led/led.c **** void led_ltn_set_on_off(uint8_t on)
+ 423:../../../drivers/led/led.c **** {
+ 981              		.loc 1 423 0
+ 982              		.cfi_startproc
+ 983              		@ args = 0, pretend = 0, frame = 0
+ 984              		@ frame_needed = 0, uses_anonymous_args = 0
+ 985              	.LVL65:
+ 424:../../../drivers/led/led.c **** 	ltn.ln = on?65535:0;  
+ 986              		.loc 1 424 0
+ 987 0368 421E     		subs	r2, r0, #1
+ 988 036a 9041     		sbcs	r0, r0, r2
+ 989              	.LVL66:
+ 423:../../../drivers/led/led.c **** 	ltn.ln = on?65535:0;  
+ 990              		.loc 1 423 0
+ 991 036c 10B5     		push	{r4, lr}
+ 992              	.LCFI10:
+ 993              		.cfi_def_cfa_offset 8
+ 994              		.cfi_offset 4, -8
+ 995              		.cfi_offset 14, -4
+ 996              		.loc 1 424 0
+ 997 036e 044B     		ldr	r3, .L123
+ 998 0370 4042     		rsbs	r0, r0, #0
+ 999 0372 5883     		strh	r0, [r3, #26]
+ 425:../../../drivers/led/led.c **** 	led_ltn_ctrl(&ltn);
+ 1000              		.loc 1 425 0
+ 1001 0374 1433     		adds	r3, r3, #20
+ 1002 0376 1800     		movs	r0, r3
+ 1003 0378 FFF7FEFF 		bl	led_ltn_ctrl
+ 1004              	.LVL67:
+ 426:../../../drivers/led/led.c **** }
+ 1005              		.loc 1 426 0
+ 1006              		@ sp needed
+ 1007 037c 10BD     		pop	{r4, pc}
+ 1008              	.L124:
+ 1009 037e C046     		.align	2
+ 1010              	.L123:
+ 1011 0380 00000000 		.word	.LANCHOR0
+ 1012              		.cfi_endproc
+ 1013              	.LFE55:
+ 1015              		.align	1
+ 1016              		.global	led_ltn_get_on_off
+ 1017              		.code	16
+ 1018              		.thumb_func
+ 1020              	led_ltn_get_on_off:
+ 1021              	.LFB56:
+ 427:../../../drivers/led/led.c **** 
+ 428:../../../drivers/led/led.c **** uint8_t led_ltn_get_on_off(void)
+ 429:../../../drivers/led/led.c **** {
+ 1022              		.loc 1 429 0
+ 1023              		.cfi_startproc
+ 1024              		@ args = 0, pretend = 0, frame = 0
+ 1025              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1026              		@ link register save eliminated.
+ 430:../../../drivers/led/led.c **** 	return ltn.ln?1:0;
+ 1027              		.loc 1 430 0
+ 1028 0384 024B     		ldr	r3, .L126
+ 431:../../../drivers/led/led.c **** }
+ 1029              		.loc 1 431 0
+ 1030              		@ sp needed
+ 430:../../../drivers/led/led.c **** 	return ltn.ln?1:0;
+ 1031              		.loc 1 430 0
+ 1032 0386 588B     		ldrh	r0, [r3, #26]
+ 1033 0388 431E     		subs	r3, r0, #1
+ 1034 038a 9841     		sbcs	r0, r0, r3
+ 1035 038c C0B2     		uxtb	r0, r0
+ 1036              		.loc 1 431 0
+ 1037 038e 7047     		bx	lr
+ 1038              	.L127:
+ 1039              		.align	2
+ 1040              	.L126:
+ 1041 0390 00000000 		.word	.LANCHOR0
+ 1042              		.cfi_endproc
+ 1043              	.LFE56:
+ 1045              		.align	1
+ 1046              		.global	led_ltn_init
+ 1047              		.code	16
+ 1048              		.thumb_func
+ 1050              	led_ltn_init:
+ 1051              	.LFB57:
+ 432:../../../drivers/led/led.c **** 
+ 433:../../../drivers/led/led.c **** void led_ltn_init(light_ltn_t* t)
+ 434:../../../drivers/led/led.c **** {
+ 1052              		.loc 1 434 0
+ 1053              		.cfi_startproc
+ 1054              		@ args = 0, pretend = 0, frame = 8
+ 1055              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1056              	.LVL68:
+ 1057 0394 13B5     		push	{r0, r1, r4, lr}
+ 1058              	.LCFI11:
+ 1059              		.cfi_def_cfa_offset 16
+ 1060              		.cfi_offset 0, -16
+ 1061              		.cfi_offset 1, -12
+ 1062              		.cfi_offset 4, -8
+ 1063              		.cfi_offset 14, -4
+ 435:../../../drivers/led/led.c **** 	GPIO_CFG cfg4 ={FUNC_PWM_OUT5, GFG_PULLUP};
+ 1064              		.loc 1 435 0
+ 1065 0396 6A46     		mov	r2, sp
+ 1066 0398 0E4B     		ldr	r3, .L131
+ 436:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM5_W, &cfg4);
+ 1067              		.loc 1 436 0
+ 1068 039a 6946     		mov	r1, sp
+ 435:../../../drivers/led/led.c **** 	GPIO_CFG cfg4 ={FUNC_PWM_OUT5, GFG_PULLUP};
+ 1069              		.loc 1 435 0
+ 1070 039c 5B78     		ldrb	r3, [r3, #1]
+ 434:../../../drivers/led/led.c **** 	GPIO_CFG cfg4 ={FUNC_PWM_OUT5, GFG_PULLUP};
+ 1071              		.loc 1 434 0
+ 1072 039e 0400     		movs	r4, r0
+ 1073              		.loc 1 436 0
+ 1074 03a0 1820     		movs	r0, #24
+ 1075              	.LVL69:
+ 435:../../../drivers/led/led.c **** 	GPIO_CFG cfg4 ={FUNC_PWM_OUT5, GFG_PULLUP};
+ 1076              		.loc 1 435 0
+ 1077 03a2 1370     		strb	r3, [r2]
+ 1078              		.loc 1 436 0
+ 1079 03a4 FFF7FEFF 		bl	bc_gpio_init
+ 1080              	.LVL70:
+ 437:../../../drivers/led/led.c **** 
+ 438:../../../drivers/led/led.c **** 	struct PWM_CTRL_BITS bits = {0};
+ 1081              		.loc 1 438 0
+ 1082 03a8 0023     		movs	r3, #0
+ 1083 03aa 01A9     		add	r1, sp, #4
+ 439:../../../drivers/led/led.c **** 	//bits.ENABLE = PWM_DISABLE;
+ 440:../../../drivers/led/led.c **** 	//bits.HIGHF = 0;
+ 441:../../../drivers/led/led.c **** 	//bits.SYNC = 0;
+ 442:../../../drivers/led/led.c **** 	//bits.VAL = 0;
+ 443:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH5, &bits);
+ 1084              		.loc 1 443 0
+ 1085 03ac 2020     		movs	r0, #32
+ 438:../../../drivers/led/led.c **** 	//bits.ENABLE = PWM_DISABLE;
+ 1086              		.loc 1 438 0
+ 1087 03ae 0B70     		strb	r3, [r1]
+ 1088              		.loc 1 443 0
+ 1089 03b0 FFF7FEFF 		bl	PWM_Init
+ 1090              	.LVL71:
+ 1091 03b4 084B     		ldr	r3, .L131+4
+ 444:../../../drivers/led/led.c **** 	if(t==NULL){
+ 1092              		.loc 1 444 0
+ 1093 03b6 002C     		cmp	r4, #0
+ 1094 03b8 03D1     		bne	.L129
+ 445:../../../drivers/led/led.c **** 		ltn.ln = ALI_DEFAULT_LN_VAL;
+ 1095              		.loc 1 445 0
+ 1096 03ba 2422     		movs	r2, #36
+ 1097 03bc 5242     		rsbs	r2, r2, #0
+ 1098 03be 5A83     		strh	r2, [r3, #26]
+ 1099 03c0 03E0     		b	.L130
+ 1100              	.L129:
+ 446:../../../drivers/led/led.c **** 	}
+ 447:../../../drivers/led/led.c **** 	else{
+ 448:../../../drivers/led/led.c **** 		ltn = *t;
+ 1101              		.loc 1 448 0
+ 1102 03c2 1A00     		movs	r2, r3
+ 1103 03c4 1432     		adds	r2, r2, #20
+ 1104 03c6 03CC     		ldmia	r4!, {r0, r1}
+ 1105 03c8 03C2     		stmia	r2!, {r0, r1}
+ 1106              	.LVL72:
+ 1107              	.L130:
+ 449:../../../drivers/led/led.c **** 	}
+ 450:../../../drivers/led/led.c **** 	led_ltn_ctrl(&ltn);
+ 1108              		.loc 1 450 0
+ 1109 03ca 1433     		adds	r3, r3, #20
+ 1110 03cc 1800     		movs	r0, r3
+ 1111 03ce FFF7FEFF 		bl	led_ltn_ctrl
+ 1112              	.LVL73:
+ 451:../../../drivers/led/led.c **** }
+ 1113              		.loc 1 451 0
+ 1114              		@ sp needed
+ 1115 03d2 13BD     		pop	{r0, r1, r4, pc}
+ 1116              	.L132:
+ 1117              		.align	2
+ 1118              	.L131:
+ 1119 03d4 00000000 		.word	.LANCHOR1
+ 1120 03d8 00000000 		.word	.LANCHOR0
+ 1121              		.cfi_endproc
+ 1122              	.LFE57:
+ 1124              		.comm	lrgbRate,4,4
+ 1125              		.align	1
+ 1126              		.global	led_rgb_set_color
+ 1127              		.code	16
+ 1128              		.thumb_func
+ 1130              	led_rgb_set_color:
+ 1131              	.LFB58:
+ 452:../../../drivers/led/led.c **** 
+ 453:../../../drivers/led/led.c **** static light_rgb_t lrgb;
+ 454:../../../drivers/led/led.c **** float lrgbRate;
+ 455:../../../drivers/led/led.c **** 
+ 456:../../../drivers/led/led.c **** /*
+ 457:../../../drivers/led/led.c ****  * FOR RGB
+ 458:../../../drivers/led/led.c ****  */
+ 459:../../../drivers/led/led.c **** static void _rgb_ctrl(light_rgb_t* t);
+ 460:../../../drivers/led/led.c **** 
+ 461:../../../drivers/led/led.c **** int led_rgb_set_color(uint16_t r, uint16_t g, uint16_t b)
+ 462:../../../drivers/led/led.c **** {
+ 1132              		.loc 1 462 0
+ 1133              		.cfi_startproc
+ 1134              		@ args = 0, pretend = 0, frame = 0
+ 1135              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1136              	.LVL74:
+ 1137 03dc 10B5     		push	{r4, lr}
+ 1138              	.LCFI12:
+ 1139              		.cfi_def_cfa_offset 8
+ 1140              		.cfi_offset 4, -8
+ 1141              		.cfi_offset 14, -4
+ 463:../../../drivers/led/led.c **** 	lrgb.rVal = r;
+ 1142              		.loc 1 463 0
+ 1143 03de 044B     		ldr	r3, .L134
+ 464:../../../drivers/led/led.c **** 	lrgb.gVal = g;
+ 465:../../../drivers/led/led.c **** 	lrgb.bVal = b;
+ 466:../../../drivers/led/led.c **** 	_rgb_ctrl(&lrgb);
+ 467:../../../drivers/led/led.c **** 	return 0;
+ 468:../../../drivers/led/led.c **** }
+ 1144              		.loc 1 468 0
+ 1145              		@ sp needed
+ 463:../../../drivers/led/led.c **** 	lrgb.rVal = r;
+ 1146              		.loc 1 463 0
+ 1147 03e0 9886     		strh	r0, [r3, #52]
+ 464:../../../drivers/led/led.c **** 	lrgb.gVal = g;
+ 1148              		.loc 1 464 0
+ 1149 03e2 D986     		strh	r1, [r3, #54]
+ 465:../../../drivers/led/led.c **** 	_rgb_ctrl(&lrgb);
+ 1150              		.loc 1 465 0
+ 1151 03e4 1A87     		strh	r2, [r3, #56]
+ 466:../../../drivers/led/led.c **** 	return 0;
+ 1152              		.loc 1 466 0
+ 1153 03e6 00F085F8 		bl	_rgb_ctrl.constprop.1
+ 1154              	.LVL75:
+ 1155              		.loc 1 468 0
+ 1156 03ea 0020     		movs	r0, #0
+ 1157 03ec 10BD     		pop	{r4, pc}
+ 1158              	.L135:
+ 1159 03ee C046     		.align	2
+ 1160              	.L134:
+ 1161 03f0 00000000 		.word	.LANCHOR0
+ 1162              		.cfi_endproc
+ 1163              	.LFE58:
+ 1165              		.align	1
+ 1166              		.global	led_rgb_get_color
+ 1167              		.code	16
+ 1168              		.thumb_func
+ 1170              	led_rgb_get_color:
+ 1171              	.LFB59:
+ 469:../../../drivers/led/led.c **** 
+ 470:../../../drivers/led/led.c **** int led_rgb_get_color(uint16_t* r, uint16_t* g, uint16_t* b)
+ 471:../../../drivers/led/led.c **** {
+ 1172              		.loc 1 471 0
+ 1173              		.cfi_startproc
+ 1174              		@ args = 0, pretend = 0, frame = 0
+ 1175              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1176              	.LVL76:
+ 1177 03f4 10B5     		push	{r4, lr}
+ 1178              	.LCFI13:
+ 1179              		.cfi_def_cfa_offset 8
+ 1180              		.cfi_offset 4, -8
+ 1181              		.cfi_offset 14, -4
+ 472:../../../drivers/led/led.c **** 	*r = lrgb.rVal;
+ 1182              		.loc 1 472 0
+ 1183 03f6 044B     		ldr	r3, .L137
+ 473:../../../drivers/led/led.c **** 	*g = lrgb.gVal;
+ 474:../../../drivers/led/led.c **** 	*b = lrgb.bVal;
+ 475:../../../drivers/led/led.c **** 	return 0;
+ 476:../../../drivers/led/led.c **** }
+ 1184              		.loc 1 476 0
+ 1185              		@ sp needed
+ 472:../../../drivers/led/led.c **** 	*r = lrgb.rVal;
+ 1186              		.loc 1 472 0
+ 1187 03f8 9C8E     		ldrh	r4, [r3, #52]
+ 1188 03fa 0480     		strh	r4, [r0]
+ 473:../../../drivers/led/led.c **** 	*g = lrgb.gVal;
+ 1189              		.loc 1 473 0
+ 1190 03fc D88E     		ldrh	r0, [r3, #54]
+ 1191              	.LVL77:
+ 1192 03fe 0880     		strh	r0, [r1]
+ 474:../../../drivers/led/led.c **** 	return 0;
+ 1193              		.loc 1 474 0
+ 1194 0400 1B8F     		ldrh	r3, [r3, #56]
+ 1195              		.loc 1 476 0
+ 1196 0402 0020     		movs	r0, #0
+ 474:../../../drivers/led/led.c **** 	return 0;
+ 1197              		.loc 1 474 0
+ 1198 0404 1380     		strh	r3, [r2]
+ 1199              		.loc 1 476 0
+ 1200 0406 10BD     		pop	{r4, pc}
+ 1201              	.L138:
+ 1202              		.align	2
+ 1203              	.L137:
+ 1204 0408 00000000 		.word	.LANCHOR0
+ 1205              		.cfi_endproc
+ 1206              	.LFE59:
+ 1208              		.align	1
+ 1209              		.global	led_rgb_set_lightness
+ 1210              		.code	16
+ 1211              		.thumb_func
+ 1213              	led_rgb_set_lightness:
+ 1214              	.LFB60:
+ 477:../../../drivers/led/led.c **** 
+ 478:../../../drivers/led/led.c **** void led_rgb_set_lightness(uint16_t ln)
+ 479:../../../drivers/led/led.c **** {
+ 1215              		.loc 1 479 0
+ 1216              		.cfi_startproc
+ 1217              		@ args = 0, pretend = 0, frame = 0
+ 1218              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1219              	.LVL78:
+ 1220 040c 10B5     		push	{r4, lr}
+ 1221              	.LCFI14:
+ 1222              		.cfi_def_cfa_offset 8
+ 1223              		.cfi_offset 4, -8
+ 1224              		.cfi_offset 14, -4
+ 480:../../../drivers/led/led.c **** 	lrgb.ln = ln;
+ 1225              		.loc 1 480 0
+ 1226 040e 024B     		ldr	r3, .L140
+ 481:../../../drivers/led/led.c **** 	_rgb_ctrl(&lrgb);
+ 482:../../../drivers/led/led.c **** }
+ 1227              		.loc 1 482 0
+ 1228              		@ sp needed
+ 480:../../../drivers/led/led.c **** 	lrgb.ln = ln;
+ 1229              		.loc 1 480 0
+ 1230 0410 5886     		strh	r0, [r3, #50]
+ 481:../../../drivers/led/led.c **** 	_rgb_ctrl(&lrgb);
+ 1231              		.loc 1 481 0
+ 1232 0412 00F06FF8 		bl	_rgb_ctrl.constprop.1
+ 1233              	.LVL79:
+ 1234              		.loc 1 482 0
+ 1235 0416 10BD     		pop	{r4, pc}
+ 1236              	.L141:
+ 1237              		.align	2
+ 1238              	.L140:
+ 1239 0418 00000000 		.word	.LANCHOR0
+ 1240              		.cfi_endproc
+ 1241              	.LFE60:
+ 1243              		.align	1
+ 1244              		.global	led_rgb_get_lightness
+ 1245              		.code	16
+ 1246              		.thumb_func
+ 1248              	led_rgb_get_lightness:
+ 1249              	.LFB61:
+ 483:../../../drivers/led/led.c **** 
+ 484:../../../drivers/led/led.c **** uint16_t led_rgb_get_lightness(void)
+ 485:../../../drivers/led/led.c **** {
+ 1250              		.loc 1 485 0
+ 1251              		.cfi_startproc
+ 1252              		@ args = 0, pretend = 0, frame = 0
+ 1253              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1254              		@ link register save eliminated.
+ 486:../../../drivers/led/led.c **** 	return lrgb.ln;
+ 1255              		.loc 1 486 0
+ 1256 041c 014B     		ldr	r3, .L143
+ 487:../../../drivers/led/led.c **** }
+ 1257              		.loc 1 487 0
+ 1258              		@ sp needed
+ 486:../../../drivers/led/led.c **** 	return lrgb.ln;
+ 1259              		.loc 1 486 0
+ 1260 041e 588E     		ldrh	r0, [r3, #50]
+ 1261              		.loc 1 487 0
+ 1262 0420 7047     		bx	lr
+ 1263              	.L144:
+ 1264 0422 C046     		.align	2
+ 1265              	.L143:
+ 1266 0424 00000000 		.word	.LANCHOR0
+ 1267              		.cfi_endproc
+ 1268              	.LFE61:
+ 1270              		.align	1
+ 1271              		.global	led_rgb_set_on_off
+ 1272              		.code	16
+ 1273              		.thumb_func
+ 1275              	led_rgb_set_on_off:
+ 1276              	.LFB62:
+ 488:../../../drivers/led/led.c **** 
+ 489:../../../drivers/led/led.c **** void led_rgb_set_on_off(uint8_t on)
+ 490:../../../drivers/led/led.c **** {
+ 1277              		.loc 1 490 0
+ 1278              		.cfi_startproc
+ 1279              		@ args = 0, pretend = 0, frame = 0
+ 1280              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1281              	.LVL80:
+ 1282 0428 10B5     		push	{r4, lr}
+ 1283              	.LCFI15:
+ 1284              		.cfi_def_cfa_offset 8
+ 1285              		.cfi_offset 4, -8
+ 1286              		.cfi_offset 14, -4
+ 491:../../../drivers/led/led.c **** 	lrgb.on = on;
+ 1287              		.loc 1 491 0
+ 1288 042a 034B     		ldr	r3, .L146
+ 492:../../../drivers/led/led.c **** 	_rgb_ctrl(&lrgb);
+ 493:../../../drivers/led/led.c **** }
+ 1289              		.loc 1 493 0
+ 1290              		@ sp needed
+ 491:../../../drivers/led/led.c **** 	lrgb.on = on;
+ 1291              		.loc 1 491 0
+ 1292 042c 2833     		adds	r3, r3, #40
+ 1293 042e 5872     		strb	r0, [r3, #9]
+ 492:../../../drivers/led/led.c **** 	_rgb_ctrl(&lrgb);
+ 1294              		.loc 1 492 0
+ 1295 0430 00F060F8 		bl	_rgb_ctrl.constprop.1
+ 1296              	.LVL81:
+ 1297              		.loc 1 493 0
+ 1298 0434 10BD     		pop	{r4, pc}
+ 1299              	.L147:
+ 1300 0436 C046     		.align	2
+ 1301              	.L146:
+ 1302 0438 00000000 		.word	.LANCHOR0
+ 1303              		.cfi_endproc
+ 1304              	.LFE62:
+ 1306              		.align	1
+ 1307              		.global	led_rgb_get_on_off
+ 1308              		.code	16
+ 1309              		.thumb_func
+ 1311              	led_rgb_get_on_off:
+ 1312              	.LFB63:
+ 494:../../../drivers/led/led.c **** 
+ 495:../../../drivers/led/led.c **** uint8_t led_rgb_get_on_off(void)
+ 496:../../../drivers/led/led.c **** {
+ 1313              		.loc 1 496 0
+ 1314              		.cfi_startproc
+ 1315              		@ args = 0, pretend = 0, frame = 0
+ 1316              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1317              		@ link register save eliminated.
+ 497:../../../drivers/led/led.c **** 	return lrgb.on;
+ 1318              		.loc 1 497 0
+ 1319 043c 014B     		ldr	r3, .L149
+ 498:../../../drivers/led/led.c **** }
+ 1320              		.loc 1 498 0
+ 1321              		@ sp needed
+ 497:../../../drivers/led/led.c **** 	return lrgb.on;
+ 1322              		.loc 1 497 0
+ 1323 043e 2833     		adds	r3, r3, #40
+ 1324 0440 587A     		ldrb	r0, [r3, #9]
+ 1325              		.loc 1 498 0
+ 1326 0442 7047     		bx	lr
+ 1327              	.L150:
+ 1328              		.align	2
+ 1329              	.L149:
+ 1330 0444 00000000 		.word	.LANCHOR0
+ 1331              		.cfi_endproc
+ 1332              	.LFE63:
+ 1334              		.align	1
+ 1335              		.global	led_rgb_init
+ 1336              		.code	16
+ 1337              		.thumb_func
+ 1339              	led_rgb_init:
+ 1340              	.LFB64:
+ 499:../../../drivers/led/led.c **** 
+ 500:../../../drivers/led/led.c **** void led_rgb_init(light_rgb_t* t)
+ 501:../../../drivers/led/led.c **** {
+ 1341              		.loc 1 501 0
+ 1342              		.cfi_startproc
+ 1343              		@ args = 0, pretend = 0, frame = 16
+ 1344              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1345              	.LVL82:
+ 1346 0448 30B5     		push	{r4, r5, lr}
+ 1347              	.LCFI16:
+ 1348              		.cfi_def_cfa_offset 12
+ 1349              		.cfi_offset 4, -12
+ 1350              		.cfi_offset 5, -8
+ 1351              		.cfi_offset 14, -4
+ 1352 044a 85B0     		sub	sp, sp, #20
+ 1353              	.LCFI17:
+ 1354              		.cfi_def_cfa_offset 32
+ 502:../../../drivers/led/led.c **** 	/*init gpio*/	
+ 503:../../../drivers/led/led.c **** 	GPIO_CFG cfg3 ={FUNC_PWM_OUT3, GFG_PULLUP};
+ 1355              		.loc 1 503 0
+ 1356 044c 6A46     		mov	r2, sp
+ 1357 044e 254D     		ldr	r5, .L154
+ 504:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM3_B, &cfg3);
+ 1358              		.loc 1 504 0
+ 1359 0450 6946     		mov	r1, sp
+ 503:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM3_B, &cfg3);
+ 1360              		.loc 1 503 0
+ 1361 0452 AB78     		ldrb	r3, [r5, #2]
+ 501:../../../drivers/led/led.c **** 	/*init gpio*/	
+ 1362              		.loc 1 501 0
+ 1363 0454 0400     		movs	r4, r0
+ 1364              		.loc 1 504 0
+ 1365 0456 1320     		movs	r0, #19
+ 1366              	.LVL83:
+ 503:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM3_B, &cfg3);
+ 1367              		.loc 1 503 0
+ 1368 0458 1370     		strb	r3, [r2]
+ 1369              		.loc 1 504 0
+ 1370 045a FFF7FEFF 		bl	bc_gpio_init
+ 1371              	.LVL84:
+ 505:../../../drivers/led/led.c **** 	
+ 506:../../../drivers/led/led.c **** 	GPIO_CFG cfg2 ={FUNC_PWM_OUT2, GFG_PULLUP};
+ 1372              		.loc 1 506 0
+ 1373 045e EB78     		ldrb	r3, [r5, #3]
+ 1374 0460 01A9     		add	r1, sp, #4
+ 507:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM2_G, &cfg2);
+ 1375              		.loc 1 507 0
+ 1376 0462 0E20     		movs	r0, #14
+ 506:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM2_G, &cfg2);
+ 1377              		.loc 1 506 0
+ 1378 0464 0B70     		strb	r3, [r1]
+ 1379              		.loc 1 507 0
+ 1380 0466 FFF7FEFF 		bl	bc_gpio_init
+ 1381              	.LVL85:
+ 508:../../../drivers/led/led.c **** 
+ 509:../../../drivers/led/led.c **** 	GPIO_CFG cfg1 ={FUNC_PWM_OUT1, GFG_PULLUP};
+ 1382              		.loc 1 509 0
+ 1383 046a 2B79     		ldrb	r3, [r5, #4]
+ 1384 046c 02A9     		add	r1, sp, #8
+ 510:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM1_R, &cfg1);
+ 1385              		.loc 1 510 0
+ 1386 046e 0620     		movs	r0, #6
+ 509:../../../drivers/led/led.c **** 	bc_gpio_init(ALI_PWM1_R, &cfg1);
+ 1387              		.loc 1 509 0
+ 1388 0470 0B70     		strb	r3, [r1]
+ 1389              		.loc 1 510 0
+ 1390 0472 FFF7FEFF 		bl	bc_gpio_init
+ 1391              	.LVL86:
+ 511:../../../drivers/led/led.c **** 	
+ 512:../../../drivers/led/led.c **** 	struct PWM_CTRL_BITS bits = {0};
+ 1392              		.loc 1 512 0
+ 1393 0476 0023     		movs	r3, #0
+ 1394 0478 03AD     		add	r5, sp, #12
+ 513:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH3, &bits);
+ 1395              		.loc 1 513 0
+ 1396 047a 2900     		movs	r1, r5
+ 1397 047c 0820     		movs	r0, #8
+ 512:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH3, &bits);
+ 1398              		.loc 1 512 0
+ 1399 047e 2B70     		strb	r3, [r5]
+ 1400              		.loc 1 513 0
+ 1401 0480 FFF7FEFF 		bl	PWM_Init
+ 1402              	.LVL87:
+ 514:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH2, &bits);
+ 1403              		.loc 1 514 0
+ 1404 0484 2900     		movs	r1, r5
+ 1405 0486 0420     		movs	r0, #4
+ 1406 0488 FFF7FEFF 		bl	PWM_Init
+ 1407              	.LVL88:
+ 515:../../../drivers/led/led.c **** 	PWM_Init(PWM_CH1, &bits);
+ 1408              		.loc 1 515 0
+ 1409 048c 2900     		movs	r1, r5
+ 1410 048e 0220     		movs	r0, #2
+ 1411 0490 FFF7FEFF 		bl	PWM_Init
+ 1412              	.LVL89:
+ 1413 0494 144A     		ldr	r2, .L154+4
+ 516:../../../drivers/led/led.c **** 	
+ 517:../../../drivers/led/led.c **** 	if(t==NULL){
+ 1414              		.loc 1 517 0
+ 1415 0496 002C     		cmp	r4, #0
+ 1416 0498 0DD1     		bne	.L152
+ 518:../../../drivers/led/led.c **** 		lrgb.freq = ALI_FREQUENCY_2K;
+ 1417              		.loc 1 518 0
+ 1418 049a 144B     		ldr	r3, .L154+8
+ 519:../../../drivers/led/led.c **** 		lrgb.on = ALI_CW_ON;
+ 1419              		.loc 1 519 0
+ 1420 049c 0121     		movs	r1, #1
+ 518:../../../drivers/led/led.c **** 		lrgb.freq = ALI_FREQUENCY_2K;
+ 1421              		.loc 1 518 0
+ 1422 049e 9385     		strh	r3, [r2, #44]
+ 1423              		.loc 1 519 0
+ 1424 04a0 1300     		movs	r3, r2
+ 1425 04a2 2833     		adds	r3, r3, #40
+ 1426 04a4 5972     		strb	r1, [r3, #9]
+ 520:../../../drivers/led/led.c **** 		lrgb.ln = ALI_DEFAULT_LN_VAL;
+ 1427              		.loc 1 520 0
+ 1428 04a6 2423     		movs	r3, #36
+ 1429 04a8 5B42     		rsbs	r3, r3, #0
+ 1430 04aa 5386     		strh	r3, [r2, #50]
+ 521:../../../drivers/led/led.c **** 		lrgb.rVal = ALI_DEFAULT_R_VAL;
+ 1431              		.loc 1 521 0
+ 1432 04ac 2333     		adds	r3, r3, #35
+ 1433 04ae 9386     		strh	r3, [r2, #52]
+ 522:../../../drivers/led/led.c **** 		lrgb.gVal = ALI_DEFAULT_G_VAL;
+ 1434              		.loc 1 522 0
+ 1435 04b0 D386     		strh	r3, [r2, #54]
+ 523:../../../drivers/led/led.c **** 		lrgb.bVal = ALI_DEFAULT_B_VAL;
+ 1436              		.loc 1 523 0
+ 1437 04b2 1387     		strh	r3, [r2, #56]
+ 1438 04b4 05E0     		b	.L153
+ 1439              	.L152:
+ 524:../../../drivers/led/led.c **** 	}
+ 525:../../../drivers/led/led.c **** 	else{
+ 526:../../../drivers/led/led.c **** 		lrgb = *t;
+ 1440              		.loc 1 526 0
+ 1441 04b6 1300     		movs	r3, r2
+ 1442 04b8 2833     		adds	r3, r3, #40
+ 1443 04ba 23CC     		ldmia	r4!, {r0, r1, r5}
+ 1444 04bc 23C3     		stmia	r3!, {r0, r1, r5}
+ 1445              	.LVL90:
+ 1446 04be 03CC     		ldmia	r4!, {r0, r1}
+ 1447 04c0 03C3     		stmia	r3!, {r0, r1}
+ 1448              	.LVL91:
+ 1449              	.L153:
+ 527:../../../drivers/led/led.c **** 	}
+ 528:../../../drivers/led/led.c **** 	lrgbRate = (float)lrgb.freq/4096/4096;
+ 1450              		.loc 1 528 0
+ 1451 04c2 908D     		ldrh	r0, [r2, #44]
+ 1452 04c4 FFF7FEFF 		bl	__aeabi_ui2f
+ 1453              	.LVL92:
+ 1454 04c8 E621     		movs	r1, #230
+ 1455 04ca 8905     		lsls	r1, r1, #22
+ 1456 04cc FFF7FEFF 		bl	__aeabi_fmul
+ 1457              	.LVL93:
+ 1458 04d0 E621     		movs	r1, #230
+ 1459 04d2 8905     		lsls	r1, r1, #22
+ 1460 04d4 FFF7FEFF 		bl	__aeabi_fmul
+ 1461              	.LVL94:
+ 1462 04d8 054B     		ldr	r3, .L154+12
+ 1463 04da 1860     		str	r0, [r3]
+ 529:../../../drivers/led/led.c **** #ifndef RELEASE
+ 530:../../../drivers/led/led.c **** 	printf("lrgbRate[%f]\r\n", lrgbRate);
+ 531:../../../drivers/led/led.c **** #endif
+ 532:../../../drivers/led/led.c **** 
+ 533:../../../drivers/led/led.c **** 	_rgb_ctrl(&lrgb);
+ 1464              		.loc 1 533 0
+ 1465 04dc 00F00AF8 		bl	_rgb_ctrl.constprop.1
+ 1466              	.LVL95:
+ 534:../../../drivers/led/led.c **** }
+ 1467              		.loc 1 534 0
+ 1468 04e0 05B0     		add	sp, sp, #20
+ 1469              		@ sp needed
+ 1470 04e2 30BD     		pop	{r4, r5, pc}
+ 1471              	.L155:
+ 1472              		.align	2
+ 1473              	.L154:
+ 1474 04e4 00000000 		.word	.LANCHOR1
+ 1475 04e8 00000000 		.word	.LANCHOR0
+ 1476 04ec E02E0000 		.word	12000
+ 1477 04f0 00000000 		.word	lrgbRate
+ 1478              		.cfi_endproc
+ 1479              	.LFE64:
+ 1481              		.global	__aeabi_i2f
+ 1482              		.global	__aeabi_f2uiz
+ 1483              		.align	1
+ 1484              		.code	16
+ 1485              		.thumb_func
+ 1487              	_rgb_ctrl.constprop.1:
+ 1488              	.LFB68:
+ 535:../../../drivers/led/led.c **** 
+ 536:../../../drivers/led/led.c **** static void _rgb_ctrl(light_rgb_t* t)
+ 1489              		.loc 1 536 0
+ 1490              		.cfi_startproc
+ 1491              		@ args = 0, pretend = 0, frame = 0
+ 1492              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1493              	.LVL96:
+ 1494 04f4 70B5     		push	{r4, r5, r6, lr}
+ 1495              	.LCFI18:
+ 1496              		.cfi_def_cfa_offset 16
+ 1497              		.cfi_offset 4, -16
+ 1498              		.cfi_offset 5, -12
+ 1499              		.cfi_offset 6, -8
+ 1500              		.cfi_offset 14, -4
+ 537:../../../drivers/led/led.c **** {
+ 538:../../../drivers/led/led.c **** 	if(t->on){
+ 1501              		.loc 1 538 0
+ 1502 04f6 414C     		ldr	r4, .L164
+ 1503 04f8 2300     		movs	r3, r4
+ 1504 04fa 2833     		adds	r3, r3, #40
+ 1505 04fc 5D7A     		ldrb	r5, [r3, #9]
+ 1506 04fe 002D     		cmp	r5, #0
+ 1507 0500 63D0     		beq	.L157
+ 539:../../../drivers/led/led.c **** #ifndef RELEASE
+ 540:../../../drivers/led/led.c **** 		printf("on[%x] ln[%x] r[%x] g[%x] b[%x]\r\n", t->on, t->ln, t->rVal, t->gVal, t->bVal);
+ 541:../../../drivers/led/led.c **** #endif
+ 542:../../../drivers/led/led.c **** 		if(t->rVal){
+ 1508              		.loc 1 542 0
+ 1509 0502 A18E     		ldrh	r1, [r4, #52]
+ 1510 0504 0029     		cmp	r1, #0
+ 1511 0506 16D0     		beq	.L158
+ 1512              	.LBB10:
+ 543:../../../drivers/led/led.c **** 			uint16_t r = (t->rVal>>4)*(t->ln>>4)*lrgbRate;
+ 1513              		.loc 1 543 0
+ 1514 0508 608E     		ldrh	r0, [r4, #50]
+ 1515 050a 0909     		lsrs	r1, r1, #4
+ 1516 050c 0009     		lsrs	r0, r0, #4
+ 1517 050e 4843     		muls	r0, r1
+ 1518 0510 FFF7FEFF 		bl	__aeabi_i2f
+ 1519              	.LVL97:
+ 1520 0514 3A4B     		ldr	r3, .L164+4
+ 1521 0516 1968     		ldr	r1, [r3]
+ 1522 0518 FFF7FEFF 		bl	__aeabi_fmul
+ 1523              	.LVL98:
+ 1524 051c FFF7FEFF 		bl	__aeabi_f2uiz
+ 1525              	.LVL99:
+ 544:../../../drivers/led/led.c **** 			#ifndef RELEASE
+ 545:../../../drivers/led/led.c **** 				printf(" r[%x]\r\n", r);
+ 546:../../../drivers/led/led.c **** 			#endif
+ 547:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH1, r, t->freq-r);//cold
+ 1526              		.loc 1 547 0
+ 1527 0520 A28D     		ldrh	r2, [r4, #44]
+ 543:../../../drivers/led/led.c **** 			uint16_t r = (t->rVal>>4)*(t->ln>>4)*lrgbRate;
+ 1528              		.loc 1 543 0
+ 1529 0522 81B2     		uxth	r1, r0
+ 1530              	.LVL100:
+ 1531              		.loc 1 547 0
+ 1532 0524 521A     		subs	r2, r2, r1
+ 1533 0526 92B2     		uxth	r2, r2
+ 1534 0528 0220     		movs	r0, #2
+ 1535 052a FFF7FEFF 		bl	PWM_SetPnCnt
+ 1536              	.LVL101:
+ 548:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH1);
+ 1537              		.loc 1 548 0
+ 1538 052e 0220     		movs	r0, #2
+ 1539 0530 FFF7FEFF 		bl	PWM_Start
+ 1540              	.LVL102:
+ 1541 0534 06E0     		b	.L159
+ 1542              	.L158:
+ 1543              	.LBE10:
+ 549:../../../drivers/led/led.c **** 		}
+ 550:../../../drivers/led/led.c **** 		else{
+ 551:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH1, 0, 0);
+ 1544              		.loc 1 551 0
+ 1545 0536 0220     		movs	r0, #2
+ 1546 0538 0A00     		movs	r2, r1
+ 1547 053a FFF7FEFF 		bl	PWM_SetPnCnt
+ 1548              	.LVL103:
+ 552:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH1);
+ 1549              		.loc 1 552 0
+ 1550 053e 0220     		movs	r0, #2
+ 1551 0540 FFF7FEFF 		bl	PWM_DeInit
+ 1552              	.LVL104:
+ 1553              	.L159:
+ 553:../../../drivers/led/led.c **** 		}
+ 554:../../../drivers/led/led.c **** 		if(t->gVal){
+ 1554              		.loc 1 554 0
+ 1555 0544 E18E     		ldrh	r1, [r4, #54]
+ 1556 0546 0029     		cmp	r1, #0
+ 1557 0548 16D0     		beq	.L160
+ 1558              	.LBB11:
+ 555:../../../drivers/led/led.c **** 			uint16_t g = (t->gVal>>4)*(t->ln>>4)*lrgbRate;
+ 1559              		.loc 1 555 0
+ 1560 054a 608E     		ldrh	r0, [r4, #50]
+ 1561 054c 0909     		lsrs	r1, r1, #4
+ 1562 054e 0009     		lsrs	r0, r0, #4
+ 1563 0550 4843     		muls	r0, r1
+ 1564 0552 FFF7FEFF 		bl	__aeabi_i2f
+ 1565              	.LVL105:
+ 1566 0556 2A4B     		ldr	r3, .L164+4
+ 1567 0558 1968     		ldr	r1, [r3]
+ 1568 055a FFF7FEFF 		bl	__aeabi_fmul
+ 1569              	.LVL106:
+ 1570 055e FFF7FEFF 		bl	__aeabi_f2uiz
+ 1571              	.LVL107:
+ 556:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH2, g, t->freq-g);//warm
+ 1572              		.loc 1 556 0
+ 1573 0562 A28D     		ldrh	r2, [r4, #44]
+ 555:../../../drivers/led/led.c **** 			uint16_t g = (t->gVal>>4)*(t->ln>>4)*lrgbRate;
+ 1574              		.loc 1 555 0
+ 1575 0564 81B2     		uxth	r1, r0
+ 1576              	.LVL108:
+ 1577              		.loc 1 556 0
+ 1578 0566 521A     		subs	r2, r2, r1
+ 1579 0568 92B2     		uxth	r2, r2
+ 1580 056a 0420     		movs	r0, #4
+ 1581 056c FFF7FEFF 		bl	PWM_SetPnCnt
+ 1582              	.LVL109:
+ 557:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH2);
+ 1583              		.loc 1 557 0
+ 1584 0570 0420     		movs	r0, #4
+ 1585 0572 FFF7FEFF 		bl	PWM_Start
+ 1586              	.LVL110:
+ 1587 0576 06E0     		b	.L161
+ 1588              	.L160:
+ 1589              	.LBE11:
+ 558:../../../drivers/led/led.c **** 		}
+ 559:../../../drivers/led/led.c **** 		else{
+ 560:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH2, 0, 0);
+ 1590              		.loc 1 560 0
+ 1591 0578 0420     		movs	r0, #4
+ 1592 057a 0A00     		movs	r2, r1
+ 1593 057c FFF7FEFF 		bl	PWM_SetPnCnt
+ 1594              	.LVL111:
+ 561:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH2);
+ 1595              		.loc 1 561 0
+ 1596 0580 0420     		movs	r0, #4
+ 1597 0582 FFF7FEFF 		bl	PWM_DeInit
+ 1598              	.LVL112:
+ 1599              	.L161:
+ 562:../../../drivers/led/led.c **** 		}
+ 563:../../../drivers/led/led.c **** 		if(t->bVal){
+ 1600              		.loc 1 563 0
+ 1601 0586 218F     		ldrh	r1, [r4, #56]
+ 1602 0588 0029     		cmp	r1, #0
+ 1603 058a 16D0     		beq	.L162
+ 1604              	.LBB12:
+ 564:../../../drivers/led/led.c **** 			uint16_t b = (t->bVal>>4)*(t->ln>>4)*lrgbRate;
+ 1605              		.loc 1 564 0
+ 1606 058c 608E     		ldrh	r0, [r4, #50]
+ 1607 058e 0909     		lsrs	r1, r1, #4
+ 1608 0590 0009     		lsrs	r0, r0, #4
+ 1609 0592 4843     		muls	r0, r1
+ 1610 0594 FFF7FEFF 		bl	__aeabi_i2f
+ 1611              	.LVL113:
+ 1612 0598 194B     		ldr	r3, .L164+4
+ 1613 059a 1968     		ldr	r1, [r3]
+ 1614 059c FFF7FEFF 		bl	__aeabi_fmul
+ 1615              	.LVL114:
+ 1616 05a0 FFF7FEFF 		bl	__aeabi_f2uiz
+ 1617              	.LVL115:
+ 565:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH3, b, t->freq-b);//warm
+ 1618              		.loc 1 565 0
+ 1619 05a4 A28D     		ldrh	r2, [r4, #44]
+ 564:../../../drivers/led/led.c **** 			uint16_t b = (t->bVal>>4)*(t->ln>>4)*lrgbRate;
+ 1620              		.loc 1 564 0
+ 1621 05a6 81B2     		uxth	r1, r0
+ 1622              	.LVL116:
+ 1623              		.loc 1 565 0
+ 1624 05a8 521A     		subs	r2, r2, r1
+ 1625 05aa 92B2     		uxth	r2, r2
+ 1626 05ac 0820     		movs	r0, #8
+ 1627 05ae FFF7FEFF 		bl	PWM_SetPnCnt
+ 1628              	.LVL117:
+ 566:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH3);
+ 1629              		.loc 1 566 0
+ 1630 05b2 0820     		movs	r0, #8
+ 1631 05b4 FFF7FEFF 		bl	PWM_Start
+ 1632              	.LVL118:
+ 1633 05b8 1FE0     		b	.L156
+ 1634              	.L162:
+ 1635              	.LBE12:
+ 567:../../../drivers/led/led.c **** 		}
+ 568:../../../drivers/led/led.c **** 		else{
+ 569:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH3, 0, 0);
+ 1636              		.loc 1 569 0
+ 1637 05ba 0A00     		movs	r2, r1
+ 1638 05bc 0820     		movs	r0, #8
+ 1639 05be FFF7FEFF 		bl	PWM_SetPnCnt
+ 1640              	.LVL119:
+ 570:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH3);
+ 1641              		.loc 1 570 0
+ 1642 05c2 0820     		movs	r0, #8
+ 1643 05c4 FFF7FEFF 		bl	PWM_DeInit
+ 1644              	.LVL120:
+ 1645 05c8 17E0     		b	.L156
+ 1646              	.L157:
+ 571:../../../drivers/led/led.c **** 		}
+ 572:../../../drivers/led/led.c **** 		return;
+ 573:../../../drivers/led/led.c **** 	}
+ 574:../../../drivers/led/led.c **** 
+ 575:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH1, 0, 0);
+ 1647              		.loc 1 575 0
+ 1648 05ca 2A00     		movs	r2, r5
+ 1649 05cc 2900     		movs	r1, r5
+ 1650 05ce 0220     		movs	r0, #2
+ 1651 05d0 FFF7FEFF 		bl	PWM_SetPnCnt
+ 1652              	.LVL121:
+ 576:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH2, 0, 0);
+ 1653              		.loc 1 576 0
+ 1654 05d4 2A00     		movs	r2, r5
+ 1655 05d6 2900     		movs	r1, r5
+ 1656 05d8 0420     		movs	r0, #4
+ 1657 05da FFF7FEFF 		bl	PWM_SetPnCnt
+ 1658              	.LVL122:
+ 577:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH3, 0, 0);
+ 1659              		.loc 1 577 0
+ 1660 05de 2A00     		movs	r2, r5
+ 1661 05e0 2900     		movs	r1, r5
+ 1662 05e2 0820     		movs	r0, #8
+ 1663 05e4 FFF7FEFF 		bl	PWM_SetPnCnt
+ 1664              	.LVL123:
+ 578:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH1);
+ 1665              		.loc 1 578 0
+ 1666 05e8 0220     		movs	r0, #2
+ 1667 05ea FFF7FEFF 		bl	PWM_DeInit
+ 1668              	.LVL124:
+ 579:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH2);
+ 1669              		.loc 1 579 0
+ 1670 05ee 0420     		movs	r0, #4
+ 1671 05f0 FFF7FEFF 		bl	PWM_DeInit
+ 1672              	.LVL125:
+ 580:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH3);
+ 1673              		.loc 1 580 0
+ 1674 05f4 0820     		movs	r0, #8
+ 1675 05f6 FFF7FEFF 		bl	PWM_DeInit
+ 1676              	.LVL126:
+ 1677              	.L156:
+ 581:../../../drivers/led/led.c **** }
+ 1678              		.loc 1 581 0
+ 1679              		@ sp needed
+ 1680 05fa 70BD     		pop	{r4, r5, r6, pc}
+ 1681              	.L165:
+ 1682              		.align	2
+ 1683              	.L164:
+ 1684 05fc 00000000 		.word	.LANCHOR0
+ 1685 0600 00000000 		.word	lrgbRate
+ 1686              		.cfi_endproc
+ 1687              	.LFE68:
+ 1689              		.align	1
+ 1690              		.code	16
+ 1691              		.thumb_func
+ 1693              	_cw_ctrl.constprop.2:
+ 1694              	.LFB67:
+ 204:../../../drivers/led/led.c **** {
+ 1695              		.loc 1 204 0
+ 1696              		.cfi_startproc
+ 1697              		@ args = 0, pretend = 0, frame = 8
+ 1698              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1699              	.LVL127:
+ 1700 0604 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 1701              	.LCFI19:
+ 1702              		.cfi_def_cfa_offset 32
+ 1703              		.cfi_offset 0, -32
+ 1704              		.cfi_offset 1, -28
+ 1705              		.cfi_offset 2, -24
+ 1706              		.cfi_offset 4, -20
+ 1707              		.cfi_offset 5, -16
+ 1708              		.cfi_offset 6, -12
+ 1709              		.cfi_offset 7, -8
+ 1710              		.cfi_offset 14, -4
+ 206:../../../drivers/led/led.c **** 		return;
+ 1711              		.loc 1 206 0
+ 1712 0606 374C     		ldr	r4, .L172
+ 1713 0608 374A     		ldr	r2, .L172+4
+ 1714 060a E389     		ldrh	r3, [r4, #14]
+ 1715 060c 9D18     		adds	r5, r3, r2
+ 1716 060e 0193     		str	r3, [sp, #4]
+ 1717 0610 9623     		movs	r3, #150
+ 1718 0612 AAB2     		uxth	r2, r5
+ 1719 0614 DB01     		lsls	r3, r3, #7
+ 1720 0616 9A42     		cmp	r2, r3
+ 1721 0618 62D8     		bhi	.L166
+ 209:../../../drivers/led/led.c **** 		uint16_t c,w;
+ 1722              		.loc 1 209 0
+ 1723 061a 2689     		ldrh	r6, [r4, #8]
+ 1724 061c 002E     		cmp	r6, #0
+ 1725 061e 4FD0     		beq	.L168
+ 1726              	.LBB13:
+ 211:../../../drivers/led/led.c **** 		w = kScale*(20000 -lcw.tp)*lcw.ln/10;
+ 1727              		.loc 1 211 0
+ 1728 0620 6089     		ldrh	r0, [r4, #10]
+ 1729 0622 FFF7FEFF 		bl	__aeabi_i2f
+ 1730              	.LVL128:
+ 1731 0626 676A     		ldr	r7, [r4, #36]
+ 1732 0628 061C     		adds	r6, r0, #0
+ 1733 062a 2800     		movs	r0, r5
+ 1734 062c FFF7FEFF 		bl	__aeabi_i2f
+ 1735              	.LVL129:
+ 1736 0630 391C     		adds	r1, r7, #0
+ 1737 0632 FFF7FEFF 		bl	__aeabi_fmul
+ 1738              	.LVL130:
+ 1739 0636 311C     		adds	r1, r6, #0
+ 1740 0638 FFF7FEFF 		bl	__aeabi_fmul
+ 1741              	.LVL131:
+ 1742 063c 2B49     		ldr	r1, .L172+8
+ 1743 063e FFF7FEFF 		bl	__aeabi_fdiv
+ 1744              	.LVL132:
+ 1745 0642 FFF7FEFF 		bl	__aeabi_f2uiz
+ 1746              	.LVL133:
+ 212:../../../drivers/led/led.c **** #ifndef RELEASE
+ 1747              		.loc 1 212 0
+ 1748 0646 019B     		ldr	r3, [sp, #4]
+ 211:../../../drivers/led/led.c **** 		w = kScale*(20000 -lcw.tp)*lcw.ln/10;
+ 1749              		.loc 1 211 0
+ 1750 0648 85B2     		uxth	r5, r0
+ 1751              	.LVL134:
+ 212:../../../drivers/led/led.c **** #ifndef RELEASE
+ 1752              		.loc 1 212 0
+ 1753 064a 2948     		ldr	r0, .L172+12
+ 1754 064c C01A     		subs	r0, r0, r3
+ 1755 064e FFF7FEFF 		bl	__aeabi_i2f
+ 1756              	.LVL135:
+ 1757 0652 391C     		adds	r1, r7, #0
+ 1758 0654 FFF7FEFF 		bl	__aeabi_fmul
+ 1759              	.LVL136:
+ 1760 0658 311C     		adds	r1, r6, #0
+ 1761 065a FFF7FEFF 		bl	__aeabi_fmul
+ 1762              	.LVL137:
+ 1763 065e 2349     		ldr	r1, .L172+8
+ 1764 0660 FFF7FEFF 		bl	__aeabi_fdiv
+ 1765              	.LVL138:
+ 1766 0664 FFF7FEFF 		bl	__aeabi_f2uiz
+ 1767              	.LVL139:
+ 1768 0668 86B2     		uxth	r6, r0
+ 1769              	.LVL140:
+ 216:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH4, c, lcw.freq-c);//cold
+ 1770              		.loc 1 216 0
+ 1771 066a 002D     		cmp	r5, #0
+ 1772 066c 0AD0     		beq	.L169
+ 217:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH4);
+ 1773              		.loc 1 217 0
+ 1774 066e A288     		ldrh	r2, [r4, #4]
+ 1775 0670 2900     		movs	r1, r5
+ 1776 0672 521B     		subs	r2, r2, r5
+ 1777 0674 92B2     		uxth	r2, r2
+ 1778 0676 1020     		movs	r0, #16
+ 1779 0678 FFF7FEFF 		bl	PWM_SetPnCnt
+ 1780              	.LVL141:
+ 218:../../../drivers/led/led.c **** 		}
+ 1781              		.loc 1 218 0
+ 1782 067c 1020     		movs	r0, #16
+ 1783 067e FFF7FEFF 		bl	PWM_Start
+ 1784              	.LVL142:
+ 1785 0682 07E0     		b	.L170
+ 1786              	.L169:
+ 221:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH4);
+ 1787              		.loc 1 221 0
+ 1788 0684 1020     		movs	r0, #16
+ 1789 0686 2A00     		movs	r2, r5
+ 1790 0688 2900     		movs	r1, r5
+ 1791 068a FFF7FEFF 		bl	PWM_SetPnCnt
+ 1792              	.LVL143:
+ 222:../../../drivers/led/led.c **** 		}
+ 1793              		.loc 1 222 0
+ 1794 068e 1020     		movs	r0, #16
+ 1795 0690 FFF7FEFF 		bl	PWM_DeInit
+ 1796              	.LVL144:
+ 1797              	.L170:
+ 224:../../../drivers/led/led.c **** 			PWM_SetPnCnt(PWM_CH5, w, lcw.freq-w);//warm
+ 1798              		.loc 1 224 0
+ 1799 0694 002E     		cmp	r6, #0
+ 1800 0696 0AD0     		beq	.L171
+ 225:../../../drivers/led/led.c **** 			PWM_Start(PWM_CH5);
+ 1801              		.loc 1 225 0
+ 1802 0698 A288     		ldrh	r2, [r4, #4]
+ 1803 069a 3100     		movs	r1, r6
+ 1804 069c 921B     		subs	r2, r2, r6
+ 1805 069e 92B2     		uxth	r2, r2
+ 1806 06a0 2020     		movs	r0, #32
+ 1807 06a2 FFF7FEFF 		bl	PWM_SetPnCnt
+ 1808              	.LVL145:
+ 226:../../../drivers/led/led.c **** 		}
+ 1809              		.loc 1 226 0
+ 1810 06a6 2020     		movs	r0, #32
+ 1811 06a8 FFF7FEFF 		bl	PWM_Start
+ 1812              	.LVL146:
+ 1813 06ac 18E0     		b	.L166
+ 1814              	.L171:
+ 229:../../../drivers/led/led.c **** 			PWM_DeInit(PWM_CH5);
+ 1815              		.loc 1 229 0
+ 1816 06ae 3200     		movs	r2, r6
+ 1817 06b0 3100     		movs	r1, r6
+ 1818 06b2 2020     		movs	r0, #32
+ 1819 06b4 FFF7FEFF 		bl	PWM_SetPnCnt
+ 1820              	.LVL147:
+ 230:../../../drivers/led/led.c **** 		}
+ 1821              		.loc 1 230 0
+ 1822 06b8 2020     		movs	r0, #32
+ 1823 06ba FFF7FEFF 		bl	PWM_DeInit
+ 1824              	.LVL148:
+ 1825 06be 0FE0     		b	.L166
+ 1826              	.LVL149:
+ 1827              	.L168:
+ 1828              	.LBE13:
+ 270:../../../drivers/led/led.c **** 	PWM_SetPnCnt(PWM_CH5, 0, 0);
+ 1829              		.loc 1 270 0
+ 1830 06c0 3200     		movs	r2, r6
+ 1831 06c2 3100     		movs	r1, r6
+ 1832 06c4 1020     		movs	r0, #16
+ 1833 06c6 FFF7FEFF 		bl	PWM_SetPnCnt
+ 1834              	.LVL150:
+ 271:../../../drivers/led/led.c **** #if (LIGHT_CW_WITH_RGB)
+ 1835              		.loc 1 271 0
+ 1836 06ca 3200     		movs	r2, r6
+ 1837 06cc 3100     		movs	r1, r6
+ 1838 06ce 2020     		movs	r0, #32
+ 1839 06d0 FFF7FEFF 		bl	PWM_SetPnCnt
+ 1840              	.LVL151:
+ 280:../../../drivers/led/led.c **** 	PWM_DeInit(PWM_CH5);
+ 1841              		.loc 1 280 0
+ 1842 06d4 1020     		movs	r0, #16
+ 1843 06d6 FFF7FEFF 		bl	PWM_DeInit
+ 1844              	.LVL152:
+ 281:../../../drivers/led/led.c **** }
+ 1845              		.loc 1 281 0
+ 1846 06da 2020     		movs	r0, #32
+ 1847 06dc FFF7FEFF 		bl	PWM_DeInit
+ 1848              	.LVL153:
+ 1849              	.L166:
+ 282:../../../drivers/led/led.c **** 
+ 1850              		.loc 1 282 0
+ 1851              		@ sp needed
+ 1852 06e0 F7BD     		pop	{r0, r1, r2, r4, r5, r6, r7, pc}
+ 1853              	.L173:
+ 1854 06e2 C046     		.align	2
+ 1855              	.L172:
+ 1856 06e4 00000000 		.word	.LANCHOR0
+ 1857 06e8 E0FCFFFF 		.word	-800
+ 1858 06ec 00002041 		.word	1092616192
+ 1859 06f0 204E0000 		.word	20000
+ 1860              		.cfi_endproc
+ 1861              	.LFE67:
+ 1863              		.section	.rodata
+ 1864              		.set	.LANCHOR1,. + 0
+ 1865              	.LC0:
+ 1866 0000 54       		.byte	84
+ 1867              	.LC1:
+ 1868 0001 55       		.byte	85
+ 1869              	.LC2:
+ 1870 0002 53       		.byte	83
+ 1871              	.LC3:
+ 1872 0003 52       		.byte	82
+ 1873              	.LC4:
+ 1874 0004 51       		.byte	81
+ 1875              		.bss
+ 1876              		.align	2
+ 1877              		.set	.LANCHOR0,. + 0
+ 1880              	lcw:
+ 1881 0000 00000000 		.space	20
+ 1881      00000000 
+ 1881      00000000 
+ 1881      00000000 
+ 1881      00000000 
+ 1884              	ltn:
+ 1885 0014 00000000 		.space	8
+ 1885      00000000 
+ 1888              	ucPeriodCnt:
+ 1889 001c 0000     		.space	2
+ 1892              	deltaLn:
+ 1893 001e 0000     		.space	2
+ 1896              	deltaTp:
+ 1897 0020 0000     		.space	2
+ 1898 0022 0000     		.space	2
+ 1901              	kScale:
+ 1902 0024 00000000 		.space	4
+ 1905              	lrgb:
+ 1906 0028 00000000 		.space	20
+ 1906      00000000 
+ 1906      00000000 
+ 1906      00000000 
+ 1906      00000000 
+ 1907              		.text
+ 1908              	.Letext0:
+ 1909              		.file 2 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1910              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1911              		.file 4 "../../../drivers/hal/inc/bc62xx_gpio.h"
+ 1912              		.file 5 "../../../drivers/led/inc/led.h"
+ 1913              		.file 6 "../../../drivers/hal/inc/bc62xx_pwm.h"
+ 1914              		.file 7 "../../../device/inc/systick.h"

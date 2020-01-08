@@ -1,0 +1,2589 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"bc62xx_flash.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.align	1
+  20              		.global	Start
+  21              		.code	16
+  22              		.thumb_func
+  24              	Start:
+  25              	.LFB41:
+  26              		.file 1 "../../../drivers/hal/bc62xx_flash.c"
+   1:../../../drivers/hal/bc62xx_flash.c **** #include "bc62xx_flash.h"
+   2:../../../drivers/hal/bc62xx_flash.c **** 
+   3:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline))   FillSendCMD(uint8_t *buf, uint8_t cmd, int flash_addr);
+   4:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32)))  ReadFlashSPI(uint8_t *txdata,int txlen,uint8_t *rxbuf,i
+   5:../../../drivers/hal/bc62xx_flash.c **** void  __attribute__((noinline,aligned(32)))  FlashWriteEnable();
+   6:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32)))   WaitFlashFinish();
+   7:../../../drivers/hal/bc62xx_flash.c **** 
+   8:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+   9:../../../drivers/hal/bc62xx_flash.c **** //static byte qspi_txbuf[60]={0};
+  10:../../../drivers/hal/bc62xx_flash.c **** //static byte readreg[2] =  {0,0};
+  11:../../../drivers/hal/bc62xx_flash.c **** #else
+  12:../../../drivers/hal/bc62xx_flash.c ****   uint8_t *readreg = (uint8_t *)(RXBUF_ADDR); // 2 byte
+  13:../../../drivers/hal/bc62xx_flash.c ****   uint8_t *temp2 = (uint8_t *)(RXBUF_ADDR+2); 
+  14:../../../drivers/hal/bc62xx_flash.c ****   uint8_t *temp = (uint8_t *)(RXBUF_ADDR+6); 
+  15:../../../drivers/hal/bc62xx_flash.c **** #endif
+  16:../../../drivers/hal/bc62xx_flash.c **** 
+  17:../../../drivers/hal/bc62xx_flash.c **** 
+  18:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline)) Start()
+  19:../../../drivers/hal/bc62xx_flash.c **** {
+  27              		.loc 1 19 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  20:../../../drivers/hal/bc62xx_flash.c **** 	__ASM("nop");
+  32              		.loc 1 20 0
+  33              		.syntax divided
+  34              	@ 20 "../../../drivers/hal/bc62xx_flash.c" 1
+  35 0000 C046     		nop
+  36              	@ 0 "" 2
+  21:../../../drivers/hal/bc62xx_flash.c **** }
+  37              		.loc 1 21 0
+  38              		.thumb
+  39              		.syntax unified
+  40              		@ sp needed
+  41 0002 7047     		bx	lr
+  42              		.cfi_endproc
+  43              	.LFE41:
+  45              		.align	1
+  46              		.global	FillSendCMD
+  47              		.code	16
+  48              		.thumb_func
+  50              	FillSendCMD:
+  51              	.LFB42:
+  22:../../../drivers/hal/bc62xx_flash.c **** 
+  23:../../../drivers/hal/bc62xx_flash.c **** /*
+  24:../../../drivers/hal/bc62xx_flash.c **** void HWRITE_T(int reg,byte val)
+  25:../../../drivers/hal/bc62xx_flash.c **** {
+  26:../../../drivers/hal/bc62xx_flash.c **** //	do {
+  27:../../../drivers/hal/bc62xx_flash.c **** 	HREAD(reg) = val;
+  28:../../../drivers/hal/bc62xx_flash.c **** //	while(n--);
+  29:../../../drivers/hal/bc62xx_flash.c **** //	}
+  30:../../../drivers/hal/bc62xx_flash.c **** //	while(0)	
+  31:../../../drivers/hal/bc62xx_flash.c **** 	__ASM("nop");
+  32:../../../drivers/hal/bc62xx_flash.c **** 	__ASM("nop");
+  33:../../../drivers/hal/bc62xx_flash.c **** 	__ASM("nop");
+  34:../../../drivers/hal/bc62xx_flash.c **** 	__ASM("nop");
+  35:../../../drivers/hal/bc62xx_flash.c **** //	__ASM("nop");
+  36:../../../drivers/hal/bc62xx_flash.c **** }
+  37:../../../drivers/hal/bc62xx_flash.c **** 
+  38:../../../drivers/hal/bc62xx_flash.c **** void HWRITEW_T(int reg,int val)
+  39:../../../drivers/hal/bc62xx_flash.c **** {
+  40:../../../drivers/hal/bc62xx_flash.c **** //	do {
+  41:../../../drivers/hal/bc62xx_flash.c **** 	HWRITE_T(reg, (byte)(val));
+  42:../../../drivers/hal/bc62xx_flash.c **** 	HWRITE_T(reg + 1, (byte)((int)(val) >> 8));
+  43:../../../drivers/hal/bc62xx_flash.c **** //	}
+  44:../../../drivers/hal/bc62xx_flash.c **** //	while(0)
+  45:../../../drivers/hal/bc62xx_flash.c **** }
+  46:../../../drivers/hal/bc62xx_flash.c **** 
+  47:../../../drivers/hal/bc62xx_flash.c **** void   QSPI_Delay(volatile int cnt)
+  48:../../../drivers/hal/bc62xx_flash.c **** {
+  49:../../../drivers/hal/bc62xx_flash.c **** 	while(cnt--);
+  50:../../../drivers/hal/bc62xx_flash.c **** }
+  51:../../../drivers/hal/bc62xx_flash.c **** */
+  52:../../../drivers/hal/bc62xx_flash.c **** 
+  53:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline))   FillSendCMD(uint8_t *buf, uint8_t cmd, int flash_addr)
+  54:../../../drivers/hal/bc62xx_flash.c **** {
+  52              		.loc 1 54 0
+  53              		.cfi_startproc
+  54              		@ args = 0, pretend = 0, frame = 0
+  55              		@ frame_needed = 0, uses_anonymous_args = 0
+  56              		@ link register save eliminated.
+  57              	.LVL0:
+  55:../../../drivers/hal/bc62xx_flash.c **** 	//uint8_t j;
+  56:../../../drivers/hal/bc62xx_flash.c **** 	buf[0] = cmd;
+  57:../../../drivers/hal/bc62xx_flash.c **** 	//for(j = 0;j < 3;j++);
+  58:../../../drivers/hal/bc62xx_flash.c **** //	QSPI_Delay(1);
+  59:../../../drivers/hal/bc62xx_flash.c **** 	buf[1] = flash_addr >> 16;
+  58              		.loc 1 59 0
+  59 0004 1314     		asrs	r3, r2, #16
+  60 0006 4370     		strb	r3, [r0, #1]
+  60:../../../drivers/hal/bc62xx_flash.c **** 	//for(j = 0;j < 3;j++);
+  61:../../../drivers/hal/bc62xx_flash.c **** //	QSPI_Delay(1);
+  62:../../../drivers/hal/bc62xx_flash.c **** 	buf[2] = flash_addr >> 8;
+  61              		.loc 1 62 0
+  62 0008 1312     		asrs	r3, r2, #8
+  56:../../../drivers/hal/bc62xx_flash.c **** 	//for(j = 0;j < 3;j++);
+  63              		.loc 1 56 0
+  64 000a 0170     		strb	r1, [r0]
+  65              		.loc 1 62 0
+  66 000c 8370     		strb	r3, [r0, #2]
+  63:../../../drivers/hal/bc62xx_flash.c **** 	//for(j = 0;j < 3;j++);
+  64:../../../drivers/hal/bc62xx_flash.c **** //	QSPI_Delay(1);
+  65:../../../drivers/hal/bc62xx_flash.c **** 	buf[3] = flash_addr;
+  67              		.loc 1 65 0
+  68 000e C270     		strb	r2, [r0, #3]
+  66:../../../drivers/hal/bc62xx_flash.c **** }
+  69              		.loc 1 66 0
+  70              		@ sp needed
+  71 0010 7047     		bx	lr
+  72              		.cfi_endproc
+  73              	.LFE42:
+  75              		.align	1
+  76              		.global	ReadFlashDSPI
+  77              		.code	16
+  78              		.thumb_func
+  80              	ReadFlashDSPI:
+  81              	.LFB43:
+  67:../../../drivers/hal/bc62xx_flash.c **** 
+  68:../../../drivers/hal/bc62xx_flash.c **** /*
+  69:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) QSPI_ReadFlashQSPI(int flash_addr, int rxlen, uint8_t *r
+  70:../../../drivers/hal/bc62xx_flash.c **** {
+  71:../../../drivers/hal/bc62xx_flash.c **** //	int addr;
+  72:../../../drivers/hal/bc62xx_flash.c **** 	volatile int i, j;
+  73:../../../drivers/hal/bc62xx_flash.c **** //	byte *cmd = (byte *)0x10000b90;
+  74:../../../drivers/hal/bc62xx_flash.c **** 	static uint8_t rxbuf_t[300]={0};
+  75:../../../drivers/hal/bc62xx_flash.c **** 	static uint8_t cmd[4]  = {0};
+  76:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t mode, delay;
+  77:../../../drivers/hal/bc62xx_flash.c **** 	FillSendCMD(cmd, 0x6b, flash_addr);
+  78:../../../drivers/hal/bc62xx_flash.c **** 	mode = HREAD(CORE_QSPI_CTRL);
+  79:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+  80:../../../drivers/hal/bc62xx_flash.c **** //	for(i = 0;i < 2;i++) {
+  81:../../../drivers/hal/bc62xx_flash.c **** //		addr = i == 0 ? 0xc000 : 0;
+  82:../../../drivers/hal/bc62xx_flash.c **** //		addr =  0;
+  83:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL  , 0x46);//mode&0xb8 |0x05
+  84:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY, 8);
+  85:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)cmd);
+  86:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXLEN , 4);
+  87:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXADDR , (int)rxbuf_t);
+  88:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , rxlen);
+  89:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_DMA_START , 8);
+  90:../../../drivers/hal/bc62xx_flash.c **** 		for(j = 0;j <20;j++);
+  91:../../../drivers/hal/bc62xx_flash.c **** //		QSPI_Delay(20);
+  92:../../../drivers/hal/bc62xx_flash.c **** //		while(!(HREAD(CORE_DMA_STATUS) & 8) && i == 1);
+  93:../../../drivers/hal/bc62xx_flash.c **** 		while(!(HREAD(CORE_DMA_STATUS) & 8) );
+  94:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL, mode);
+  95:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , delay);
+  96:../../../drivers/hal/bc62xx_flash.c **** //	}
+  97:../../../drivers/hal/bc62xx_flash.c **** 	for(i=0;i<rxlen;i++)
+  98:../../../drivers/hal/bc62xx_flash.c **** 		rxbuf[i] = rxbuf_t[i];
+  99:../../../drivers/hal/bc62xx_flash.c **** }
+ 100:../../../drivers/hal/bc62xx_flash.c **** 
+ 101:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) QSPI_ReadFlashFastQSPI(int flash_addr, int rxlen, uint8_
+ 102:../../../drivers/hal/bc62xx_flash.c **** {
+ 103:../../../drivers/hal/bc62xx_flash.c **** //	int addr;
+ 104:../../../drivers/hal/bc62xx_flash.c **** 	volatile int i, j;
+ 105:../../../drivers/hal/bc62xx_flash.c **** //	byte *cmd = (byte *)0x10000b90;
+ 106:../../../drivers/hal/bc62xx_flash.c **** //	byte cmd[4]  = {0};
+ 107:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t mode, delay;
+ 108:../../../drivers/hal/bc62xx_flash.c **** 	FillSendCMD(qspi_txbuf, 0xeb, flash_addr);
+ 109:../../../drivers/hal/bc62xx_flash.c **** 	mode = HREAD(CORE_QSPI_CTRL);
+ 110:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 111:../../../drivers/hal/bc62xx_flash.c **** //	for(i = 0;i < 2;i++) {
+ 112:../../../drivers/hal/bc62xx_flash.c **** //		addr = i == 0 ? 0xc000 : 0;
+ 113:../../../drivers/hal/bc62xx_flash.c **** //		addr =  0;
+ 114:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 115:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL  , 0x46);//mode&0xb8 |0x05
+ 116:../../../drivers/hal/bc62xx_flash.c **** #else
+ 117:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL  , 0x06);//mode&0xb8 |0x05
+ 118:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 119:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY, 0x44);
+ 120:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)qspi_txbuf);
+ 121:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXLEN , 4);
+ 122:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXADDR , (int)rxbuf);
+ 123:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , rxlen);
+ 124:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_DMA_START , 8);
+ 125:../../../drivers/hal/bc62xx_flash.c **** 		for(j = 0;j <20;j++);
+ 126:../../../drivers/hal/bc62xx_flash.c **** //		QSPI_Delay(20);
+ 127:../../../drivers/hal/bc62xx_flash.c **** //		while(!(HREAD(CORE_DMA_STATUS) & 8) && i == 1);
+ 128:../../../drivers/hal/bc62xx_flash.c **** 		while(!(HREAD(CORE_DMA_STATUS) & 8) );
+ 129:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL, mode);
+ 130:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , delay);
+ 131:../../../drivers/hal/bc62xx_flash.c **** //	}
+ 132:../../../drivers/hal/bc62xx_flash.c **** }
+ 133:../../../drivers/hal/bc62xx_flash.c **** */
+ 134:../../../drivers/hal/bc62xx_flash.c **** 
+ 135:../../../drivers/hal/bc62xx_flash.c **** void  ReadFlashDSPI(uint8_t cammond,int flash_addr, int rxlen, uint8_t *rxbuf)
+ 136:../../../drivers/hal/bc62xx_flash.c **** {
+  82              		.loc 1 136 0
+  83              		.cfi_startproc
+  84              		@ args = 0, pretend = 0, frame = 16
+  85              		@ frame_needed = 0, uses_anonymous_args = 0
+  86              	.LVL1:
+  87 0012 F0B5     		push	{r4, r5, r6, r7, lr}
+  88              	.LCFI0:
+  89              		.cfi_def_cfa_offset 20
+  90              		.cfi_offset 4, -20
+  91              		.cfi_offset 5, -16
+  92              		.cfi_offset 6, -12
+  93              		.cfi_offset 7, -8
+  94              		.cfi_offset 14, -4
+  95 0014 1E00     		movs	r6, r3
+ 137:../../../drivers/hal/bc62xx_flash.c **** //	int addr;
+ 138:../../../drivers/hal/bc62xx_flash.c **** //	volatile unsigned int i, j;
+ 139:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t mode, delay;
+ 140:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 141:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[4]={0,0,0,0};
+  96              		.loc 1 141 0
+  97 0016 0023     		movs	r3, #0
+  98              	.LVL2:
+ 136:../../../drivers/hal/bc62xx_flash.c **** //	int addr;
+  99              		.loc 1 136 0
+ 100 0018 85B0     		sub	sp, sp, #20
+ 101              	.LCFI1:
+ 102              		.cfi_def_cfa_offset 40
+ 103              		.loc 1 141 0
+ 104 001a 03AC     		add	r4, sp, #12
+ 136:../../../drivers/hal/bc62xx_flash.c **** //	int addr;
+ 105              		.loc 1 136 0
+ 106 001c 1500     		movs	r5, r2
+ 142:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 143:../../../drivers/hal/bc62xx_flash.c **** 	FillSendCMD(temp, cammond, flash_addr);
+ 107              		.loc 1 143 0
+ 108 001e 0A00     		movs	r2, r1
+ 109              	.LVL3:
+ 110 0020 0100     		movs	r1, r0
+ 111              	.LVL4:
+ 112 0022 2000     		movs	r0, r4
+ 113              	.LVL5:
+ 141:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 114              		.loc 1 141 0
+ 115 0024 0393     		str	r3, [sp, #12]
+ 116              		.loc 1 143 0
+ 117 0026 FFF7FEFF 		bl	FillSendCMD
+ 118              	.LVL6:
+ 144:../../../drivers/hal/bc62xx_flash.c **** 	mode = HREAD(CORE_QSPI_CTRL);
+ 119              		.loc 1 144 0
+ 120 002a 1B4A     		ldr	r2, .L8
+ 145:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 146:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 147:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL  , 0x45);//mode&0xb8 |0x05
+ 148:../../../drivers/hal/bc62xx_flash.c **** #else
+ 149:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL  , 0x05);//mode&0xb8 |0x05
+ 150:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 151:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY, 8);
+ 152:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)temp);
+ 121              		.loc 1 152 0
+ 122 002c E0B2     		uxtb	r0, r4
+ 144:../../../drivers/hal/bc62xx_flash.c **** 	mode = HREAD(CORE_QSPI_CTRL);
+ 123              		.loc 1 144 0
+ 124 002e 1378     		ldrb	r3, [r2]
+ 125              		.loc 1 152 0
+ 126 0030 8446     		mov	ip, r0
+ 144:../../../drivers/hal/bc62xx_flash.c **** 	mode = HREAD(CORE_QSPI_CTRL);
+ 127              		.loc 1 144 0
+ 128 0032 DBB2     		uxtb	r3, r3
+ 129 0034 0093     		str	r3, [sp]
+ 130              	.LVL7:
+ 145:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 131              		.loc 1 145 0
+ 132 0036 194B     		ldr	r3, .L8+4
+ 133              		.loc 1 152 0
+ 134 0038 6746     		mov	r7, ip
+ 145:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 135              		.loc 1 145 0
+ 136 003a 1978     		ldrb	r1, [r3]
+ 137              		.loc 1 152 0
+ 138 003c 1848     		ldr	r0, .L8+8
+ 145:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 139              		.loc 1 145 0
+ 140 003e C9B2     		uxtb	r1, r1
+ 141 0040 0191     		str	r1, [sp, #4]
+ 142              	.LVL8:
+ 147:../../../drivers/hal/bc62xx_flash.c **** #else
+ 143              		.loc 1 147 0
+ 144 0042 4521     		movs	r1, #69
+ 145 0044 1170     		strb	r1, [r2]
+ 146              	.LVL9:
+ 151:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)temp);
+ 147              		.loc 1 151 0
+ 148 0046 3D39     		subs	r1, r1, #61
+ 149              		.loc 1 152 0
+ 150 0048 0C41     		asrs	r4, r4, r1
+ 151:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)temp);
+ 151              		.loc 1 151 0
+ 152 004a 1970     		strb	r1, [r3]
+ 153              		.loc 1 152 0
+ 154 004c 0770     		strb	r7, [r0]
+ 155 004e 1548     		ldr	r0, .L8+12
+ 156 0050 E4B2     		uxtb	r4, r4
+ 157 0052 0470     		strb	r4, [r0]
+ 153:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXLEN , 4);
+ 158              		.loc 1 153 0
+ 159 0054 0424     		movs	r4, #4
+ 160 0056 1448     		ldr	r0, .L8+16
+ 161 0058 0470     		strb	r4, [r0]
+ 162 005a 0024     		movs	r4, #0
+ 163 005c 1348     		ldr	r0, .L8+20
+ 164 005e 0470     		strb	r4, [r0]
+ 154:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXADDR , (int)rxbuf);
+ 165              		.loc 1 154 0
+ 166 0060 F4B2     		uxtb	r4, r6
+ 167 0062 0E41     		asrs	r6, r6, r1
+ 168              	.LVL10:
+ 169 0064 1248     		ldr	r0, .L8+24
+ 170 0066 F6B2     		uxtb	r6, r6
+ 171 0068 0470     		strb	r4, [r0]
+ 155:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , rxlen);
+ 172              		.loc 1 155 0
+ 173 006a ECB2     		uxtb	r4, r5
+ 174 006c 0D41     		asrs	r5, r5, r1
+ 175              	.LVL11:
+ 154:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXADDR , (int)rxbuf);
+ 176              		.loc 1 154 0
+ 177 006e 1148     		ldr	r0, .L8+28
+ 178              		.loc 1 155 0
+ 179 0070 EDB2     		uxtb	r5, r5
+ 154:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXADDR , (int)rxbuf);
+ 180              		.loc 1 154 0
+ 181 0072 0670     		strb	r6, [r0]
+ 182              		.loc 1 155 0
+ 183 0074 1048     		ldr	r0, .L8+32
+ 184 0076 0470     		strb	r4, [r0]
+ 185 0078 1048     		ldr	r0, .L8+36
+ 156:../../../drivers/hal/bc62xx_flash.c **** 		
+ 157:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_DMA_START , 8);
+ 158:../../../drivers/hal/bc62xx_flash.c **** 		//for(j = 0;j < 20;j++);
+ 159:../../../drivers/hal/bc62xx_flash.c **** 		while(!(HREAD(CORE_DMA_STATUS) & 8) );
+ 186              		.loc 1 159 0
+ 187 007a 114C     		ldr	r4, .L8+40
+ 155:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , rxlen);
+ 188              		.loc 1 155 0
+ 189 007c 0570     		strb	r5, [r0]
+ 157:../../../drivers/hal/bc62xx_flash.c **** 		//for(j = 0;j < 20;j++);
+ 190              		.loc 1 157 0
+ 191 007e 1148     		ldr	r0, .L8+44
+ 192 0080 0170     		strb	r1, [r0]
+ 193              	.L4:
+ 194              		.loc 1 159 0 discriminator 1
+ 195 0082 2078     		ldrb	r0, [r4]
+ 196 0084 0842     		tst	r0, r1
+ 197 0086 FCD0     		beq	.L4
+ 160:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL, mode);
+ 198              		.loc 1 160 0
+ 199 0088 6946     		mov	r1, sp
+ 200 008a 0978     		ldrb	r1, [r1]
+ 201 008c 1170     		strb	r1, [r2]
+ 161:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , delay);
+ 202              		.loc 1 161 0
+ 203 008e 6A46     		mov	r2, sp
+ 204 0090 1279     		ldrb	r2, [r2, #4]
+ 205 0092 1A70     		strb	r2, [r3]
+ 162:../../../drivers/hal/bc62xx_flash.c **** }
+ 206              		.loc 1 162 0
+ 207 0094 05B0     		add	sp, sp, #20
+ 208              		@ sp needed
+ 209 0096 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 210              	.L9:
+ 211              		.align	2
+ 212              	.L8:
+ 213 0098 A0800010 		.word	268468384
+ 214 009c A1800010 		.word	268468385
+ 215 00a0 A4800010 		.word	268468388
+ 216 00a4 A5800010 		.word	268468389
+ 217 00a8 A2800010 		.word	268468386
+ 218 00ac A3800010 		.word	268468387
+ 219 00b0 A6800010 		.word	268468390
+ 220 00b4 A7800010 		.word	268468391
+ 221 00b8 A8800010 		.word	268468392
+ 222 00bc A9800010 		.word	268468393
+ 223 00c0 30830010 		.word	268469040
+ 224 00c4 0A800010 		.word	268468234
+ 225              		.cfi_endproc
+ 226              	.LFE43:
+ 228 00c8 C046C046 		.align	5
+ 228      C046C046 
+ 228      C046C046 
+ 228      C046C046 
+ 228      C046C046 
+ 229              		.global	QSPI_ReadFlashData
+ 230              		.code	16
+ 231              		.thumb_func
+ 233              	QSPI_ReadFlashData:
+ 234              	.LFB44:
+ 163:../../../drivers/hal/bc62xx_flash.c **** 
+ 164:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) QSPI_ReadFlashData(int flash_addr, int len, uint8_t *rxb
+ 165:../../../drivers/hal/bc62xx_flash.c **** {
+ 235              		.loc 1 165 0
+ 236              		.cfi_startproc
+ 237              		@ args = 0, pretend = 0, frame = 0
+ 238              		@ frame_needed = 0, uses_anonymous_args = 0
+ 239              	.LVL12:
+ 240 00e0 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 241              	.LCFI2:
+ 242              		.cfi_def_cfa_offset 24
+ 243              		.cfi_offset 3, -24
+ 244              		.cfi_offset 4, -20
+ 245              		.cfi_offset 5, -16
+ 246              		.cfi_offset 6, -12
+ 247              		.cfi_offset 7, -8
+ 248              		.cfi_offset 14, -4
+ 249              		.loc 1 165 0
+ 250 00e2 0700     		movs	r7, r0
+ 251 00e4 0D00     		movs	r5, r1
+ 252 00e6 1600     		movs	r6, r2
+ 253              	.LBB14:
+ 254              	.LBB15:
+ 255              		.file 2 "../../../cmsis/cmsis_gcc.h"
+   1:../../../cmsis/cmsis_gcc.h **** /**************************************************************************//**
+   2:../../../cmsis/cmsis_gcc.h ****  * @file     cmsis_gcc.h
+   3:../../../cmsis/cmsis_gcc.h ****  * @brief    CMSIS Cortex-M Core Function/Instruction Header File
+   4:../../../cmsis/cmsis_gcc.h ****  * @version  V4.30
+   5:../../../cmsis/cmsis_gcc.h ****  * @date     20. October 2015
+   6:../../../cmsis/cmsis_gcc.h ****  ******************************************************************************/
+   7:../../../cmsis/cmsis_gcc.h **** /* Copyright (c) 2009 - 2015 ARM LIMITED
+   8:../../../cmsis/cmsis_gcc.h **** 
+   9:../../../cmsis/cmsis_gcc.h ****    All rights reserved.
+  10:../../../cmsis/cmsis_gcc.h ****    Redistribution and use in source and binary forms, with or without
+  11:../../../cmsis/cmsis_gcc.h ****    modification, are permitted provided that the following conditions are met:
+  12:../../../cmsis/cmsis_gcc.h ****    - Redistributions of source code must retain the above copyright
+  13:../../../cmsis/cmsis_gcc.h ****      notice, this list of conditions and the following disclaimer.
+  14:../../../cmsis/cmsis_gcc.h ****    - Redistributions in binary form must reproduce the above copyright
+  15:../../../cmsis/cmsis_gcc.h ****      notice, this list of conditions and the following disclaimer in the
+  16:../../../cmsis/cmsis_gcc.h ****      documentation and/or other materials provided with the distribution.
+  17:../../../cmsis/cmsis_gcc.h ****    - Neither the name of ARM nor the names of its contributors may be used
+  18:../../../cmsis/cmsis_gcc.h ****      to endorse or promote products derived from this software without
+  19:../../../cmsis/cmsis_gcc.h ****      specific prior written permission.
+  20:../../../cmsis/cmsis_gcc.h ****    *
+  21:../../../cmsis/cmsis_gcc.h ****    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:../../../cmsis/cmsis_gcc.h ****    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:../../../cmsis/cmsis_gcc.h ****    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:../../../cmsis/cmsis_gcc.h ****    ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
+  25:../../../cmsis/cmsis_gcc.h ****    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:../../../cmsis/cmsis_gcc.h ****    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:../../../cmsis/cmsis_gcc.h ****    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:../../../cmsis/cmsis_gcc.h ****    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:../../../cmsis/cmsis_gcc.h ****    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:../../../cmsis/cmsis_gcc.h ****    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:../../../cmsis/cmsis_gcc.h ****    POSSIBILITY OF SUCH DAMAGE.
+  32:../../../cmsis/cmsis_gcc.h ****    ---------------------------------------------------------------------------*/
+  33:../../../cmsis/cmsis_gcc.h **** 
+  34:../../../cmsis/cmsis_gcc.h **** 
+  35:../../../cmsis/cmsis_gcc.h **** #ifndef __CMSIS_GCC_H
+  36:../../../cmsis/cmsis_gcc.h **** #define __CMSIS_GCC_H
+  37:../../../cmsis/cmsis_gcc.h **** 
+  38:../../../cmsis/cmsis_gcc.h **** /* ignore some GCC warnings */
+  39:../../../cmsis/cmsis_gcc.h **** #if defined ( __GNUC__ )
+  40:../../../cmsis/cmsis_gcc.h **** #pragma GCC diagnostic push
+  41:../../../cmsis/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wsign-conversion"
+  42:../../../cmsis/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wconversion"
+  43:../../../cmsis/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wunused-parameter"
+  44:../../../cmsis/cmsis_gcc.h **** #endif
+  45:../../../cmsis/cmsis_gcc.h **** 
+  46:../../../cmsis/cmsis_gcc.h **** 
+  47:../../../cmsis/cmsis_gcc.h **** /* ###########################  Core Function Access  ########################### */
+  48:../../../cmsis/cmsis_gcc.h **** /** \ingroup  CMSIS_Core_FunctionInterface
+  49:../../../cmsis/cmsis_gcc.h ****     \defgroup CMSIS_Core_RegAccFunctions CMSIS Core Register Access Functions
+  50:../../../cmsis/cmsis_gcc.h ****   @{
+  51:../../../cmsis/cmsis_gcc.h ****  */
+  52:../../../cmsis/cmsis_gcc.h **** 
+  53:../../../cmsis/cmsis_gcc.h **** /**
+  54:../../../cmsis/cmsis_gcc.h ****   \brief   Enable IRQ Interrupts
+  55:../../../cmsis/cmsis_gcc.h ****   \details Enables IRQ interrupts by clearing the I-bit in the CPSR.
+  56:../../../cmsis/cmsis_gcc.h ****            Can only be executed in Privileged modes.
+  57:../../../cmsis/cmsis_gcc.h ****  */
+  58:../../../cmsis/cmsis_gcc.h **** __attribute__( ( always_inline ) ) __STATIC_INLINE void __enable_irq(void)
+  59:../../../cmsis/cmsis_gcc.h **** {
+  60:../../../cmsis/cmsis_gcc.h ****   __ASM volatile ("cpsie i" : : : "memory");
+  61:../../../cmsis/cmsis_gcc.h **** }
+  62:../../../cmsis/cmsis_gcc.h **** 
+  63:../../../cmsis/cmsis_gcc.h **** 
+  64:../../../cmsis/cmsis_gcc.h **** /**
+  65:../../../cmsis/cmsis_gcc.h ****   \brief   Disable IRQ Interrupts
+  66:../../../cmsis/cmsis_gcc.h ****   \details Disables IRQ interrupts by setting the I-bit in the CPSR.
+  67:../../../cmsis/cmsis_gcc.h ****   Can only be executed in Privileged modes.
+  68:../../../cmsis/cmsis_gcc.h ****  */
+  69:../../../cmsis/cmsis_gcc.h **** __attribute__( ( always_inline ) ) __STATIC_INLINE void __disable_irq(void)
+  70:../../../cmsis/cmsis_gcc.h **** {
+  71:../../../cmsis/cmsis_gcc.h ****   __ASM volatile ("cpsid i" : : : "memory");
+ 256              		.loc 2 71 0
+ 257              		.syntax divided
+ 258              	@ 71 "../../../cmsis/cmsis_gcc.h" 1
+ 259 00e8 72B6     		cpsid i
+ 260              	@ 0 "" 2
+ 261              	.LVL13:
+ 262              		.thumb
+ 263              		.syntax unified
+ 264              	.LBE15:
+ 265              	.LBE14:
+ 166:../../../drivers/hal/bc62xx_flash.c **** 	OS_ENTER_CRITICAL();
+ 167:../../../drivers/hal/bc62xx_flash.c **** 	int i=0,j=0;
+ 168:../../../drivers/hal/bc62xx_flash.c **** 
+ 169:../../../drivers/hal/bc62xx_flash.c **** 	for(i = len,j=0;i>0;i = i -0x40,j = j+0x40){
+ 266              		.loc 1 169 0
+ 267 00ea 1400     		movs	r4, r2
+ 268              	.LVL14:
+ 269              	.L11:
+ 270              		.loc 1 169 0 is_stmt 0 discriminator 1
+ 271 00ec 002D     		cmp	r5, #0
+ 272 00ee 10DD     		ble	.L15
+ 273 00f0 B91B     		subs	r1, r7, r6
+ 170:../../../drivers/hal/bc62xx_flash.c **** 		if(i>0x40)
+ 171:../../../drivers/hal/bc62xx_flash.c **** 			ReadFlashDSPI(0x3b,flash_addr+j,0x40,rxbuf+j);
+ 274              		.loc 1 171 0 is_stmt 1
+ 275 00f2 0919     		adds	r1, r1, r4
+ 276 00f4 2300     		movs	r3, r4
+ 170:../../../drivers/hal/bc62xx_flash.c **** 		if(i>0x40)
+ 277              		.loc 1 170 0
+ 278 00f6 402D     		cmp	r5, #64
+ 279 00f8 04DD     		ble	.L12
+ 280              		.loc 1 171 0
+ 281 00fa 4022     		movs	r2, #64
+ 282 00fc 3B20     		movs	r0, #59
+ 283 00fe FFF7FEFF 		bl	ReadFlashDSPI
+ 284              	.LVL15:
+ 285 0102 03E0     		b	.L13
+ 286              	.LVL16:
+ 287              	.L12:
+ 172:../../../drivers/hal/bc62xx_flash.c **** 		else
+ 173:../../../drivers/hal/bc62xx_flash.c **** 			ReadFlashDSPI(0x3b,flash_addr+j,i,rxbuf+j);	
+ 288              		.loc 1 173 0
+ 289 0104 2A00     		movs	r2, r5
+ 290 0106 3B20     		movs	r0, #59
+ 291 0108 FFF7FEFF 		bl	ReadFlashDSPI
+ 292              	.LVL17:
+ 293              	.L13:
+ 169:../../../drivers/hal/bc62xx_flash.c **** 		if(i>0x40)
+ 294              		.loc 1 169 0 discriminator 2
+ 295 010c 403D     		subs	r5, r5, #64
+ 296              	.LVL18:
+ 297 010e 4034     		adds	r4, r4, #64
+ 298              	.LVL19:
+ 299 0110 ECE7     		b	.L11
+ 300              	.L15:
+ 301              	.LBB16:
+ 302              	.LBB17:
+  60:../../../cmsis/cmsis_gcc.h **** }
+ 303              		.loc 2 60 0
+ 304              		.syntax divided
+ 305              	@ 60 "../../../cmsis/cmsis_gcc.h" 1
+ 306 0112 62B6     		cpsie i
+ 307              	@ 0 "" 2
+ 308              		.thumb
+ 309              		.syntax unified
+ 310              	.LBE17:
+ 311              	.LBE16:
+ 174:../../../drivers/hal/bc62xx_flash.c **** 	}
+ 175:../../../drivers/hal/bc62xx_flash.c **** 	OS_EXIT_CRITICAL();
+ 176:../../../drivers/hal/bc62xx_flash.c **** }
+ 312              		.loc 1 176 0
+ 313              		@ sp needed
+ 314              	.LVL20:
+ 315              	.LVL21:
+ 316              	.LVL22:
+ 317              	.LVL23:
+ 318 0114 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 319              		.cfi_endproc
+ 320              	.LFE44:
+ 322 0116 C046C046 		.align	5
+ 322      C046C046 
+ 322      C046
+ 323              		.global	ReadFlashSPI
+ 324              		.code	16
+ 325              		.thumb_func
+ 327              	ReadFlashSPI:
+ 328              	.LFB45:
+ 177:../../../drivers/hal/bc62xx_flash.c **** 
+ 178:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) ReadFlashSPI(uint8_t *txdata,int txlen,uint8_t *rxbuf,in
+ 179:../../../drivers/hal/bc62xx_flash.c **** {
+ 329              		.loc 1 179 0
+ 330              		.cfi_startproc
+ 331              		@ args = 0, pretend = 0, frame = 8
+ 332              		@ frame_needed = 0, uses_anonymous_args = 0
+ 333              	.LVL24:
+ 334 0120 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 335              	.LCFI3:
+ 336              		.cfi_def_cfa_offset 32
+ 337              		.cfi_offset 0, -32
+ 338              		.cfi_offset 1, -28
+ 339              		.cfi_offset 2, -24
+ 340              		.cfi_offset 4, -20
+ 341              		.cfi_offset 5, -16
+ 342              		.cfi_offset 6, -12
+ 343              		.cfi_offset 7, -8
+ 344              		.cfi_offset 14, -4
+ 180:../../../drivers/hal/bc62xx_flash.c **** //	volatile int i, j;
+ 181:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t mode, delay;
+ 182:../../../drivers/hal/bc62xx_flash.c **** 		mode = HREAD(CORE_QSPI_CTRL);
+ 345              		.loc 1 182 0
+ 346 0122 1C4D     		ldr	r5, .L20
+ 347 0124 2E78     		ldrb	r6, [r5]
+ 348 0126 F4B2     		uxtb	r4, r6
+ 349 0128 0094     		str	r4, [sp]
+ 350              	.LVL25:
+ 183:../../../drivers/hal/bc62xx_flash.c **** 		delay = HREAD(CORE_QSPI_DELAY);
+ 351              		.loc 1 183 0
+ 352 012a 1B4C     		ldr	r4, .L20+4
+ 353 012c 2778     		ldrb	r7, [r4]
+ 354 012e FFB2     		uxtb	r7, r7
+ 355 0130 0197     		str	r7, [sp, #4]
+ 356              	.LVL26:
+ 184:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 185:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL , 0x44);// 0x40  mode&0xb8 |0x00
+ 357              		.loc 1 185 0
+ 358 0132 4427     		movs	r7, #68
+ 359 0134 2F70     		strb	r7, [r5]
+ 360              	.LVL27:
+ 186:../../../drivers/hal/bc62xx_flash.c **** #else
+ 187:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL , 0x04);// 0x40  mode&0xb8 |0x00
+ 188:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 189:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , 0x0);
+ 361              		.loc 1 189 0
+ 362 0136 0027     		movs	r7, #0
+ 363 0138 2770     		strb	r7, [r4]
+ 190:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR ,(int)txdata );
+ 364              		.loc 1 190 0
+ 365 013a C7B2     		uxtb	r7, r0
+ 366 013c BC46     		mov	ip, r7
+ 367 013e 6646     		mov	r6, ip
+ 368 0140 164F     		ldr	r7, .L20+8
+ 369 0142 0012     		asrs	r0, r0, #8
+ 370              	.LVL28:
+ 371 0144 3E70     		strb	r6, [r7]
+ 372 0146 164F     		ldr	r7, .L20+12
+ 373 0148 C0B2     		uxtb	r0, r0
+ 374 014a 3870     		strb	r0, [r7]
+ 191:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXLEN , txlen);
+ 375              		.loc 1 191 0
+ 376 014c 1548     		ldr	r0, .L20+16
+ 377 014e CFB2     		uxtb	r7, r1
+ 378 0150 0770     		strb	r7, [r0]
+ 379 0152 0912     		asrs	r1, r1, #8
+ 380              	.LVL29:
+ 381 0154 1448     		ldr	r0, .L20+20
+ 382 0156 C9B2     		uxtb	r1, r1
+ 383 0158 0170     		strb	r1, [r0]
+ 192:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXADDR , (int)rxbuf);
+ 384              		.loc 1 192 0
+ 385 015a 1449     		ldr	r1, .L20+24
+ 386 015c D0B2     		uxtb	r0, r2
+ 387 015e 0870     		strb	r0, [r1]
+ 388 0160 1212     		asrs	r2, r2, #8
+ 389              	.LVL30:
+ 390 0162 1349     		ldr	r1, .L20+28
+ 391 0164 D2B2     		uxtb	r2, r2
+ 392 0166 0A70     		strb	r2, [r1]
+ 193:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , rxlen);
+ 393              		.loc 1 193 0
+ 394 0168 124A     		ldr	r2, .L20+32
+ 395 016a D9B2     		uxtb	r1, r3
+ 396 016c 1170     		strb	r1, [r2]
+ 397 016e 1B12     		asrs	r3, r3, #8
+ 398              	.LVL31:
+ 399 0170 114A     		ldr	r2, .L20+36
+ 400 0172 DBB2     		uxtb	r3, r3
+ 401 0174 1370     		strb	r3, [r2]
+ 194:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_DMA_START , 8);
+ 402              		.loc 1 194 0
+ 403 0176 0823     		movs	r3, #8
+ 404 0178 104A     		ldr	r2, .L20+40
+ 195:../../../drivers/hal/bc62xx_flash.c **** 		//for(j = 0;j < 20;j++);
+ 196:../../../drivers/hal/bc62xx_flash.c **** 		while(!(HREAD(CORE_DMA_STATUS) & 8) );
+ 405              		.loc 1 196 0
+ 406 017a 1149     		ldr	r1, .L20+44
+ 194:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_DMA_START , 8);
+ 407              		.loc 1 194 0
+ 408 017c 1370     		strb	r3, [r2]
+ 409              	.L17:
+ 410              		.loc 1 196 0 discriminator 1
+ 411 017e 0A78     		ldrb	r2, [r1]
+ 412 0180 1A42     		tst	r2, r3
+ 413 0182 FCD0     		beq	.L17
+ 197:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL , mode);
+ 414              		.loc 1 197 0
+ 415 0184 6B46     		mov	r3, sp
+ 416 0186 1B78     		ldrb	r3, [r3]
+ 198:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , delay);
+ 199:../../../drivers/hal/bc62xx_flash.c **** }
+ 417              		.loc 1 199 0
+ 418              		@ sp needed
+ 197:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL , mode);
+ 419              		.loc 1 197 0
+ 420 0188 2B70     		strb	r3, [r5]
+ 198:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , delay);
+ 421              		.loc 1 198 0
+ 422 018a 6B46     		mov	r3, sp
+ 423 018c 1B79     		ldrb	r3, [r3, #4]
+ 424 018e 2370     		strb	r3, [r4]
+ 425              		.loc 1 199 0
+ 426 0190 F7BD     		pop	{r0, r1, r2, r4, r5, r6, r7, pc}
+ 427              	.L21:
+ 428 0192 C046     		.align	2
+ 429              	.L20:
+ 430 0194 A0800010 		.word	268468384
+ 431 0198 A1800010 		.word	268468385
+ 432 019c A4800010 		.word	268468388
+ 433 01a0 A5800010 		.word	268468389
+ 434 01a4 A2800010 		.word	268468386
+ 435 01a8 A3800010 		.word	268468387
+ 436 01ac A6800010 		.word	268468390
+ 437 01b0 A7800010 		.word	268468391
+ 438 01b4 A8800010 		.word	268468392
+ 439 01b8 A9800010 		.word	268468393
+ 440 01bc 0A800010 		.word	268468234
+ 441 01c0 30830010 		.word	268469040
+ 442              		.cfi_endproc
+ 443              	.LFE45:
+ 445 01c4 C046C046 		.align	5
+ 445      C046C046 
+ 445      C046C046 
+ 445      C046C046 
+ 445      C046C046 
+ 446              		.global	QSPI_ReadFlashRDID
+ 447              		.code	16
+ 448              		.thumb_func
+ 450              	QSPI_ReadFlashRDID:
+ 451              	.LFB46:
+ 200:../../../drivers/hal/bc62xx_flash.c **** 
+ 201:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) QSPI_ReadFlashRDID(uint8_t *rxbuf)
+ 202:../../../drivers/hal/bc62xx_flash.c **** {
+ 452              		.loc 1 202 0
+ 453              		.cfi_startproc
+ 454              		@ args = 0, pretend = 0, frame = 8
+ 455              		@ frame_needed = 0, uses_anonymous_args = 0
+ 456              	.LVL32:
+ 203:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 204:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[1]={0};
+ 205:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 206:../../../drivers/hal/bc62xx_flash.c **** 	temp[0] = 0x9f;
+ 457              		.loc 1 206 0
+ 458 01e0 9F23     		movs	r3, #159
+ 202:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 459              		.loc 1 202 0
+ 460 01e2 07B5     		push	{r0, r1, r2, lr}
+ 461              	.LCFI4:
+ 462              		.cfi_def_cfa_offset 16
+ 463              		.cfi_offset 0, -16
+ 464              		.cfi_offset 1, -12
+ 465              		.cfi_offset 2, -8
+ 466              		.cfi_offset 14, -4
+ 202:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 467              		.loc 1 202 0
+ 468 01e4 0200     		movs	r2, r0
+ 469              		.loc 1 206 0
+ 470 01e6 01A8     		add	r0, sp, #4
+ 471              	.LVL33:
+ 472 01e8 0370     		strb	r3, [r0]
+ 207:../../../drivers/hal/bc62xx_flash.c **** 	ReadFlashSPI(temp,1,rxbuf,3);
+ 473              		.loc 1 207 0
+ 474 01ea 0121     		movs	r1, #1
+ 475 01ec 9C3B     		subs	r3, r3, #156
+ 476 01ee FFF7FEFF 		bl	ReadFlashSPI
+ 477              	.LVL34:
+ 208:../../../drivers/hal/bc62xx_flash.c **** }
+ 478              		.loc 1 208 0
+ 479              		@ sp needed
+ 480 01f2 07BD     		pop	{r0, r1, r2, pc}
+ 481              		.cfi_endproc
+ 482              	.LFE46:
+ 484 01f4 C046C046 		.align	5
+ 484      C046C046 
+ 484      C046C046 
+ 485              		.global	QSPI_ReadFlashReg
+ 486              		.code	16
+ 487              		.thumb_func
+ 489              	QSPI_ReadFlashReg:
+ 490              	.LFB47:
+ 209:../../../drivers/hal/bc62xx_flash.c **** 
+ 210:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) QSPI_ReadFlashReg(uint8_t *rxbuf)
+ 211:../../../drivers/hal/bc62xx_flash.c **** {
+ 491              		.loc 1 211 0
+ 492              		.cfi_startproc
+ 493              		@ args = 0, pretend = 0, frame = 8
+ 494              		@ frame_needed = 0, uses_anonymous_args = 0
+ 495              	.LVL35:
+ 212:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 213:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp2[1]={0};
+ 214:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 215:../../../drivers/hal/bc62xx_flash.c **** 	temp2[0] = 0x05;
+ 496              		.loc 1 215 0
+ 497 0200 0523     		movs	r3, #5
+ 211:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 498              		.loc 1 211 0
+ 499 0202 37B5     		push	{r0, r1, r2, r4, r5, lr}
+ 500              	.LCFI5:
+ 501              		.cfi_def_cfa_offset 24
+ 502              		.cfi_offset 0, -24
+ 503              		.cfi_offset 1, -20
+ 504              		.cfi_offset 2, -16
+ 505              		.cfi_offset 4, -12
+ 506              		.cfi_offset 5, -8
+ 507              		.cfi_offset 14, -4
+ 508              		.loc 1 215 0
+ 509 0204 01AC     		add	r4, sp, #4
+ 510 0206 2370     		strb	r3, [r4]
+ 216:../../../drivers/hal/bc62xx_flash.c **** 	ReadFlashSPI(temp2,1,rxbuf,1); //s7-s0
+ 511              		.loc 1 216 0
+ 512 0208 043B     		subs	r3, r3, #4
+ 211:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 513              		.loc 1 211 0
+ 514 020a 0500     		movs	r5, r0
+ 515              		.loc 1 216 0
+ 516 020c 0200     		movs	r2, r0
+ 517 020e 1900     		movs	r1, r3
+ 518 0210 2000     		movs	r0, r4
+ 519              	.LVL36:
+ 520 0212 FFF7FEFF 		bl	ReadFlashSPI
+ 521              	.LVL37:
+ 217:../../../drivers/hal/bc62xx_flash.c **** 	temp2[0] = 0x35;
+ 522              		.loc 1 217 0
+ 523 0216 3523     		movs	r3, #53
+ 524 0218 2370     		strb	r3, [r4]
+ 218:../../../drivers/hal/bc62xx_flash.c **** 	ReadFlashSPI(temp2,1,rxbuf+1,1);	//s15-s8
+ 525              		.loc 1 218 0
+ 526 021a 343B     		subs	r3, r3, #52
+ 527 021c 6A1C     		adds	r2, r5, #1
+ 528 021e 1900     		movs	r1, r3
+ 529 0220 2000     		movs	r0, r4
+ 530 0222 FFF7FEFF 		bl	ReadFlashSPI
+ 531              	.LVL38:
+ 219:../../../drivers/hal/bc62xx_flash.c **** }
+ 532              		.loc 1 219 0
+ 533              		@ sp needed
+ 534              	.LVL39:
+ 535 0226 37BD     		pop	{r0, r1, r2, r4, r5, pc}
+ 536              		.cfi_endproc
+ 537              	.LFE47:
+ 539 0228 C046C046 		.align	5
+ 539      C046C046 
+ 539      C046C046 
+ 539      C046C046 
+ 539      C046C046 
+ 540              		.global	QSPI_ReadFlashREMS
+ 541              		.code	16
+ 542              		.thumb_func
+ 544              	QSPI_ReadFlashREMS:
+ 545              	.LFB48:
+ 220:../../../drivers/hal/bc62xx_flash.c **** 
+ 221:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) QSPI_ReadFlashREMS(uint8_t *rxbuf)
+ 222:../../../drivers/hal/bc62xx_flash.c **** {
+ 546              		.loc 1 222 0
+ 547              		.cfi_startproc
+ 548              		@ args = 0, pretend = 0, frame = 8
+ 549              		@ frame_needed = 0, uses_anonymous_args = 0
+ 550              	.LVL40:
+ 223:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 224:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[4]={0,0,0,0};
+ 551              		.loc 1 224 0
+ 552 0240 0023     		movs	r3, #0
+ 222:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 553              		.loc 1 222 0
+ 554 0242 07B5     		push	{r0, r1, r2, lr}
+ 555              	.LCFI6:
+ 556              		.cfi_def_cfa_offset 16
+ 557              		.cfi_offset 0, -16
+ 558              		.cfi_offset 1, -12
+ 559              		.cfi_offset 2, -8
+ 560              		.cfi_offset 14, -4
+ 222:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 561              		.loc 1 222 0
+ 562 0244 0200     		movs	r2, r0
+ 563              		.loc 1 224 0
+ 564 0246 0193     		str	r3, [sp, #4]
+ 565 0248 01A8     		add	r0, sp, #4
+ 566              	.LVL41:
+ 225:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 226:../../../drivers/hal/bc62xx_flash.c **** 	temp[0] = 0x90;
+ 567              		.loc 1 226 0
+ 568 024a 9033     		adds	r3, r3, #144
+ 569 024c 0370     		strb	r3, [r0]
+ 227:../../../drivers/hal/bc62xx_flash.c **** 	ReadFlashSPI(temp,4,rxbuf,2); //s7-s0
+ 570              		.loc 1 227 0
+ 571 024e 0421     		movs	r1, #4
+ 572 0250 8E3B     		subs	r3, r3, #142
+ 573 0252 FFF7FEFF 		bl	ReadFlashSPI
+ 574              	.LVL42:
+ 228:../../../drivers/hal/bc62xx_flash.c **** }
+ 575              		.loc 1 228 0
+ 576              		@ sp needed
+ 577 0256 07BD     		pop	{r0, r1, r2, pc}
+ 578              		.cfi_endproc
+ 579              	.LFE48:
+ 581 0258 C046C046 		.align	5
+ 581      C046C046 
+ 582              		.global	QSPI_ReadFlashUID
+ 583              		.code	16
+ 584              		.thumb_func
+ 586              	QSPI_ReadFlashUID:
+ 587              	.LFB49:
+ 229:../../../drivers/hal/bc62xx_flash.c **** 
+ 230:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) QSPI_ReadFlashUID(uint8_t *rxbuf)
+ 231:../../../drivers/hal/bc62xx_flash.c **** {
+ 588              		.loc 1 231 0
+ 589              		.cfi_startproc
+ 590              		@ args = 0, pretend = 0, frame = 8
+ 591              		@ frame_needed = 0, uses_anonymous_args = 0
+ 592              	.LVL43:
+ 593 0260 37B5     		push	{r0, r1, r2, r4, r5, lr}
+ 594              	.LCFI7:
+ 595              		.cfi_def_cfa_offset 24
+ 596              		.cfi_offset 0, -24
+ 597              		.cfi_offset 1, -20
+ 598              		.cfi_offset 2, -16
+ 599              		.cfi_offset 4, -12
+ 600              		.cfi_offset 5, -8
+ 601              		.cfi_offset 14, -4
+ 232:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 233:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[5]={0,0,0,0,0};
+ 602              		.loc 1 233 0
+ 603 0262 0524     		movs	r4, #5
+ 231:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 604              		.loc 1 231 0
+ 605 0264 0500     		movs	r5, r0
+ 606              		.loc 1 233 0
+ 607 0266 2200     		movs	r2, r4
+ 608 0268 0021     		movs	r1, #0
+ 609 026a 6846     		mov	r0, sp
+ 610              	.LVL44:
+ 611 026c FFF7FEFF 		bl	memset
+ 612              	.LVL45:
+ 234:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 235:../../../drivers/hal/bc62xx_flash.c **** 	temp[0] = 0x4b;
+ 613              		.loc 1 235 0
+ 614 0270 6A46     		mov	r2, sp
+ 615 0272 4B23     		movs	r3, #75
+ 236:../../../drivers/hal/bc62xx_flash.c **** 	ReadFlashSPI(temp,5,rxbuf,8); //s7-s0
+ 616              		.loc 1 236 0
+ 617 0274 2100     		movs	r1, r4
+ 235:../../../drivers/hal/bc62xx_flash.c **** 	ReadFlashSPI(temp,5,rxbuf,8); //s7-s0
+ 618              		.loc 1 235 0
+ 619 0276 1370     		strb	r3, [r2]
+ 620              		.loc 1 236 0
+ 621 0278 6846     		mov	r0, sp
+ 622 027a 2A00     		movs	r2, r5
+ 623 027c 433B     		subs	r3, r3, #67
+ 624 027e FFF7FEFF 		bl	ReadFlashSPI
+ 625              	.LVL46:
+ 237:../../../drivers/hal/bc62xx_flash.c **** }
+ 626              		.loc 1 237 0
+ 627              		@ sp needed
+ 628              	.LVL47:
+ 629 0282 37BD     		pop	{r0, r1, r2, r4, r5, pc}
+ 630              		.cfi_endproc
+ 631              	.LFE49:
+ 633 0284 C046C046 		.align	5
+ 633      C046C046 
+ 633      C046C046 
+ 633      C046C046 
+ 633      C046C046 
+ 634              		.global	WaitFlashFinish
+ 635              		.code	16
+ 636              		.thumb_func
+ 638              	WaitFlashFinish:
+ 639              	.LFB50:
+ 238:../../../drivers/hal/bc62xx_flash.c **** 
+ 239:../../../drivers/hal/bc62xx_flash.c **** void  WaitFlashFinish()
+ 240:../../../drivers/hal/bc62xx_flash.c **** {
+ 640              		.loc 1 240 0
+ 641              		.cfi_startproc
+ 642              		@ args = 0, pretend = 0, frame = 8
+ 643              		@ frame_needed = 0, uses_anonymous_args = 0
+ 241:../../../drivers/hal/bc62xx_flash.c **** //	uint8_t j;
+ 242:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 243:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t readreg[2] =  {0,0};
+ 644              		.loc 1 243 0
+ 645 02a0 0023     		movs	r3, #0
+ 240:../../../drivers/hal/bc62xx_flash.c **** //	uint8_t j;
+ 646              		.loc 1 240 0
+ 647 02a2 37B5     		push	{r0, r1, r2, r4, r5, lr}
+ 648              	.LCFI8:
+ 649              		.cfi_def_cfa_offset 24
+ 650              		.cfi_offset 0, -24
+ 651              		.cfi_offset 1, -20
+ 652              		.cfi_offset 2, -16
+ 653              		.cfi_offset 4, -12
+ 654              		.cfi_offset 5, -8
+ 655              		.cfi_offset 14, -4
+ 244:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 245:../../../drivers/hal/bc62xx_flash.c **** 	do{
+ 246:../../../drivers/hal/bc62xx_flash.c **** 		//for(j = 0;j < 40;j++);
+ 247:../../../drivers/hal/bc62xx_flash.c **** 		QSPI_ReadFlashReg(readreg);
+ 248:../../../drivers/hal/bc62xx_flash.c **** 	}	while((readreg[0]&0x01));
+ 656              		.loc 1 248 0
+ 657 02a4 0125     		movs	r5, #1
+ 243:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 658              		.loc 1 243 0
+ 659 02a6 01AC     		add	r4, sp, #4
+ 660 02a8 2370     		strb	r3, [r4]
+ 661 02aa 6370     		strb	r3, [r4, #1]
+ 662              	.L27:
+ 247:../../../drivers/hal/bc62xx_flash.c **** 	}	while((readreg[0]&0x01));
+ 663              		.loc 1 247 0 discriminator 1
+ 664 02ac 2000     		movs	r0, r4
+ 665 02ae FFF7FEFF 		bl	QSPI_ReadFlashReg
+ 666              	.LVL48:
+ 667              		.loc 1 248 0 discriminator 1
+ 668 02b2 2378     		ldrb	r3, [r4]
+ 669 02b4 2B42     		tst	r3, r5
+ 670 02b6 F9D1     		bne	.L27
+ 249:../../../drivers/hal/bc62xx_flash.c **** }
+ 671              		.loc 1 249 0
+ 672              		@ sp needed
+ 673 02b8 37BD     		pop	{r0, r1, r2, r4, r5, pc}
+ 674              		.cfi_endproc
+ 675              	.LFE50:
+ 677              		.align	1
+ 678              		.global	WriteFlashData
+ 679              		.code	16
+ 680              		.thumb_func
+ 682              	WriteFlashData:
+ 683              	.LFB51:
+ 250:../../../drivers/hal/bc62xx_flash.c **** 
+ 251:../../../drivers/hal/bc62xx_flash.c **** void WriteFlashData( int txlen, uint8_t *txdata)
+ 252:../../../drivers/hal/bc62xx_flash.c **** {
+ 684              		.loc 1 252 0
+ 685              		.cfi_startproc
+ 686              		@ args = 0, pretend = 0, frame = 16
+ 687              		@ frame_needed = 0, uses_anonymous_args = 0
+ 688              	.LVL49:
+ 689 02ba F0B5     		push	{r4, r5, r6, r7, lr}
+ 690              	.LCFI9:
+ 691              		.cfi_def_cfa_offset 20
+ 692              		.cfi_offset 4, -20
+ 693              		.cfi_offset 5, -16
+ 694              		.cfi_offset 6, -12
+ 695              		.cfi_offset 7, -8
+ 696              		.cfi_offset 14, -4
+ 697 02bc 0C00     		movs	r4, r1
+ 698 02be 85B0     		sub	sp, sp, #20
+ 699              	.LCFI10:
+ 700              		.cfi_def_cfa_offset 40
+ 701              		.loc 1 252 0
+ 702 02c0 0500     		movs	r5, r0
+ 253:../../../drivers/hal/bc62xx_flash.c **** 	volatile int j;
+ 254:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t mode, delay;
+ 255:../../../drivers/hal/bc62xx_flash.c **** 	FlashWriteEnable();
+ 703              		.loc 1 255 0
+ 704 02c2 FFF7FEFF 		bl	FlashWriteEnable
+ 705              	.LVL50:
+ 256:../../../drivers/hal/bc62xx_flash.c **** 	mode = HREAD(CORE_QSPI_CTRL);
+ 706              		.loc 1 256 0
+ 707 02c6 1C4A     		ldr	r2, .L37
+ 257:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 708              		.loc 1 257 0
+ 709 02c8 1C4B     		ldr	r3, .L37+4
+ 256:../../../drivers/hal/bc62xx_flash.c **** 	mode = HREAD(CORE_QSPI_CTRL);
+ 710              		.loc 1 256 0
+ 711 02ca 1678     		ldrb	r6, [r2]
+ 712              		.loc 1 257 0
+ 713 02cc 1878     		ldrb	r0, [r3]
+ 258:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 259:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL ,0x44);//mode&0xf8 |0x40
+ 260:../../../drivers/hal/bc62xx_flash.c **** #else
+ 261:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL ,0x04);//mode&0xf8 |0x40
+ 262:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 263:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , 0x0);
+ 264:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)txdata);
+ 714              		.loc 1 264 0
+ 715 02ce E7B2     		uxtb	r7, r4
+ 257:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 716              		.loc 1 257 0
+ 717 02d0 C1B2     		uxtb	r1, r0
+ 718 02d2 0191     		str	r1, [sp, #4]
+ 719              		.loc 1 264 0
+ 720 02d4 BC46     		mov	ip, r7
+ 259:../../../drivers/hal/bc62xx_flash.c **** #else
+ 721              		.loc 1 259 0
+ 722 02d6 4421     		movs	r1, #68
+ 723              		.loc 1 264 0
+ 724 02d8 6046     		mov	r0, ip
+ 259:../../../drivers/hal/bc62xx_flash.c **** #else
+ 725              		.loc 1 259 0
+ 726 02da 1170     		strb	r1, [r2]
+ 263:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)txdata);
+ 727              		.loc 1 263 0
+ 728 02dc 0021     		movs	r1, #0
+ 729              		.loc 1 264 0
+ 730 02de 184F     		ldr	r7, .L37+8
+ 263:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)txdata);
+ 731              		.loc 1 263 0
+ 732 02e0 1970     		strb	r1, [r3]
+ 733              		.loc 1 264 0
+ 734 02e2 2412     		asrs	r4, r4, #8
+ 735              	.LVL51:
+ 736 02e4 3870     		strb	r0, [r7]
+ 737 02e6 174F     		ldr	r7, .L37+12
+ 738 02e8 E4B2     		uxtb	r4, r4
+ 739 02ea 3C70     		strb	r4, [r7]
+ 265:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXLEN , txlen );
+ 740              		.loc 1 265 0
+ 741 02ec 164C     		ldr	r4, .L37+16
+ 742 02ee EFB2     		uxtb	r7, r5
+ 743 02f0 2770     		strb	r7, [r4]
+ 744 02f2 2C12     		asrs	r4, r5, #8
+ 745 02f4 154F     		ldr	r7, .L37+20
+ 746 02f6 E4B2     		uxtb	r4, r4
+ 747 02f8 3C70     		strb	r4, [r7]
+ 266:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , 0);
+ 267:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_DMA_START , 8);
+ 748              		.loc 1 267 0
+ 749 02fa 0827     		movs	r7, #8
+ 266:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , 0);
+ 750              		.loc 1 266 0
+ 751 02fc 144C     		ldr	r4, .L37+24
+ 256:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 752              		.loc 1 256 0
+ 753 02fe F6B2     		uxtb	r6, r6
+ 754              	.LVL52:
+ 266:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , 0);
+ 755              		.loc 1 266 0
+ 756 0300 2170     		strb	r1, [r4]
+ 757 0302 144C     		ldr	r4, .L37+28
+ 758 0304 2170     		strb	r1, [r4]
+ 759              		.loc 1 267 0
+ 760 0306 144C     		ldr	r4, .L37+32
+ 761 0308 2770     		strb	r7, [r4]
+ 268:../../../drivers/hal/bc62xx_flash.c **** 		for(j = 0;j <(txlen*10);j++);
+ 762              		.loc 1 268 0
+ 763 030a 0391     		str	r1, [sp, #12]
+ 764 030c 0A31     		adds	r1, r1, #10
+ 765 030e 4D43     		muls	r5, r1
+ 766              	.LVL53:
+ 767              	.L30:
+ 768              		.loc 1 268 0 is_stmt 0 discriminator 1
+ 769 0310 0399     		ldr	r1, [sp, #12]
+ 770 0312 8D42     		cmp	r5, r1
+ 771 0314 03DD     		ble	.L36
+ 772              		.loc 1 268 0 discriminator 3
+ 773 0316 0399     		ldr	r1, [sp, #12]
+ 774 0318 0131     		adds	r1, r1, #1
+ 775 031a 0391     		str	r1, [sp, #12]
+ 776 031c F8E7     		b	.L30
+ 777              	.L36:
+ 269:../../../drivers/hal/bc62xx_flash.c **** 		while(!(HREAD(CORE_DMA_STATUS) & 8) );
+ 778              		.loc 1 269 0 is_stmt 1 discriminator 1
+ 779 031e 0821     		movs	r1, #8
+ 780 0320 0E4D     		ldr	r5, .L37+36
+ 781              	.L34:
+ 782 0322 2C78     		ldrb	r4, [r5]
+ 783 0324 0C42     		tst	r4, r1
+ 784 0326 FCD0     		beq	.L34
+ 270:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL , mode);
+ 785              		.loc 1 270 0
+ 786 0328 1670     		strb	r6, [r2]
+ 271:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , delay);
+ 787              		.loc 1 271 0
+ 788 032a 6A46     		mov	r2, sp
+ 789 032c 1279     		ldrb	r2, [r2, #4]
+ 790 032e 1A70     		strb	r2, [r3]
+ 272:../../../drivers/hal/bc62xx_flash.c **** 		WaitFlashFinish();
+ 791              		.loc 1 272 0
+ 792 0330 FFF7FEFF 		bl	WaitFlashFinish
+ 793              	.LVL54:
+ 273:../../../drivers/hal/bc62xx_flash.c **** }
+ 794              		.loc 1 273 0
+ 795 0334 05B0     		add	sp, sp, #20
+ 796              		@ sp needed
+ 797              	.LVL55:
+ 798 0336 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 799              	.L38:
+ 800              		.align	2
+ 801              	.L37:
+ 802 0338 A0800010 		.word	268468384
+ 803 033c A1800010 		.word	268468385
+ 804 0340 A4800010 		.word	268468388
+ 805 0344 A5800010 		.word	268468389
+ 806 0348 A2800010 		.word	268468386
+ 807 034c A3800010 		.word	268468387
+ 808 0350 A8800010 		.word	268468392
+ 809 0354 A9800010 		.word	268468393
+ 810 0358 0A800010 		.word	268468234
+ 811 035c 30830010 		.word	268469040
+ 812              		.cfi_endproc
+ 813              	.LFE51:
+ 815              		.align	5
+ 816              		.global	QSPI_WriteFlashData
+ 817              		.code	16
+ 818              		.thumb_func
+ 820              	QSPI_WriteFlashData:
+ 821              	.LFB52:
+ 274:../../../drivers/hal/bc62xx_flash.c **** 
+ 275:../../../drivers/hal/bc62xx_flash.c **** void  __attribute__((noinline,aligned(32))) QSPI_WriteFlashData(int flash_addr, int txlen, uint8_t 
+ 276:../../../drivers/hal/bc62xx_flash.c **** {
+ 822              		.loc 1 276 0
+ 823              		.cfi_startproc
+ 824              		@ args = 0, pretend = 0, frame = 32
+ 825              		@ frame_needed = 0, uses_anonymous_args = 0
+ 826              	.LVL56:
+ 827 0360 F0B5     		push	{r4, r5, r6, r7, lr}
+ 828              	.LCFI11:
+ 829              		.cfi_def_cfa_offset 20
+ 830              		.cfi_offset 4, -20
+ 831              		.cfi_offset 5, -16
+ 832              		.cfi_offset 6, -12
+ 833              		.cfi_offset 7, -8
+ 834              		.cfi_offset 14, -4
+ 835 0362 0600     		movs	r6, r0
+ 836 0364 89B0     		sub	sp, sp, #36
+ 837              	.LCFI12:
+ 838              		.cfi_def_cfa_offset 56
+ 839              		.loc 1 276 0
+ 840 0366 0D00     		movs	r5, r1
+ 841 0368 1400     		movs	r4, r2
+ 842              	.LBB18:
+ 843              	.LBB19:
+ 844              		.loc 2 71 0
+ 845              		.syntax divided
+ 846              	@ 71 "../../../cmsis/cmsis_gcc.h" 1
+ 847 036a 72B6     		cpsid i
+ 848              	@ 0 "" 2
+ 849              	.LVL57:
+ 850              		.thumb
+ 851              		.syntax unified
+ 852              	.LBE19:
+ 853              	.LBE18:
+ 277:../../../drivers/hal/bc62xx_flash.c **** 	OS_ENTER_CRITICAL();
+ 278:../../../drivers/hal/bc62xx_flash.c **** 	int i=0,j=0,x=0, offset=0;
+ 279:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 280:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[0x10+4]={0};	
+ 854              		.loc 1 280 0
+ 855 036c 1422     		movs	r2, #20
+ 856              	.LVL58:
+ 857 036e 0021     		movs	r1, #0
+ 858              	.LVL59:
+ 859 0370 03A8     		add	r0, sp, #12
+ 860              	.LVL60:
+ 861 0372 FFF7FEFF 		bl	memset
+ 862              	.LVL61:
+ 863 0376 0094     		str	r4, [sp]
+ 864              	.LVL62:
+ 865              	.L40:
+ 281:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 282:../../../drivers/hal/bc62xx_flash.c **** 	for(i = txlen,j=0;i>0;i = i -0x10,j = j+0x10){
+ 866              		.loc 1 282 0 discriminator 1
+ 867 0378 002D     		cmp	r5, #0
+ 868 037a 00DC     		bgt	.LCB709
+ 869 037c 9AE0     		b	.L68	@long jump
+ 870              	.LCB709:
+ 871 037e 4F4C     		ldr	r4, .L73
+ 283:../../../drivers/hal/bc62xx_flash.c **** 		
+ 284:../../../drivers/hal/bc62xx_flash.c **** 		if(i>0x10){
+ 872              		.loc 1 284 0
+ 873 0380 102D     		cmp	r5, #16
+ 874 0382 49DD     		ble	.L41
+ 875 0384 3300     		movs	r3, r6
+ 876 0386 1033     		adds	r3, r3, #16
+ 877 0388 0193     		str	r3, [sp, #4]
+ 285:../../../drivers/hal/bc62xx_flash.c **** 			offset = (flash_addr+j +0x10)%0x100;
+ 878              		.loc 1 285 0
+ 879 038a 1C40     		ands	r4, r3
+ 880 038c 03D5     		bpl	.L42
+ 881 038e 4C48     		ldr	r0, .L73+4
+ 882 0390 013C     		subs	r4, r4, #1
+ 883 0392 0443     		orrs	r4, r0
+ 884 0394 0134     		adds	r4, r4, #1
+ 885              	.L42:
+ 886              	.LVL63:
+ 286:../../../drivers/hal/bc62xx_flash.c **** 		 	if(offset < 0x10 && offset !=0)
+ 287:../../../drivers/hal/bc62xx_flash.c **** 		 	{
+ 288:../../../drivers/hal/bc62xx_flash.c **** 				FillSendCMD(temp, 0x02, flash_addr+j);
+ 887              		.loc 1 288 0
+ 888 0396 3200     		movs	r2, r6
+ 889 0398 0221     		movs	r1, #2
+ 890 039a 03A8     		add	r0, sp, #12
+ 286:../../../drivers/hal/bc62xx_flash.c **** 		 	if(offset < 0x10 && offset !=0)
+ 891              		.loc 1 286 0
+ 892 039c 0F2C     		cmp	r4, #15
+ 893 039e 2BDC     		bgt	.L43
+ 894              	.LVL64:
+ 286:../../../drivers/hal/bc62xx_flash.c **** 		 	if(offset < 0x10 && offset !=0)
+ 895              		.loc 1 286 0 is_stmt 0 discriminator 1
+ 896 03a0 002C     		cmp	r4, #0
+ 897 03a2 29D0     		beq	.L43
+ 898              		.loc 1 288 0 is_stmt 1
+ 899 03a4 FFF7FEFF 		bl	FillSendCMD
+ 900              	.LVL65:
+ 289:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x < 0x10-offset;x++)  
+ 901              		.loc 1 289 0
+ 902 03a8 1022     		movs	r2, #16
+ 903 03aa 0023     		movs	r3, #0
+ 904 03ac 121B     		subs	r2, r2, r4
+ 905              	.LVL66:
+ 906              	.L44:
+ 907              		.loc 1 289 0 is_stmt 0 discriminator 1
+ 908 03ae 9342     		cmp	r3, r2
+ 909 03b0 06DA     		bge	.L69
+ 290:../../../drivers/hal/bc62xx_flash.c **** 					temp[x+4] = txdata[j+x];
+ 910              		.loc 1 290 0 is_stmt 1 discriminator 3
+ 911 03b2 0098     		ldr	r0, [sp]
+ 912 03b4 03A9     		add	r1, sp, #12
+ 913 03b6 C05C     		ldrb	r0, [r0, r3]
+ 914 03b8 C918     		adds	r1, r1, r3
+ 915 03ba 0871     		strb	r0, [r1, #4]
+ 289:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x < 0x10-offset;x++)  
+ 916              		.loc 1 289 0 discriminator 3
+ 917 03bc 0133     		adds	r3, r3, #1
+ 918              	.LVL67:
+ 919 03be F6E7     		b	.L44
+ 920              	.L69:
+ 921 03c0 D743     		mvns	r7, r2
+ 291:../../../drivers/hal/bc62xx_flash.c **** 				WriteFlashData(0x10-offset +4,temp);
+ 922              		.loc 1 291 0
+ 923 03c2 1420     		movs	r0, #20
+ 924 03c4 03A9     		add	r1, sp, #12
+ 925 03c6 001B     		subs	r0, r0, r4
+ 926 03c8 FF17     		asrs	r7, r7, #31
+ 927 03ca 1740     		ands	r7, r2
+ 928 03cc FFF7FEFF 		bl	WriteFlashData
+ 929              	.LVL68:
+ 292:../../../drivers/hal/bc62xx_flash.c **** 				
+ 293:../../../drivers/hal/bc62xx_flash.c **** 				FillSendCMD(temp, 0x02, flash_addr+j+0x10-offset);
+ 930              		.loc 1 293 0
+ 931 03d0 019B     		ldr	r3, [sp, #4]
+ 932 03d2 0221     		movs	r1, #2
+ 933 03d4 1A1B     		subs	r2, r3, r4
+ 934 03d6 03A8     		add	r0, sp, #12
+ 935 03d8 FFF7FEFF 		bl	FillSendCMD
+ 936              	.LVL69:
+ 937 03dc 03A9     		add	r1, sp, #12
+ 938              	.L47:
+ 939              	.LVL70:
+ 294:../../../drivers/hal/bc62xx_flash.c **** 				for(;x < 0x10;x++)  
+ 940              		.loc 1 294 0 discriminator 1
+ 941 03de 102F     		cmp	r7, #16
+ 942 03e0 06D0     		beq	.L70
+ 295:../../../drivers/hal/bc62xx_flash.c **** 					temp[x+4-0x10 + offset] = txdata[j+x];
+ 943              		.loc 1 295 0 discriminator 2
+ 944 03e2 009A     		ldr	r2, [sp]
+ 945 03e4 E319     		adds	r3, r4, r7
+ 946 03e6 D25D     		ldrb	r2, [r2, r7]
+ 947 03e8 0C3B     		subs	r3, r3, #12
+ 948 03ea CA54     		strb	r2, [r1, r3]
+ 294:../../../drivers/hal/bc62xx_flash.c **** 				for(;x < 0x10;x++)  
+ 949              		.loc 1 294 0 discriminator 2
+ 950 03ec 0137     		adds	r7, r7, #1
+ 951              	.LVL71:
+ 952 03ee F6E7     		b	.L47
+ 953              	.L70:
+ 296:../../../drivers/hal/bc62xx_flash.c **** 				WriteFlashData(offset+4,temp);
+ 954              		.loc 1 296 0
+ 955 03f0 201D     		adds	r0, r4, #4
+ 956 03f2 FFF7FEFF 		bl	WriteFlashData
+ 957              	.LVL72:
+ 958 03f6 57E0     		b	.L49
+ 959              	.LVL73:
+ 960              	.L43:
+ 297:../../../drivers/hal/bc62xx_flash.c **** 		 	}else
+ 298:../../../drivers/hal/bc62xx_flash.c **** 		 		{	
+ 299:../../../drivers/hal/bc62xx_flash.c **** 				FillSendCMD(temp, 0x02, flash_addr+j);
+ 961              		.loc 1 299 0
+ 962 03f8 FFF7FEFF 		bl	FillSendCMD
+ 963              	.LVL74:
+ 300:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x < 0x10;x++)  
+ 964              		.loc 1 300 0
+ 965 03fc 0023     		movs	r3, #0
+ 966              	.LVL75:
+ 967              	.L50:
+ 301:../../../drivers/hal/bc62xx_flash.c **** 					temp[x+4] = txdata[j+x];
+ 968              		.loc 1 301 0 discriminator 3
+ 969 03fe 0099     		ldr	r1, [sp]
+ 970 0400 03AA     		add	r2, sp, #12
+ 971 0402 C95C     		ldrb	r1, [r1, r3]
+ 972 0404 D218     		adds	r2, r2, r3
+ 300:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x < 0x10;x++)  
+ 973              		.loc 1 300 0 discriminator 3
+ 974 0406 0133     		adds	r3, r3, #1
+ 975              	.LVL76:
+ 976              		.loc 1 301 0 discriminator 3
+ 977 0408 1171     		strb	r1, [r2, #4]
+ 300:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x < 0x10;x++)  
+ 978              		.loc 1 300 0 discriminator 3
+ 979 040a 102B     		cmp	r3, #16
+ 980 040c F7D1     		bne	.L50
+ 302:../../../drivers/hal/bc62xx_flash.c **** 				WriteFlashData(0x10+4,temp);
+ 981              		.loc 1 302 0
+ 982 040e 03A9     		add	r1, sp, #12
+ 983 0410 1420     		movs	r0, #20
+ 984 0412 FFF7FEFF 		bl	WriteFlashData
+ 985              	.LVL77:
+ 986 0416 47E0     		b	.L49
+ 987              	.LVL78:
+ 988              	.L41:
+ 303:../../../drivers/hal/bc62xx_flash.c **** 				}
+ 304:../../../drivers/hal/bc62xx_flash.c **** 		}
+ 305:../../../drivers/hal/bc62xx_flash.c **** 		else
+ 306:../../../drivers/hal/bc62xx_flash.c **** 		{
+ 307:../../../drivers/hal/bc62xx_flash.c **** 			offset = (flash_addr+j +i)%0x100;
+ 989              		.loc 1 307 0
+ 990 0418 AB19     		adds	r3, r5, r6
+ 991 041a 0193     		str	r3, [sp, #4]
+ 992 041c 1C40     		ands	r4, r3
+ 993 041e 03D5     		bpl	.L51
+ 994 0420 2748     		ldr	r0, .L73+4
+ 995 0422 013C     		subs	r4, r4, #1
+ 996 0424 0443     		orrs	r4, r0
+ 997 0426 0134     		adds	r4, r4, #1
+ 998              	.L51:
+ 999              	.LVL79:
+ 308:../../../drivers/hal/bc62xx_flash.c **** 		 	if(offset <  i && offset != 0 )
+ 309:../../../drivers/hal/bc62xx_flash.c **** 		 	{
+ 310:../../../drivers/hal/bc62xx_flash.c **** 				FillSendCMD(temp, 0x02, flash_addr+j);
+ 1000              		.loc 1 310 0
+ 1001 0428 3200     		movs	r2, r6
+ 1002 042a 0221     		movs	r1, #2
+ 1003 042c 03A8     		add	r0, sp, #12
+ 308:../../../drivers/hal/bc62xx_flash.c **** 		 	if(offset <  i && offset != 0 )
+ 1004              		.loc 1 308 0
+ 1005 042e A542     		cmp	r5, r4
+ 1006 0430 2BDD     		ble	.L52
+ 1007              	.LVL80:
+ 308:../../../drivers/hal/bc62xx_flash.c **** 		 	if(offset <  i && offset != 0 )
+ 1008              		.loc 1 308 0 is_stmt 0 discriminator 1
+ 1009 0432 002C     		cmp	r4, #0
+ 1010 0434 29D0     		beq	.L52
+ 1011              		.loc 1 310 0 is_stmt 1
+ 1012 0436 FFF7FEFF 		bl	FillSendCMD
+ 1013              	.LVL81:
+ 311:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x <i- offset;x++)  
+ 1014              		.loc 1 311 0
+ 1015 043a 0023     		movs	r3, #0
+ 1016 043c 281B     		subs	r0, r5, r4
+ 1017              	.LVL82:
+ 1018              	.L53:
+ 1019              		.loc 1 311 0 is_stmt 0 discriminator 1
+ 1020 043e 8342     		cmp	r3, r0
+ 1021 0440 06DA     		bge	.L71
+ 312:../../../drivers/hal/bc62xx_flash.c **** 					temp[x+4] = txdata[j+x];
+ 1022              		.loc 1 312 0 is_stmt 1 discriminator 3
+ 1023 0442 0099     		ldr	r1, [sp]
+ 1024 0444 03AA     		add	r2, sp, #12
+ 1025 0446 C95C     		ldrb	r1, [r1, r3]
+ 1026 0448 D218     		adds	r2, r2, r3
+ 1027 044a 1171     		strb	r1, [r2, #4]
+ 311:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x <i- offset;x++)  
+ 1028              		.loc 1 311 0 discriminator 3
+ 1029 044c 0133     		adds	r3, r3, #1
+ 1030              	.LVL83:
+ 1031 044e F6E7     		b	.L53
+ 1032              	.L71:
+ 1033 0450 C743     		mvns	r7, r0
+ 1034 0452 FF17     		asrs	r7, r7, #31
+ 313:../../../drivers/hal/bc62xx_flash.c **** 				WriteFlashData(i- offset+4,temp);
+ 1035              		.loc 1 313 0
+ 1036 0454 03A9     		add	r1, sp, #12
+ 1037 0456 0740     		ands	r7, r0
+ 1038 0458 0430     		adds	r0, r0, #4
+ 1039 045a FFF7FEFF 		bl	WriteFlashData
+ 1040              	.LVL84:
+ 314:../../../drivers/hal/bc62xx_flash.c **** 				
+ 315:../../../drivers/hal/bc62xx_flash.c **** 				FillSendCMD(temp, 0x02, flash_addr+j+i-offset);
+ 1041              		.loc 1 315 0
+ 1042 045e 019B     		ldr	r3, [sp, #4]
+ 1043 0460 0221     		movs	r1, #2
+ 1044 0462 1A1B     		subs	r2, r3, r4
+ 1045 0464 03A8     		add	r0, sp, #12
+ 1046 0466 FFF7FEFF 		bl	FillSendCMD
+ 1047              	.LVL85:
+ 1048 046a 621B     		subs	r2, r4, r5
+ 1049              	.L56:
+ 1050              	.LVL86:
+ 316:../../../drivers/hal/bc62xx_flash.c **** 				for(;x < i;x++)  
+ 1051              		.loc 1 316 0 discriminator 1
+ 1052 046c BD42     		cmp	r5, r7
+ 1053 046e 07DD     		ble	.L72
+ 317:../../../drivers/hal/bc62xx_flash.c **** 					temp[x+4-i + offset] = txdata[j+x];
+ 1054              		.loc 1 317 0 discriminator 2
+ 1055 0470 D319     		adds	r3, r2, r7
+ 1056 0472 03A9     		add	r1, sp, #12
+ 1057 0474 CB18     		adds	r3, r1, r3
+ 1058 0476 0099     		ldr	r1, [sp]
+ 1059 0478 C95D     		ldrb	r1, [r1, r7]
+ 316:../../../drivers/hal/bc62xx_flash.c **** 				for(;x < i;x++)  
+ 1060              		.loc 1 316 0 discriminator 2
+ 1061 047a 0137     		adds	r7, r7, #1
+ 1062              	.LVL87:
+ 1063              		.loc 1 317 0 discriminator 2
+ 1064 047c 1971     		strb	r1, [r3, #4]
+ 1065 047e F5E7     		b	.L56
+ 1066              	.L72:
+ 318:../../../drivers/hal/bc62xx_flash.c **** 				WriteFlashData(offset+4,temp);
+ 1067              		.loc 1 318 0
+ 1068 0480 201D     		adds	r0, r4, #4
+ 1069 0482 03A9     		add	r1, sp, #12
+ 1070 0484 FFF7FEFF 		bl	WriteFlashData
+ 1071              	.LVL88:
+ 1072 0488 0EE0     		b	.L49
+ 1073              	.LVL89:
+ 1074              	.L52:
+ 319:../../../drivers/hal/bc62xx_flash.c **** 		 	}else
+ 320:../../../drivers/hal/bc62xx_flash.c **** 			 	{
+ 321:../../../drivers/hal/bc62xx_flash.c **** 			 	FillSendCMD(temp, 0x02, flash_addr+j);
+ 1075              		.loc 1 321 0
+ 1076 048a FFF7FEFF 		bl	FillSendCMD
+ 1077              	.LVL90:
+ 322:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x < i;x++)  
+ 1078              		.loc 1 322 0
+ 1079 048e 0023     		movs	r3, #0
+ 1080              	.LVL91:
+ 1081              	.L58:
+ 323:../../../drivers/hal/bc62xx_flash.c **** 					temp[x+4] = txdata[j+x];
+ 1082              		.loc 1 323 0 discriminator 3
+ 1083 0490 0099     		ldr	r1, [sp]
+ 1084 0492 03AA     		add	r2, sp, #12
+ 1085 0494 C95C     		ldrb	r1, [r1, r3]
+ 1086 0496 D218     		adds	r2, r2, r3
+ 322:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x < i;x++)  
+ 1087              		.loc 1 322 0 discriminator 3
+ 1088 0498 0133     		adds	r3, r3, #1
+ 1089              	.LVL92:
+ 1090              		.loc 1 323 0 discriminator 3
+ 1091 049a 1171     		strb	r1, [r2, #4]
+ 322:../../../drivers/hal/bc62xx_flash.c **** 				for(x = 0;x < i;x++)  
+ 1092              		.loc 1 322 0 discriminator 3
+ 1093 049c 9D42     		cmp	r5, r3
+ 1094 049e F7D1     		bne	.L58
+ 324:../../../drivers/hal/bc62xx_flash.c **** 				WriteFlashData(i+4,temp);
+ 1095              		.loc 1 324 0
+ 1096 04a0 281D     		adds	r0, r5, #4
+ 1097 04a2 03A9     		add	r1, sp, #12
+ 1098 04a4 FFF7FEFF 		bl	WriteFlashData
+ 1099              	.LVL93:
+ 1100              	.L49:
+ 1101 04a8 009B     		ldr	r3, [sp]
+ 282:../../../drivers/hal/bc62xx_flash.c **** 		
+ 1102              		.loc 1 282 0 discriminator 2
+ 1103 04aa 103D     		subs	r5, r5, #16
+ 1104              	.LVL94:
+ 1105 04ac 1033     		adds	r3, r3, #16
+ 1106 04ae 1036     		adds	r6, r6, #16
+ 1107              	.LVL95:
+ 1108 04b0 0093     		str	r3, [sp]
+ 1109 04b2 61E7     		b	.L40
+ 1110              	.L68:
+ 1111              	.LBB20:
+ 1112              	.LBB21:
+  60:../../../cmsis/cmsis_gcc.h **** }
+ 1113              		.loc 2 60 0
+ 1114              		.syntax divided
+ 1115              	@ 60 "../../../cmsis/cmsis_gcc.h" 1
+ 1116 04b4 62B6     		cpsie i
+ 1117              	@ 0 "" 2
+ 1118              		.thumb
+ 1119              		.syntax unified
+ 1120              	.LBE21:
+ 1121              	.LBE20:
+ 325:../../../drivers/hal/bc62xx_flash.c **** 				}
+ 326:../../../drivers/hal/bc62xx_flash.c **** 		}
+ 327:../../../drivers/hal/bc62xx_flash.c **** 	}
+ 328:../../../drivers/hal/bc62xx_flash.c **** 	OS_EXIT_CRITICAL();
+ 329:../../../drivers/hal/bc62xx_flash.c **** }
+ 1122              		.loc 1 329 0
+ 1123 04b6 09B0     		add	sp, sp, #36
+ 1124              		@ sp needed
+ 1125              	.LVL96:
+ 1126              	.LVL97:
+ 1127 04b8 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1128              	.L74:
+ 1129 04ba C046     		.align	2
+ 1130              	.L73:
+ 1131 04bc FF000080 		.word	-2147483393
+ 1132 04c0 00FFFFFF 		.word	-256
+ 1133              		.cfi_endproc
+ 1134              	.LFE52:
+ 1136 04c4 C046C046 		.align	5
+ 1136      C046C046 
+ 1136      C046C046 
+ 1136      C046C046 
+ 1136      C046C046 
+ 1137              		.global	SendFlashWithoutRx
+ 1138              		.code	16
+ 1139              		.thumb_func
+ 1141              	SendFlashWithoutRx:
+ 1142              	.LFB53:
+ 330:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) SendFlashWithoutRx(uint8_t *txdata,int txlen)
+ 331:../../../drivers/hal/bc62xx_flash.c **** {
+ 1143              		.loc 1 331 0
+ 1144              		.cfi_startproc
+ 1145              		@ args = 0, pretend = 0, frame = 8
+ 1146              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1147              	.LVL98:
+ 1148 04e0 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 1149              	.LCFI13:
+ 1150              		.cfi_def_cfa_offset 32
+ 1151              		.cfi_offset 0, -32
+ 1152              		.cfi_offset 1, -28
+ 1153              		.cfi_offset 2, -24
+ 1154              		.cfi_offset 4, -20
+ 1155              		.cfi_offset 5, -16
+ 1156              		.cfi_offset 6, -12
+ 1157              		.cfi_offset 7, -8
+ 1158              		.cfi_offset 14, -4
+ 332:../../../drivers/hal/bc62xx_flash.c **** //	volatile int i, j;
+ 333:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t mode, delay;
+ 334:../../../drivers/hal/bc62xx_flash.c **** 	mode = HREAD(CORE_QSPI_CTRL);
+ 335:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 336:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 337:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL,0x44 );// 0x40
+ 338:../../../drivers/hal/bc62xx_flash.c **** #else
+ 339:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL,0x04 );// 0x40
+ 340:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 341:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , 0x0);
+ 342:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)txdata);
+ 1159              		.loc 1 342 0
+ 1160 04e2 C7B2     		uxtb	r7, r0
+ 337:../../../drivers/hal/bc62xx_flash.c **** #else
+ 1161              		.loc 1 337 0
+ 1162 04e4 4426     		movs	r6, #68
+ 1163              		.loc 1 342 0
+ 1164 04e6 BC46     		mov	ip, r7
+ 334:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 1165              		.loc 1 334 0
+ 1166 04e8 144A     		ldr	r2, .L79
+ 335:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 1167              		.loc 1 335 0
+ 1168 04ea 154B     		ldr	r3, .L79+4
+ 334:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 1169              		.loc 1 334 0
+ 1170 04ec 1578     		ldrb	r5, [r2]
+ 335:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 1171              		.loc 1 335 0
+ 1172 04ee 1C78     		ldrb	r4, [r3]
+ 1173              		.loc 1 342 0
+ 1174 04f0 144F     		ldr	r7, .L79+8
+ 335:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 1175              		.loc 1 335 0
+ 1176 04f2 E4B2     		uxtb	r4, r4
+ 1177 04f4 0194     		str	r4, [sp, #4]
+ 337:../../../drivers/hal/bc62xx_flash.c **** #else
+ 1178              		.loc 1 337 0
+ 1179 04f6 1670     		strb	r6, [r2]
+ 1180              		.loc 1 342 0
+ 1181 04f8 6446     		mov	r4, ip
+ 341:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)txdata);
+ 1182              		.loc 1 341 0
+ 1183 04fa 0026     		movs	r6, #0
+ 1184              		.loc 1 342 0
+ 1185 04fc 0012     		asrs	r0, r0, #8
+ 1186              	.LVL99:
+ 341:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXADDR , (int)txdata);
+ 1187              		.loc 1 341 0
+ 1188 04fe 1E70     		strb	r6, [r3]
+ 1189              		.loc 1 342 0
+ 1190 0500 3C70     		strb	r4, [r7]
+ 1191 0502 114F     		ldr	r7, .L79+12
+ 1192 0504 C0B2     		uxtb	r0, r0
+ 1193 0506 3870     		strb	r0, [r7]
+ 343:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_TXLEN, txlen);
+ 1194              		.loc 1 343 0
+ 1195 0508 1048     		ldr	r0, .L79+16
+ 1196 050a CFB2     		uxtb	r7, r1
+ 1197 050c 0770     		strb	r7, [r0]
+ 1198 050e 0912     		asrs	r1, r1, #8
+ 1199              	.LVL100:
+ 1200 0510 0F48     		ldr	r0, .L79+20
+ 1201 0512 C9B2     		uxtb	r1, r1
+ 1202 0514 0170     		strb	r1, [r0]
+ 344:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , 0);
+ 1203              		.loc 1 344 0
+ 1204 0516 0F49     		ldr	r1, .L79+24
+ 345:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_DMA_START , 8);
+ 1205              		.loc 1 345 0
+ 1206 0518 0F48     		ldr	r0, .L79+28
+ 344:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , 0);
+ 1207              		.loc 1 344 0
+ 1208 051a 0E70     		strb	r6, [r1]
+ 1209 051c 0F49     		ldr	r1, .L79+32
+ 334:../../../drivers/hal/bc62xx_flash.c **** 	delay = HREAD(CORE_QSPI_DELAY);
+ 1210              		.loc 1 334 0
+ 1211 051e EDB2     		uxtb	r5, r5
+ 1212              	.LVL101:
+ 344:../../../drivers/hal/bc62xx_flash.c **** 		HWRITEW(CORE_QSPI_RXLEN , 0);
+ 1213              		.loc 1 344 0
+ 1214 0520 0E70     		strb	r6, [r1]
+ 1215              		.loc 1 345 0
+ 1216 0522 0821     		movs	r1, #8
+ 346:../../../drivers/hal/bc62xx_flash.c **** 		//for(j = 0;j < 20;j++);
+ 347:../../../drivers/hal/bc62xx_flash.c **** 		while(!(HREAD(CORE_DMA_STATUS) & 8) );
+ 1217              		.loc 1 347 0
+ 1218 0524 0E4E     		ldr	r6, .L79+36
+ 345:../../../drivers/hal/bc62xx_flash.c **** 		//for(j = 0;j < 20;j++);
+ 1219              		.loc 1 345 0
+ 1220 0526 0170     		strb	r1, [r0]
+ 1221              	.L76:
+ 1222              		.loc 1 347 0 discriminator 1
+ 1223 0528 3078     		ldrb	r0, [r6]
+ 1224 052a 0842     		tst	r0, r1
+ 1225 052c FCD0     		beq	.L76
+ 348:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_CTRL , mode);
+ 1226              		.loc 1 348 0
+ 1227 052e 1570     		strb	r5, [r2]
+ 349:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , delay);
+ 1228              		.loc 1 349 0
+ 1229 0530 6A46     		mov	r2, sp
+ 1230 0532 1279     		ldrb	r2, [r2, #4]
+ 350:../../../drivers/hal/bc62xx_flash.c **** 		WaitFlashFinish();
+ 351:../../../drivers/hal/bc62xx_flash.c **** 
+ 352:../../../drivers/hal/bc62xx_flash.c **** }
+ 1231              		.loc 1 352 0
+ 1232              		@ sp needed
+ 349:../../../drivers/hal/bc62xx_flash.c **** 		HWRITE(CORE_QSPI_DELAY , delay);
+ 1233              		.loc 1 349 0
+ 1234 0534 1A70     		strb	r2, [r3]
+ 350:../../../drivers/hal/bc62xx_flash.c **** 		WaitFlashFinish();
+ 1235              		.loc 1 350 0
+ 1236 0536 FFF7FEFF 		bl	WaitFlashFinish
+ 1237              	.LVL102:
+ 1238              	.LVL103:
+ 1239              		.loc 1 352 0
+ 1240 053a F7BD     		pop	{r0, r1, r2, r4, r5, r6, r7, pc}
+ 1241              	.L80:
+ 1242              		.align	2
+ 1243              	.L79:
+ 1244 053c A0800010 		.word	268468384
+ 1245 0540 A1800010 		.word	268468385
+ 1246 0544 A4800010 		.word	268468388
+ 1247 0548 A5800010 		.word	268468389
+ 1248 054c A2800010 		.word	268468386
+ 1249 0550 A3800010 		.word	268468387
+ 1250 0554 A8800010 		.word	268468392
+ 1251 0558 0A800010 		.word	268468234
+ 1252 055c A9800010 		.word	268468393
+ 1253 0560 30830010 		.word	268469040
+ 1254              		.cfi_endproc
+ 1255              	.LFE53:
+ 1257 0564 C046C046 		.align	5
+ 1257      C046C046 
+ 1257      C046C046 
+ 1257      C046C046 
+ 1257      C046C046 
+ 1258              		.global	QSPI_FlashDeepPowerDown
+ 1259              		.code	16
+ 1260              		.thumb_func
+ 1262              	QSPI_FlashDeepPowerDown:
+ 1263              	.LFB54:
+ 353:../../../drivers/hal/bc62xx_flash.c **** 
+ 354:../../../drivers/hal/bc62xx_flash.c **** 
+ 355:../../../drivers/hal/bc62xx_flash.c **** void  __attribute__((noinline,aligned(32)))  QSPI_FlashDeepPowerDown()
+ 356:../../../drivers/hal/bc62xx_flash.c **** {
+ 1264              		.loc 1 356 0
+ 1265              		.cfi_startproc
+ 1266              		@ args = 0, pretend = 0, frame = 8
+ 1267              		@ frame_needed = 0, uses_anonymous_args = 0
+ 357:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 358:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[1]={0};
+ 359:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 360:../../../drivers/hal/bc62xx_flash.c **** 	int i;
+ 361:../../../drivers/hal/bc62xx_flash.c **** 	temp[0] = 0xb9;
+ 1268              		.loc 1 361 0
+ 1269 0580 B923     		movs	r3, #185
+ 356:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 1270              		.loc 1 356 0
+ 1271 0582 07B5     		push	{r0, r1, r2, lr}
+ 1272              	.LCFI14:
+ 1273              		.cfi_def_cfa_offset 16
+ 1274              		.cfi_offset 0, -16
+ 1275              		.cfi_offset 1, -12
+ 1276              		.cfi_offset 2, -8
+ 1277              		.cfi_offset 14, -4
+ 362:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp,1);
+ 1278              		.loc 1 362 0
+ 1279 0584 0121     		movs	r1, #1
+ 361:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp,1);
+ 1280              		.loc 1 361 0
+ 1281 0586 01A8     		add	r0, sp, #4
+ 1282 0588 0370     		strb	r3, [r0]
+ 363:../../../drivers/hal/bc62xx_flash.c **** 	for(i=0;i<5000;i++);
+ 364:../../../drivers/hal/bc62xx_flash.c **** }
+ 1283              		.loc 1 364 0
+ 1284              		@ sp needed
+ 362:../../../drivers/hal/bc62xx_flash.c **** 	for(i=0;i<5000;i++);
+ 1285              		.loc 1 362 0
+ 1286 058a FFF7FEFF 		bl	SendFlashWithoutRx
+ 1287              	.LVL104:
+ 1288              		.loc 1 364 0
+ 1289 058e 07BD     		pop	{r0, r1, r2, pc}
+ 1290              		.cfi_endproc
+ 1291              	.LFE54:
+ 1293 0590 C046C046 		.align	5
+ 1293      C046C046 
+ 1293      C046C046 
+ 1293      C046C046 
+ 1294              		.global	FlashWriteEnable
+ 1295              		.code	16
+ 1296              		.thumb_func
+ 1298              	FlashWriteEnable:
+ 1299              	.LFB55:
+ 365:../../../drivers/hal/bc62xx_flash.c **** 
+ 366:../../../drivers/hal/bc62xx_flash.c **** void  __attribute__((noinline,aligned(32)))  FlashWriteEnable()
+ 367:../../../drivers/hal/bc62xx_flash.c **** {
+ 1300              		.loc 1 367 0
+ 1301              		.cfi_startproc
+ 1302              		@ args = 0, pretend = 0, frame = 8
+ 1303              		@ frame_needed = 0, uses_anonymous_args = 0
+ 368:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 369:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp2[1]={0};
+ 370:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 371:../../../drivers/hal/bc62xx_flash.c **** 	temp2[0] = 0x06;
+ 1304              		.loc 1 371 0
+ 1305 05a0 0623     		movs	r3, #6
+ 367:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 1306              		.loc 1 367 0
+ 1307 05a2 07B5     		push	{r0, r1, r2, lr}
+ 1308              	.LCFI15:
+ 1309              		.cfi_def_cfa_offset 16
+ 1310              		.cfi_offset 0, -16
+ 1311              		.cfi_offset 1, -12
+ 1312              		.cfi_offset 2, -8
+ 1313              		.cfi_offset 14, -4
+ 372:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp2,1);
+ 1314              		.loc 1 372 0
+ 1315 05a4 0121     		movs	r1, #1
+ 371:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp2,1);
+ 1316              		.loc 1 371 0
+ 1317 05a6 01A8     		add	r0, sp, #4
+ 1318 05a8 0370     		strb	r3, [r0]
+ 373:../../../drivers/hal/bc62xx_flash.c **** }
+ 1319              		.loc 1 373 0
+ 1320              		@ sp needed
+ 372:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp2,1);
+ 1321              		.loc 1 372 0
+ 1322 05aa FFF7FEFF 		bl	SendFlashWithoutRx
+ 1323              	.LVL105:
+ 1324              		.loc 1 373 0
+ 1325 05ae 07BD     		pop	{r0, r1, r2, pc}
+ 1326              		.cfi_endproc
+ 1327              	.LFE55:
+ 1329 05b0 C046C046 		.align	5
+ 1329      C046C046 
+ 1329      C046C046 
+ 1329      C046C046 
+ 1330              		.global	QSPI_FlashWriteDisable
+ 1331              		.code	16
+ 1332              		.thumb_func
+ 1334              	QSPI_FlashWriteDisable:
+ 1335              	.LFB56:
+ 374:../../../drivers/hal/bc62xx_flash.c **** 
+ 375:../../../drivers/hal/bc62xx_flash.c **** void  __attribute__((noinline,aligned(32)))  QSPI_FlashWriteDisable()
+ 376:../../../drivers/hal/bc62xx_flash.c **** {
+ 1336              		.loc 1 376 0
+ 1337              		.cfi_startproc
+ 1338              		@ args = 0, pretend = 0, frame = 8
+ 1339              		@ frame_needed = 0, uses_anonymous_args = 0
+ 377:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 378:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[1]={0};
+ 379:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 380:../../../drivers/hal/bc62xx_flash.c **** 	temp[0] = 0x04;
+ 1340              		.loc 1 380 0
+ 1341 05c0 0423     		movs	r3, #4
+ 376:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 1342              		.loc 1 376 0
+ 1343 05c2 07B5     		push	{r0, r1, r2, lr}
+ 1344              	.LCFI16:
+ 1345              		.cfi_def_cfa_offset 16
+ 1346              		.cfi_offset 0, -16
+ 1347              		.cfi_offset 1, -12
+ 1348              		.cfi_offset 2, -8
+ 1349              		.cfi_offset 14, -4
+ 381:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp,1);
+ 1350              		.loc 1 381 0
+ 1351 05c4 0121     		movs	r1, #1
+ 380:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp,1);
+ 1352              		.loc 1 380 0
+ 1353 05c6 01A8     		add	r0, sp, #4
+ 1354 05c8 0370     		strb	r3, [r0]
+ 382:../../../drivers/hal/bc62xx_flash.c **** }
+ 1355              		.loc 1 382 0
+ 1356              		@ sp needed
+ 381:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp,1);
+ 1357              		.loc 1 381 0
+ 1358 05ca FFF7FEFF 		bl	SendFlashWithoutRx
+ 1359              	.LVL106:
+ 1360              		.loc 1 382 0
+ 1361 05ce 07BD     		pop	{r0, r1, r2, pc}
+ 1362              		.cfi_endproc
+ 1363              	.LFE56:
+ 1365 05d0 C046C046 		.align	5
+ 1365      C046C046 
+ 1365      C046C046 
+ 1365      C046C046 
+ 1366              		.global	QSPI_PageEraseFlash
+ 1367              		.code	16
+ 1368              		.thumb_func
+ 1370              	QSPI_PageEraseFlash:
+ 1371              	.LFB57:
+ 383:../../../drivers/hal/bc62xx_flash.c **** 
+ 384:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32))) QSPI_PageEraseFlash(int flash_addr)
+ 385:../../../drivers/hal/bc62xx_flash.c **** {
+ 1372              		.loc 1 385 0
+ 1373              		.cfi_startproc
+ 1374              		@ args = 0, pretend = 0, frame = 8
+ 1375              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1376              	.LVL107:
+ 1377 05e0 07B5     		push	{r0, r1, r2, lr}
+ 1378              	.LCFI17:
+ 1379              		.cfi_def_cfa_offset 16
+ 1380              		.cfi_offset 0, -16
+ 1381              		.cfi_offset 1, -12
+ 1382              		.cfi_offset 2, -8
+ 1383              		.cfi_offset 14, -4
+ 1384              		.loc 1 385 0
+ 1385 05e2 0200     		movs	r2, r0
+ 1386              	.LBB22:
+ 1387              	.LBB23:
+ 1388              		.loc 2 71 0
+ 1389              		.syntax divided
+ 1390              	@ 71 "../../../cmsis/cmsis_gcc.h" 1
+ 1391 05e4 72B6     		cpsid i
+ 1392              	@ 0 "" 2
+ 1393              		.thumb
+ 1394              		.syntax unified
+ 1395              	.LBE23:
+ 1396              	.LBE22:
+ 386:../../../drivers/hal/bc62xx_flash.c **** 	OS_ENTER_CRITICAL();
+ 387:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 388:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[4]={0};
+ 1397              		.loc 1 388 0
+ 1398 05e6 0023     		movs	r3, #0
+ 389:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 390:../../../drivers/hal/bc62xx_flash.c **** 	FillSendCMD(temp, 0x81, flash_addr);
+ 1399              		.loc 1 390 0
+ 1400 05e8 01A8     		add	r0, sp, #4
+ 1401              	.LVL108:
+ 1402 05ea 8121     		movs	r1, #129
+ 388:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 1403              		.loc 1 388 0
+ 1404 05ec 0193     		str	r3, [sp, #4]
+ 1405              		.loc 1 390 0
+ 1406 05ee FFF7FEFF 		bl	FillSendCMD
+ 1407              	.LVL109:
+ 391:../../../drivers/hal/bc62xx_flash.c **** 	FlashWriteEnable();	
+ 1408              		.loc 1 391 0
+ 1409 05f2 FFF7FEFF 		bl	FlashWriteEnable
+ 1410              	.LVL110:
+ 392:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp,4);
+ 1411              		.loc 1 392 0
+ 1412 05f6 0421     		movs	r1, #4
+ 1413 05f8 01A8     		add	r0, sp, #4
+ 1414 05fa FFF7FEFF 		bl	SendFlashWithoutRx
+ 1415              	.LVL111:
+ 1416              	.LBB24:
+ 1417              	.LBB25:
+  60:../../../cmsis/cmsis_gcc.h **** }
+ 1418              		.loc 2 60 0
+ 1419              		.syntax divided
+ 1420              	@ 60 "../../../cmsis/cmsis_gcc.h" 1
+ 1421 05fe 62B6     		cpsie i
+ 1422              	@ 0 "" 2
+ 1423              		.thumb
+ 1424              		.syntax unified
+ 1425              	.LBE25:
+ 1426              	.LBE24:
+ 393:../../../drivers/hal/bc62xx_flash.c **** 	OS_EXIT_CRITICAL();
+ 394:../../../drivers/hal/bc62xx_flash.c **** }
+ 1427              		.loc 1 394 0
+ 1428              		@ sp needed
+ 1429 0600 07BD     		pop	{r0, r1, r2, pc}
+ 1430              		.cfi_endproc
+ 1431              	.LFE57:
+ 1433 0602 C046C046 		.align	5
+ 1433      C046C046 
+ 1433      C046C046 
+ 1433      C046C046 
+ 1433      C046C046 
+ 1434              		.global	QSPI_WriteFlashReg
+ 1435              		.code	16
+ 1436              		.thumb_func
+ 1438              	QSPI_WriteFlashReg:
+ 1439              	.LFB58:
+ 395:../../../drivers/hal/bc62xx_flash.c **** 
+ 396:../../../drivers/hal/bc62xx_flash.c **** void   __attribute__((noinline,aligned(32)))  QSPI_WriteFlashReg(uint8_t *txbuf)
+ 397:../../../drivers/hal/bc62xx_flash.c **** {
+ 1440              		.loc 1 397 0
+ 1441              		.cfi_startproc
+ 1442              		@ args = 0, pretend = 0, frame = 8
+ 1443              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1444              	.LVL112:
+ 1445 0620 73B5     		push	{r0, r1, r4, r5, r6, lr}
+ 1446              	.LCFI18:
+ 1447              		.cfi_def_cfa_offset 24
+ 1448              		.cfi_offset 0, -24
+ 1449              		.cfi_offset 1, -20
+ 1450              		.cfi_offset 4, -16
+ 1451              		.cfi_offset 5, -12
+ 1452              		.cfi_offset 6, -8
+ 1453              		.cfi_offset 14, -4
+ 398:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 399:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[3]={0};
+ 1454              		.loc 1 399 0
+ 1455 0622 0325     		movs	r5, #3
+ 1456 0624 01AC     		add	r4, sp, #4
+ 397:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 1457              		.loc 1 397 0
+ 1458 0626 0600     		movs	r6, r0
+ 1459              		.loc 1 399 0
+ 1460 0628 2A00     		movs	r2, r5
+ 1461 062a 0021     		movs	r1, #0
+ 1462 062c 2000     		movs	r0, r4
+ 1463              	.LVL113:
+ 1464 062e FFF7FEFF 		bl	memset
+ 1465              	.LVL114:
+ 400:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 401:../../../drivers/hal/bc62xx_flash.c **** 	temp[0] = 0x01;
+ 1466              		.loc 1 401 0
+ 1467 0632 0123     		movs	r3, #1
+ 1468 0634 2370     		strb	r3, [r4]
+ 402:../../../drivers/hal/bc62xx_flash.c **** 	temp[1] = txbuf[0];
+ 1469              		.loc 1 402 0
+ 1470 0636 3378     		ldrb	r3, [r6]
+ 403:../../../drivers/hal/bc62xx_flash.c **** 	temp[2] = txbuf[1];
+ 404:../../../drivers/hal/bc62xx_flash.c **** 	FlashWriteEnable();
+ 405:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp,3);	//s15-s8
+ 406:../../../drivers/hal/bc62xx_flash.c **** }
+ 1471              		.loc 1 406 0
+ 1472              		@ sp needed
+ 402:../../../drivers/hal/bc62xx_flash.c **** 	temp[1] = txbuf[0];
+ 1473              		.loc 1 402 0
+ 1474 0638 6370     		strb	r3, [r4, #1]
+ 403:../../../drivers/hal/bc62xx_flash.c **** 	temp[2] = txbuf[1];
+ 1475              		.loc 1 403 0
+ 1476 063a 7378     		ldrb	r3, [r6, #1]
+ 1477 063c A370     		strb	r3, [r4, #2]
+ 404:../../../drivers/hal/bc62xx_flash.c **** 	SendFlashWithoutRx(temp,3);	//s15-s8
+ 1478              		.loc 1 404 0
+ 1479 063e FFF7FEFF 		bl	FlashWriteEnable
+ 1480              	.LVL115:
+ 405:../../../drivers/hal/bc62xx_flash.c **** }
+ 1481              		.loc 1 405 0
+ 1482 0642 2900     		movs	r1, r5
+ 1483 0644 2000     		movs	r0, r4
+ 1484 0646 FFF7FEFF 		bl	SendFlashWithoutRx
+ 1485              	.LVL116:
+ 1486              	.LVL117:
+ 1487              		.loc 1 406 0
+ 1488 064a 73BD     		pop	{r0, r1, r4, r5, r6, pc}
+ 1489              		.cfi_endproc
+ 1490              	.LFE58:
+ 1492 064c C046C046 		.align	5
+ 1492      C046C046 
+ 1492      C046C046 
+ 1492      C046C046 
+ 1492      C046C046 
+ 1493              		.global	QSPI_FlashQuadEnable
+ 1494              		.code	16
+ 1495              		.thumb_func
+ 1497              	QSPI_FlashQuadEnable:
+ 1498              	.LFB59:
+ 407:../../../drivers/hal/bc62xx_flash.c **** 
+ 408:../../../drivers/hal/bc62xx_flash.c **** void   __attribute__((noinline,aligned(32)))   QSPI_FlashQuadEnable(uint8_t on)
+ 409:../../../drivers/hal/bc62xx_flash.c **** {
+ 1499              		.loc 1 409 0
+ 1500              		.cfi_startproc
+ 1501              		@ args = 0, pretend = 0, frame = 8
+ 1502              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1503              	.LVL118:
+ 410:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 411:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t temp[2]={0};
+ 1504              		.loc 1 411 0
+ 1505 0660 0023     		movs	r3, #0
+ 409:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 1506              		.loc 1 409 0
+ 1507 0662 37B5     		push	{r0, r1, r2, r4, r5, lr}
+ 1508              	.LCFI19:
+ 1509              		.cfi_def_cfa_offset 24
+ 1510              		.cfi_offset 0, -24
+ 1511              		.cfi_offset 1, -20
+ 1512              		.cfi_offset 2, -16
+ 1513              		.cfi_offset 4, -12
+ 1514              		.cfi_offset 5, -8
+ 1515              		.cfi_offset 14, -4
+ 1516              		.loc 1 411 0
+ 1517 0664 01AC     		add	r4, sp, #4
+ 409:../../../drivers/hal/bc62xx_flash.c **** #ifdef RAM10000
+ 1518              		.loc 1 409 0
+ 1519 0666 0500     		movs	r5, r0
+ 412:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 413:../../../drivers/hal/bc62xx_flash.c **** 	QSPI_ReadFlashReg(temp);
+ 1520              		.loc 1 413 0
+ 1521 0668 2000     		movs	r0, r4
+ 1522              	.LVL119:
+ 411:../../../drivers/hal/bc62xx_flash.c **** #endif
+ 1523              		.loc 1 411 0
+ 1524 066a 2380     		strh	r3, [r4]
+ 1525              		.loc 1 413 0
+ 1526 066c FFF7FEFF 		bl	QSPI_ReadFlashReg
+ 1527              	.LVL120:
+ 1528 0670 6378     		ldrb	r3, [r4, #1]
+ 1529 0672 0222     		movs	r2, #2
+ 414:../../../drivers/hal/bc62xx_flash.c **** 	if(on)
+ 1530              		.loc 1 414 0
+ 1531 0674 002D     		cmp	r5, #0
+ 1532 0676 02D0     		beq	.L87
+ 415:../../../drivers/hal/bc62xx_flash.c **** 		temp[1] = temp[1] |0x02;	
+ 1533              		.loc 1 415 0
+ 1534 0678 1343     		orrs	r3, r2
+ 1535 067a 6370     		strb	r3, [r4, #1]
+ 1536 067c 01E0     		b	.L88
+ 1537              	.L87:
+ 416:../../../drivers/hal/bc62xx_flash.c **** 	else
+ 417:../../../drivers/hal/bc62xx_flash.c **** 		temp[1] = temp[1] &0xfd;
+ 1538              		.loc 1 417 0
+ 1539 067e 9343     		bics	r3, r2
+ 1540 0680 6370     		strb	r3, [r4, #1]
+ 1541              	.L88:
+ 418:../../../drivers/hal/bc62xx_flash.c **** 	QSPI_WriteFlashReg(temp);
+ 1542              		.loc 1 418 0
+ 1543 0682 2000     		movs	r0, r4
+ 1544 0684 FFF7FEFF 		bl	QSPI_WriteFlashReg
+ 1545              	.LVL121:
+ 419:../../../drivers/hal/bc62xx_flash.c **** }
+ 1546              		.loc 1 419 0
+ 1547              		@ sp needed
+ 1548 0688 37BD     		pop	{r0, r1, r2, r4, r5, pc}
+ 1549              		.cfi_endproc
+ 1550              	.LFE59:
+ 1552 068a C046C046 		.align	5
+ 1552      C046C046 
+ 1552      C046C046 
+ 1552      C046C046 
+ 1552      C046C046 
+ 1553              		.global	End
+ 1554              		.code	16
+ 1555              		.thumb_func
+ 1557              	End:
+ 1558              	.LFB60:
+ 420:../../../drivers/hal/bc62xx_flash.c **** 
+ 421:../../../drivers/hal/bc62xx_flash.c **** 
+ 422:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32)))    End()
+ 423:../../../drivers/hal/bc62xx_flash.c **** {
+ 1559              		.loc 1 423 0
+ 1560              		.cfi_startproc
+ 1561              		@ args = 0, pretend = 0, frame = 0
+ 1562              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1563              		@ link register save eliminated.
+ 424:../../../drivers/hal/bc62xx_flash.c **** 	__ASM("nop");
+ 1564              		.loc 1 424 0
+ 1565              		.syntax divided
+ 1566              	@ 424 "../../../drivers/hal/bc62xx_flash.c" 1
+ 1567 06a0 C046     		nop
+ 1568              	@ 0 "" 2
+ 425:../../../drivers/hal/bc62xx_flash.c **** }
+ 1569              		.loc 1 425 0
+ 1570              		.thumb
+ 1571              		.syntax unified
+ 1572              		@ sp needed
+ 1573 06a2 7047     		bx	lr
+ 1574              		.cfi_endproc
+ 1575              	.LFE60:
+ 1577 06a4 C046C046 		.align	5
+ 1577      C046C046 
+ 1577      C046C046 
+ 1577      C046C046 
+ 1577      C046C046 
+ 1578              		.global	prefetch
+ 1579              		.code	16
+ 1580              		.thumb_func
+ 1582              	prefetch:
+ 1583              	.LFB61:
+ 426:../../../drivers/hal/bc62xx_flash.c **** 
+ 427:../../../drivers/hal/bc62xx_flash.c **** void __attribute__((noinline,aligned(32)))   prefetch(int start_addr, int end_addr)
+ 428:../../../drivers/hal/bc62xx_flash.c **** {
+ 1584              		.loc 1 428 0
+ 1585              		.cfi_startproc
+ 1586              		@ args = 0, pretend = 0, frame = 0
+ 1587              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1588              		@ link register save eliminated.
+ 1589              	.LVL122:
+ 429:../../../drivers/hal/bc62xx_flash.c **** 	int addr= 0;
+ 430:../../../drivers/hal/bc62xx_flash.c **** 	for(addr = (int)start_addr & (~0x1f);addr < (int)end_addr + 32;addr += 32)
+ 1590              		.loc 1 430 0
+ 1591 06c0 1F23     		movs	r3, #31
+ 1592 06c2 9843     		bics	r0, r3
+ 1593              	.LVL123:
+ 1594 06c4 0300     		movs	r3, r0
+ 1595              	.LVL124:
+ 1596 06c6 1F31     		adds	r1, r1, #31
+ 1597              	.LVL125:
+ 1598              	.L91:
+ 1599              		.loc 1 430 0 is_stmt 0 discriminator 1
+ 1600 06c8 8B42     		cmp	r3, r1
+ 1601 06ca 02DC     		bgt	.L93
+ 431:../../../drivers/hal/bc62xx_flash.c **** 	{
+ 432:../../../drivers/hal/bc62xx_flash.c **** 		__ASM("ldr r0,[%0]": : "r"(addr) :"%r0");
+ 1602              		.loc 1 432 0 is_stmt 1 discriminator 3
+ 1603              		.syntax divided
+ 1604              	@ 432 "../../../drivers/hal/bc62xx_flash.c" 1
+ 1605 06cc 1868     		ldr r0,[r3]
+ 1606              	@ 0 "" 2
+ 430:../../../drivers/hal/bc62xx_flash.c **** 	{
+ 1607              		.loc 1 430 0 discriminator 3
+ 1608              		.thumb
+ 1609              		.syntax unified
+ 1610 06ce 2033     		adds	r3, r3, #32
+ 1611              	.LVL126:
+ 1612 06d0 FAE7     		b	.L91
+ 1613              	.L93:
+ 433:../../../drivers/hal/bc62xx_flash.c **** //			__ASM("ldr r0,[%0]": : "r"(addr) :);
+ 434:../../../drivers/hal/bc62xx_flash.c **** 	}
+ 435:../../../drivers/hal/bc62xx_flash.c **** }
+ 1614              		.loc 1 435 0
+ 1615              		@ sp needed
+ 1616 06d2 7047     		bx	lr
+ 1617              		.cfi_endproc
+ 1618              	.LFE61:
+ 1620              		.align	1
+ 1621              		.global	QSPI_Init
+ 1622              		.code	16
+ 1623              		.thumb_func
+ 1625              	QSPI_Init:
+ 1626              	.LFB62:
+ 436:../../../drivers/hal/bc62xx_flash.c **** 
+ 437:../../../drivers/hal/bc62xx_flash.c **** void QSPI_Init()
+ 438:../../../drivers/hal/bc62xx_flash.c **** {
+ 1627              		.loc 1 438 0
+ 1628              		.cfi_startproc
+ 1629              		@ args = 0, pretend = 0, frame = 0
+ 1630              		@ frame_needed = 0, uses_anonymous_args = 0
+ 439:../../../drivers/hal/bc62xx_flash.c **** 	int a,b;
+ 440:../../../drivers/hal/bc62xx_flash.c **** 	a = (int)Start;
+ 1631              		.loc 1 440 0
+ 1632 06d4 0648     		ldr	r0, .L97
+ 1633              	.LVL127:
+ 441:../../../drivers/hal/bc62xx_flash.c **** 	b = (int)End;
+ 1634              		.loc 1 441 0
+ 1635 06d6 074B     		ldr	r3, .L97+4
+ 1636              	.LVL128:
+ 438:../../../drivers/hal/bc62xx_flash.c **** 	int a,b;
+ 1637              		.loc 1 438 0
+ 1638 06d8 10B5     		push	{r4, lr}
+ 1639              	.LCFI20:
+ 1640              		.cfi_def_cfa_offset 8
+ 1641              		.cfi_offset 4, -8
+ 1642              		.cfi_offset 14, -4
+ 442:../../../drivers/hal/bc62xx_flash.c **** 	if(a<b)
+ 1643              		.loc 1 442 0
+ 1644 06da 9842     		cmp	r0, r3
+ 1645 06dc 03DA     		bge	.L95
+ 443:../../../drivers/hal/bc62xx_flash.c **** 		prefetch(a,b);
+ 1646              		.loc 1 443 0
+ 1647 06de 1900     		movs	r1, r3
+ 1648 06e0 FFF7FEFF 		bl	prefetch
+ 1649              	.LVL129:
+ 1650 06e4 03E0     		b	.L94
+ 1651              	.LVL130:
+ 1652              	.L95:
+ 444:../../../drivers/hal/bc62xx_flash.c **** 	else
+ 445:../../../drivers/hal/bc62xx_flash.c **** 		prefetch(b,a);
+ 1653              		.loc 1 445 0
+ 1654 06e6 0100     		movs	r1, r0
+ 1655 06e8 1800     		movs	r0, r3
+ 1656              	.LVL131:
+ 1657 06ea FFF7FEFF 		bl	prefetch
+ 1658              	.LVL132:
+ 1659              	.L94:
+ 446:../../../drivers/hal/bc62xx_flash.c **** }
+ 1660              		.loc 1 446 0
+ 1661              		@ sp needed
+ 1662 06ee 10BD     		pop	{r4, pc}
+ 1663              	.L98:
+ 1664              		.align	2
+ 1665              	.L97:
+ 1666 06f0 00000000 		.word	Start
+ 1667 06f4 00000000 		.word	End
+ 1668              		.cfi_endproc
+ 1669              	.LFE62:
+ 1671              		.align	1
+ 1672              		.global	_Qspi_WritebyEarsePage
+ 1673              		.code	16
+ 1674              		.thumb_func
+ 1676              	_Qspi_WritebyEarsePage:
+ 1677              	.LFB63:
+ 447:../../../drivers/hal/bc62xx_flash.c **** 
+ 448:../../../drivers/hal/bc62xx_flash.c **** void _Qspi_WritebyEarsePage(uint32_t flash_addr,uint32_t len,uint8_t* tbuf)
+ 449:../../../drivers/hal/bc62xx_flash.c **** {		
+ 1678              		.loc 1 449 0
+ 1679              		.cfi_startproc
+ 1680              		@ args = 0, pretend = 0, frame = 256
+ 1681              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1682              	.LVL133:
+ 1683 06f8 F0B5     		push	{r4, r5, r6, r7, lr}
+ 1684              	.LCFI21:
+ 1685              		.cfi_def_cfa_offset 20
+ 1686              		.cfi_offset 4, -20
+ 1687              		.cfi_offset 5, -16
+ 1688              		.cfi_offset 6, -12
+ 1689              		.cfi_offset 7, -8
+ 1690              		.cfi_offset 14, -4
+ 1691 06fa 1700     		movs	r7, r2
+ 450:../../../drivers/hal/bc62xx_flash.c **** 	uint32_t i=0;
+ 451:../../../drivers/hal/bc62xx_flash.c **** 	uint8_t pagebuf[PAGE_SIZE] = {0};
+ 452:../../../drivers/hal/bc62xx_flash.c **** 	
+ 453:../../../drivers/hal/bc62xx_flash.c **** 	memset(pagebuf,0xff,PAGE_SIZE);												//将每个字节都置为ff													
+ 1692              		.loc 1 453 0
+ 1693 06fc 8022     		movs	r2, #128
+ 1694              	.LVL134:
+ 449:../../../drivers/hal/bc62xx_flash.c **** 	uint32_t i=0;
+ 1695              		.loc 1 449 0
+ 1696 06fe C1B0     		sub	sp, sp, #260
+ 1697              	.LCFI22:
+ 1698              		.cfi_def_cfa_offset 280
+ 449:../../../drivers/hal/bc62xx_flash.c **** 	uint32_t i=0;
+ 1699              		.loc 1 449 0
+ 1700 0700 0500     		movs	r5, r0
+ 1701              		.loc 1 453 0
+ 1702 0702 5200     		lsls	r2, r2, #1
+ 449:../../../drivers/hal/bc62xx_flash.c **** 	uint32_t i=0;
+ 1703              		.loc 1 449 0
+ 1704 0704 0E00     		movs	r6, r1
+ 1705              		.loc 1 453 0
+ 1706 0706 6846     		mov	r0, sp
+ 1707              	.LVL135:
+ 1708 0708 FF21     		movs	r1, #255
+ 1709              	.LVL136:
+ 1710 070a FFF7FEFF 		bl	memset
+ 1711              	.LVL137:
+ 454:../../../drivers/hal/bc62xx_flash.c **** 
+ 455:../../../drivers/hal/bc62xx_flash.c **** 	QSPI_Init();
+ 1712              		.loc 1 455 0
+ 1713 070e FFF7FEFF 		bl	QSPI_Init
+ 1714              	.LVL138:
+ 456:../../../drivers/hal/bc62xx_flash.c **** 	QSPI_ReadFlashData((flash_addr/PAGE_SIZE)*PAGE_SIZE,PAGE_SIZE,pagebuf);//从flash中读出不更改的数据
+ 1715              		.loc 1 456 0
+ 1716 0712 8021     		movs	r1, #128
+ 1717 0714 2C0A     		lsrs	r4, r5, #8
+ 1718 0716 2402     		lsls	r4, r4, #8
+ 1719 0718 6A46     		mov	r2, sp
+ 1720 071a 4900     		lsls	r1, r1, #1
+ 1721 071c 2000     		movs	r0, r4
+ 1722 071e FFF7FEFF 		bl	QSPI_ReadFlashData
+ 1723              	.LVL139:
+ 457:../../../drivers/hal/bc62xx_flash.c **** 
+ 458:../../../drivers/hal/bc62xx_flash.c **** 	for(i=0; i<len; i++)														//将需要修改数据copy到pagebuf中
+ 1724              		.loc 1 458 0
+ 1725 0722 0023     		movs	r3, #0
+ 459:../../../drivers/hal/bc62xx_flash.c **** 		pagebuf[flash_addr%256 +i] = *(tbuf + i);
+ 1726              		.loc 1 459 0
+ 1727 0724 EAB2     		uxtb	r2, r5
+ 1728              	.LVL140:
+ 1729              	.L100:
+ 458:../../../drivers/hal/bc62xx_flash.c **** 		pagebuf[flash_addr%256 +i] = *(tbuf + i);
+ 1730              		.loc 1 458 0 discriminator 1
+ 1731 0726 B342     		cmp	r3, r6
+ 1732 0728 05D0     		beq	.L102
+ 1733              		.loc 1 459 0 discriminator 3
+ 1734 072a 1900     		movs	r1, r3
+ 1735 072c F85C     		ldrb	r0, [r7, r3]
+ 1736 072e 6944     		add	r1, r1, sp
+ 1737 0730 8854     		strb	r0, [r1, r2]
+ 458:../../../drivers/hal/bc62xx_flash.c **** 		pagebuf[flash_addr%256 +i] = *(tbuf + i);
+ 1738              		.loc 1 458 0 discriminator 3
+ 1739 0732 0133     		adds	r3, r3, #1
+ 1740              	.LVL141:
+ 1741 0734 F7E7     		b	.L100
+ 1742              	.L102:
+ 460:../../../drivers/hal/bc62xx_flash.c **** 
+ 461:../../../drivers/hal/bc62xx_flash.c **** 	QSPI_Init();
+ 1743              		.loc 1 461 0
+ 1744 0736 FFF7FEFF 		bl	QSPI_Init
+ 1745              	.LVL142:
+ 462:../../../drivers/hal/bc62xx_flash.c **** 	QSPI_PageEraseFlash(flash_addr);											//将page擦除
+ 1746              		.loc 1 462 0
+ 1747 073a 2800     		movs	r0, r5
+ 1748 073c FFF7FEFF 		bl	QSPI_PageEraseFlash
+ 1749              	.LVL143:
+ 463:../../../drivers/hal/bc62xx_flash.c **** 
+ 464:../../../drivers/hal/bc62xx_flash.c **** 	QSPI_Init();
+ 1750              		.loc 1 464 0
+ 1751 0740 FFF7FEFF 		bl	QSPI_Init
+ 1752              	.LVL144:
+ 465:../../../drivers/hal/bc62xx_flash.c **** 	QSPI_WriteFlashData((flash_addr/PAGE_SIZE)*PAGE_SIZE,PAGE_SIZE,pagebuf);	//将组好的新的pagebuf重新
+ 1753              		.loc 1 465 0
+ 1754 0744 8021     		movs	r1, #128
+ 1755 0746 6A46     		mov	r2, sp
+ 1756 0748 4900     		lsls	r1, r1, #1
+ 1757 074a 2000     		movs	r0, r4
+ 1758 074c FFF7FEFF 		bl	QSPI_WriteFlashData
+ 1759              	.LVL145:
+ 466:../../../drivers/hal/bc62xx_flash.c **** }
+ 1760              		.loc 1 466 0
+ 1761 0750 41B0     		add	sp, sp, #260
+ 1762              		@ sp needed
+ 1763              	.LVL146:
+ 1764              	.LVL147:
+ 1765              	.LVL148:
+ 1766 0752 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1767              		.cfi_endproc
+ 1768              	.LFE63:
+ 1770              		.align	1
+ 1771              		.global	QSPI_WriteFlashDatabyPage
+ 1772              		.code	16
+ 1773              		.thumb_func
+ 1775              	QSPI_WriteFlashDatabyPage:
+ 1776              	.LFB64:
+ 467:../../../drivers/hal/bc62xx_flash.c **** 
+ 468:../../../drivers/hal/bc62xx_flash.c **** 
+ 469:../../../drivers/hal/bc62xx_flash.c **** void QSPI_WriteFlashDatabyPage(int flash_addr, int txlen, uint8_t *txdata)
+ 470:../../../drivers/hal/bc62xx_flash.c **** {
+ 1777              		.loc 1 470 0
+ 1778              		.cfi_startproc
+ 1779              		@ args = 0, pretend = 0, frame = 8
+ 1780              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1781              	.LVL149:
+ 1782 0754 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 1783              	.LCFI23:
+ 1784              		.cfi_def_cfa_offset 32
+ 1785              		.cfi_offset 0, -32
+ 1786              		.cfi_offset 1, -28
+ 1787              		.cfi_offset 2, -24
+ 1788              		.cfi_offset 4, -20
+ 1789              		.cfi_offset 5, -16
+ 1790              		.cfi_offset 6, -12
+ 1791              		.cfi_offset 7, -8
+ 1792              		.cfi_offset 14, -4
+ 471:../../../drivers/hal/bc62xx_flash.c **** 	uint32_t i=0;
+ 472:../../../drivers/hal/bc62xx_flash.c **** //	uint8_t pagebuf[PAGE_SIZE] = {0};
+ 473:../../../drivers/hal/bc62xx_flash.c **** 	uint32_t packnum = 0;
+ 474:../../../drivers/hal/bc62xx_flash.c **** 	uint32_t ilen = (PAGE_SIZE - flash_addr % PAGE_SIZE);
+ 1793              		.loc 1 474 0
+ 1794 0756 1C4C     		ldr	r4, .L110
+ 470:../../../drivers/hal/bc62xx_flash.c **** 	uint32_t i=0;
+ 1795              		.loc 1 470 0
+ 1796 0758 0700     		movs	r7, r0
+ 1797 075a 0D00     		movs	r5, r1
+ 1798 075c 1600     		movs	r6, r2
+ 1799              		.loc 1 474 0
+ 1800 075e 0440     		ands	r4, r0
+ 1801 0760 03D5     		bpl	.L104
+ 1802 0762 1A4B     		ldr	r3, .L110+4
+ 1803 0764 013C     		subs	r4, r4, #1
+ 1804 0766 1C43     		orrs	r4, r3
+ 1805 0768 0134     		adds	r4, r4, #1
+ 1806              	.L104:
+ 1807 076a 8023     		movs	r3, #128
+ 1808 076c 5B00     		lsls	r3, r3, #1
+ 1809 076e 1C1B     		subs	r4, r3, r4
+ 1810              	.LVL150:
+ 475:../../../drivers/hal/bc62xx_flash.c **** 		
+ 476:../../../drivers/hal/bc62xx_flash.c **** 	ilen = ilen>txlen?txlen:ilen;						//确定第一页写的长度
+ 1811              		.loc 1 476 0
+ 1812 0770 AC42     		cmp	r4, r5
+ 1813 0772 00D9     		bls	.L105
+ 1814 0774 2C00     		movs	r4, r5
+ 1815              	.LVL151:
+ 1816              	.L105:
+ 477:../../../drivers/hal/bc62xx_flash.c **** 
+ 478:../../../drivers/hal/bc62xx_flash.c **** 	_Qspi_WritebyEarsePage(flash_addr,ilen,txdata);		//写需要写的第一个page
+ 1817              		.loc 1 478 0
+ 1818 0776 3200     		movs	r2, r6
+ 1819              	.LVL152:
+ 1820 0778 2100     		movs	r1, r4
+ 1821              	.LVL153:
+ 1822 077a 3800     		movs	r0, r7
+ 1823              	.LVL154:
+ 1824 077c FFF7FEFF 		bl	_Qspi_WritebyEarsePage
+ 1825              	.LVL155:
+ 479:../../../drivers/hal/bc62xx_flash.c **** 
+ 480:../../../drivers/hal/bc62xx_flash.c **** 	flash_addr += ilen;									//写完第一页之后参量偏移
+ 481:../../../drivers/hal/bc62xx_flash.c **** 	txdata += ilen;
+ 1826              		.loc 1 481 0
+ 1827 0780 3319     		adds	r3, r6, r4
+ 482:../../../drivers/hal/bc62xx_flash.c **** 	txlen -= ilen;
+ 1828              		.loc 1 482 0
+ 1829 0782 2E1B     		subs	r6, r5, r4
+ 1830              	.LVL156:
+ 481:../../../drivers/hal/bc62xx_flash.c **** 	txlen -= ilen;
+ 1831              		.loc 1 481 0
+ 1832 0784 0093     		str	r3, [sp]
+ 483:../../../drivers/hal/bc62xx_flash.c **** 
+ 484:../../../drivers/hal/bc62xx_flash.c **** 	packnum = (txlen + 255)/PAGE_SIZE; 					//剩余数据还要写的页数
+ 1833              		.loc 1 484 0
+ 1834 0786 3300     		movs	r3, r6
+ 1835 0788 FF33     		adds	r3, r3, #255
+ 480:../../../drivers/hal/bc62xx_flash.c **** 	txdata += ilen;
+ 1836              		.loc 1 480 0
+ 1837 078a E719     		adds	r7, r4, r7
+ 1838              	.LVL157:
+ 1839              		.loc 1 484 0
+ 1840 078c DC17     		asrs	r4, r3, #31
+ 1841              	.LVL158:
+ 1842 078e E4B2     		uxtb	r4, r4
+ 1843 0790 E418     		adds	r4, r4, r3
+ 485:../../../drivers/hal/bc62xx_flash.c **** 
+ 486:../../../drivers/hal/bc62xx_flash.c **** 	for(i=0; i<packnum; i++){							//循环写剩余的数据
+ 1844              		.loc 1 486 0
+ 1845 0792 0023     		movs	r3, #0
+ 484:../../../drivers/hal/bc62xx_flash.c **** 
+ 1846              		.loc 1 484 0
+ 1847 0794 2412     		asrs	r4, r4, #8
+ 1848              	.LVL159:
+ 1849              		.loc 1 486 0
+ 1850 0796 0193     		str	r3, [sp, #4]
+ 1851              	.LVL160:
+ 1852              	.L106:
+ 1853              		.loc 1 486 0 is_stmt 0 discriminator 1
+ 1854 0798 019B     		ldr	r3, [sp, #4]
+ 1855 079a A342     		cmp	r3, r4
+ 1856 079c 13D0     		beq	.L109
+ 487:../../../drivers/hal/bc62xx_flash.c **** 	
+ 488:../../../drivers/hal/bc62xx_flash.c **** 		ilen = txlen>PAGE_SIZE?PAGE_SIZE:txlen;
+ 1857              		.loc 1 488 0 is_stmt 1 discriminator 3
+ 1858 079e 8023     		movs	r3, #128
+ 1859 07a0 3500     		movs	r5, r6
+ 1860 07a2 5B00     		lsls	r3, r3, #1
+ 1861 07a4 9E42     		cmp	r6, r3
+ 1862 07a6 00DD     		ble	.L107
+ 1863 07a8 1D00     		movs	r5, r3
+ 1864              	.L107:
+ 1865              	.LVL161:
+ 489:../../../drivers/hal/bc62xx_flash.c **** 		_Qspi_WritebyEarsePage(flash_addr,ilen,txdata);
+ 1866              		.loc 1 489 0 discriminator 3
+ 1867 07aa 3800     		movs	r0, r7
+ 1868 07ac 009A     		ldr	r2, [sp]
+ 1869 07ae 2900     		movs	r1, r5
+ 1870 07b0 FFF7FEFF 		bl	_Qspi_WritebyEarsePage
+ 1871              	.LVL162:
+ 490:../../../drivers/hal/bc62xx_flash.c **** 
+ 491:../../../drivers/hal/bc62xx_flash.c **** 		flash_addr += ilen;
+ 492:../../../drivers/hal/bc62xx_flash.c **** 		txdata += ilen;
+ 1872              		.loc 1 492 0 discriminator 3
+ 1873 07b4 009B     		ldr	r3, [sp]
+ 491:../../../drivers/hal/bc62xx_flash.c **** 		txdata += ilen;
+ 1874              		.loc 1 491 0 discriminator 3
+ 1875 07b6 EF19     		adds	r7, r5, r7
+ 1876              	.LVL163:
+ 1877              		.loc 1 492 0 discriminator 3
+ 1878 07b8 5B19     		adds	r3, r3, r5
+ 1879 07ba 0093     		str	r3, [sp]
+ 1880              	.LVL164:
+ 486:../../../drivers/hal/bc62xx_flash.c **** 	
+ 1881              		.loc 1 486 0 discriminator 3
+ 1882 07bc 019B     		ldr	r3, [sp, #4]
+ 1883              	.LVL165:
+ 493:../../../drivers/hal/bc62xx_flash.c **** 		txlen -= ilen;
+ 1884              		.loc 1 493 0 discriminator 3
+ 1885 07be 761B     		subs	r6, r6, r5
+ 1886              	.LVL166:
+ 486:../../../drivers/hal/bc62xx_flash.c **** 	
+ 1887              		.loc 1 486 0 discriminator 3
+ 1888 07c0 0133     		adds	r3, r3, #1
+ 1889 07c2 0193     		str	r3, [sp, #4]
+ 1890              	.LVL167:
+ 1891 07c4 E8E7     		b	.L106
+ 1892              	.LVL168:
+ 1893              	.L109:
+ 494:../../../drivers/hal/bc62xx_flash.c **** 	}
+ 495:../../../drivers/hal/bc62xx_flash.c **** 	
+ 496:../../../drivers/hal/bc62xx_flash.c **** }
+ 1894              		.loc 1 496 0
+ 1895              		@ sp needed
+ 1896              	.LVL169:
+ 1897              	.LVL170:
+ 1898              	.LVL171:
+ 1899 07c6 F7BD     		pop	{r0, r1, r2, r4, r5, r6, r7, pc}
+ 1900              	.L111:
+ 1901              		.align	2
+ 1902              	.L110:
+ 1903 07c8 FF000080 		.word	-2147483393
+ 1904 07cc 00FFFFFF 		.word	-256
+ 1905              		.cfi_endproc
+ 1906              	.LFE64:
+ 1908              	.Letext0:
+ 1909              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1910              		.file 4 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1911              		.file 5 "../../../device/inc/bc62xx.h"
+ 1912              		.file 6 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none

@@ -1,0 +1,1153 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"bc62xx_pwm.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.align	1
+  20              		.code	16
+  21              		.thumb_func
+  23              	HW_REG_16BIT:
+  24              	.LFB38:
+  25              		.file 1 "../../../device/inc/common.h"
+   1:../../../device/inc/common.h **** #ifndef __COMMON_H__
+   2:../../../device/inc/common.h **** #define __COMMON_H__
+   3:../../../device/inc/common.h **** 
+   4:../../../device/inc/common.h **** #include <stdio.h>
+   5:../../../device/inc/common.h **** #include <string.h>
+   6:../../../device/inc/common.h **** #include <stdint.h>
+   7:../../../device/inc/common.h **** #include <stdbool.h>
+   8:../../../device/inc/common.h **** #include <stdlib.h>
+   9:../../../device/inc/common.h **** 
+  10:../../../device/inc/common.h **** #include "bc62xx.h"
+  11:../../../device/inc/common.h **** 
+  12:../../../device/inc/common.h **** #ifdef RELEASE
+  13:../../../device/inc/common.h **** #define ASSERT(x) 
+  14:../../../device/inc/common.h **** #else
+  15:../../../device/inc/common.h **** #define ASSERT(x) while(!(x))
+  16:../../../device/inc/common.h **** #endif
+  17:../../../device/inc/common.h **** 
+  18:../../../device/inc/common.h **** #define OS_ENTER_CRITICAL() __disable_irq() 
+  19:../../../device/inc/common.h **** #define OS_EXIT_CRITICAL() __enable_irq() 
+  20:../../../device/inc/common.h **** 
+  21:../../../device/inc/common.h **** 
+  22:../../../device/inc/common.h **** static inline void HW_REG_16BIT(uint32_t reg, uint16_t word)
+  23:../../../device/inc/common.h **** {
+  26              		.loc 1 23 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 0
+  29              		@ frame_needed = 0, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31              	.LVL0:
+  24:../../../device/inc/common.h ****     HW_REG_8BIT(reg, word & 0x00FF);
+  32              		.loc 1 24 0
+  33 0000 CBB2     		uxtb	r3, r1
+  34 0002 0370     		strb	r3, [r0]
+  35              	.LBB4:
+  36              	.LBB5:
+  37              		.file 2 "../../../device/inc/bc62xx.h"
+   1:../../../device/inc/bc62xx.h **** #ifndef _BC62XX_H_
+   2:../../../device/inc/bc62xx.h **** #define _BC62XX_H_
+   3:../../../device/inc/bc62xx.h **** #include <stdio.h>
+   4:../../../device/inc/bc62xx.h **** #include "bc62xx_def.h"
+   5:../../../device/inc/bc62xx.h **** #include "btreg.h" 
+   6:../../../device/inc/bc62xx.h **** 
+   7:../../../device/inc/bc62xx.h **** #ifdef __cplusplus
+   8:../../../device/inc/bc62xx.h **** extern "C" {
+   9:../../../device/inc/bc62xx.h **** #endif
+  10:../../../device/inc/bc62xx.h **** 
+  11:../../../device/inc/bc62xx.h **** /* -------------------------  Interrupt Number Definition  ------------------------ */
+  12:../../../device/inc/bc62xx.h **** typedef enum 
+  13:../../../device/inc/bc62xx.h **** {
+  14:../../../device/inc/bc62xx.h **** /* -------------------  Cortex-M0 Processor Exceptions Numbers  -------------------                
+  15:../../../device/inc/bc62xx.h **** 	Reset_IRQn                    = -15,              /*!<   1  Reset Vector, invoked on Power up and 
+  16:../../../device/inc/bc62xx.h **** 	NonMaskableInt_IRQn           = -14,              /*!<   2  Non maskable Interrupt, cannot be stop
+  17:../../../device/inc/bc62xx.h ****     	HardFault_IRQn                = -13,              /*!<   3  Hard Fault, all classes of Fault  
+  18:../../../device/inc/bc62xx.h ****     	SVCall_IRQn                   =  -5,              /*!<  11  System Service Call via SVC instru
+  19:../../../device/inc/bc62xx.h ****     	DebugMonitor_IRQn             =  -4,              /*!<  12  Debug Monitor                     
+  20:../../../device/inc/bc62xx.h ****     	PendSV_IRQn                   =  -2,              /*!<  14  Pendable request for system servic
+  21:../../../device/inc/bc62xx.h ****     	SysTick_IRQn                  =  -1,              /*!<  15  System Tick Timer                 
+  22:../../../device/inc/bc62xx.h **** /* ---------------------  C32F0xx Specific Interrupt Numbers  --------------------                 
+  23:../../../device/inc/bc62xx.h **** 	usb_handler_IRQn              =   0,
+  24:../../../device/inc/bc62xx.h ****   	iicd_handler_IRQn             =   1,
+  25:../../../device/inc/bc62xx.h ****   	qspi_handler_IRQn             =   2,
+  26:../../../device/inc/bc62xx.h ****   	spid_handler_IRQn             =   3,
+  27:../../../device/inc/bc62xx.h ****   	uart_handler_IRQn             =   4,
+  28:../../../device/inc/bc62xx.h ****   	uartb_handler_IRQn            =   5,
+  29:../../../device/inc/bc62xx.h ****   	adcd_handler_IRQn             =   6,
+  30:../../../device/inc/bc62xx.h ****   	i2s_handler_IRQn              =   7,
+  31:../../../device/inc/bc62xx.h ****   	bt_handler_IRQn               =   8,
+  32:../../../device/inc/bc62xx.h **** 	GPIO0_intr						=  9,
+  33:../../../device/inc/bc62xx.h **** 	GPIO1_intr						=  10,
+  34:../../../device/inc/bc62xx.h **** 	GPIO2_intr						=  11,
+  35:../../../device/inc/bc62xx.h **** 	GPIO3_intr						=  12,
+  36:../../../device/inc/bc62xx.h **** 	GPIO4_intr						=  13,
+  37:../../../device/inc/bc62xx.h **** 	GPIO5_intr						=  14,
+  38:../../../device/inc/bc62xx.h **** 	GPIO6_intr						=  15,
+  39:../../../device/inc/bc62xx.h **** 	GPIO7_intr						=  16,
+  40:../../../device/inc/bc62xx.h **** 	GPIO8_intr						=  17,
+  41:../../../device/inc/bc62xx.h **** 	GPIO9_intr						=  18,
+  42:../../../device/inc/bc62xx.h **** 	GPIO10_intr						=  19,
+  43:../../../device/inc/bc62xx.h **** 	GPIO11_intr						=  20,
+  44:../../../device/inc/bc62xx.h **** 	GPIO12_intr						=  21,
+  45:../../../device/inc/bc62xx.h **** } IRQn_Type;
+  46:../../../device/inc/bc62xx.h **** 
+  47:../../../device/inc/bc62xx.h **** /** @addtogroup Configuration_of_CMSIS
+  48:../../../device/inc/bc62xx.h ****   * @{
+  49:../../../device/inc/bc62xx.h ****   */
+  50:../../../device/inc/bc62xx.h **** 
+  51:../../../device/inc/bc62xx.h **** 
+  52:../../../device/inc/bc62xx.h **** /* ================================================================================ */
+  53:../../../device/inc/bc62xx.h **** /* ================      Processor and Core Peripheral Section     ================ */
+  54:../../../device/inc/bc62xx.h **** /* ================================================================================ */
+  55:../../../device/inc/bc62xx.h **** 
+  56:../../../device/inc/bc62xx.h **** /* ----------------Configuration of the Cortex-M0 Processor and Core Peripherals---------------- */
+  57:../../../device/inc/bc62xx.h **** #define __CM0_REV                 0x0000            /*!< Cortex-M0 Core Revision                   
+  58:../../../device/inc/bc62xx.h **** #define __MPU_PRESENT                  0            /*!< MPU present or not                        
+  59:../../../device/inc/bc62xx.h **** #define __NVIC_PRIO_BITS               2            /*!< Number of Bits used for Priority Levels   
+  60:../../../device/inc/bc62xx.h **** #define __Vendor_SysTickConfig         0            /*!< Set to 1 if different SysTick Config is us
+  61:../../../device/inc/bc62xx.h **** /** @} */ /* End of group Configuration_of_CMSIS */
+  62:../../../device/inc/bc62xx.h **** 
+  63:../../../device/inc/bc62xx.h **** #include <core_cm0.h>                               /*!< Cortex-M0 processor and core peripherals 
+  64:../../../device/inc/bc62xx.h **** */
+  65:../../../device/inc/bc62xx.h **** 
+  66:../../../device/inc/bc62xx.h **** //******************************************************************************************
+  67:../../../device/inc/bc62xx.h **** //start define reg address
+  68:../../../device/inc/bc62xx.h **** //******************************************************************************************
+  69:../../../device/inc/bc62xx.h **** #define CORE_CHIPID							  0x8000
+  70:../../../device/inc/bc62xx.h **** #define CORE_KICK                  0x8003
+  71:../../../device/inc/bc62xx.h **** #define CORE_LPM_WR                0x8005
+  72:../../../device/inc/bc62xx.h **** #define CORE_MISC_CTRL             0x8006
+  73:../../../device/inc/bc62xx.h **** #define CORE_OTP_RDATA             0x8007
+  74:../../../device/inc/bc62xx.h **** #define CORE_DMA_START             0x800a
+  75:../../../device/inc/bc62xx.h **** #define CORE_RESET                 0x8010
+  76:../../../device/inc/bc62xx.h **** #define CORE_ENCRYPT               0x8011
+  77:../../../device/inc/bc62xx.h **** #define CORE_UART_TXD              0x8015
+  78:../../../device/inc/bc62xx.h **** #define CORE_UCODE_HI              0x8022
+  79:../../../device/inc/bc62xx.h **** #define CORE_UCODE_CTRL            0x8023
+  80:../../../device/inc/bc62xx.h **** #define CORE_UCODE_LOW             0x8024
+  81:../../../device/inc/bc62xx.h **** #define CORE_UCODE_DATA            0x8025
+  82:../../../device/inc/bc62xx.h **** #define	CORE_SCS_WDATA						0x8026
+  83:../../../device/inc/bc62xx.h **** #define	CORE_SCS_ADDR							0x802a
+  84:../../../device/inc/bc62xx.h **** #define	CORE_FLASH_OFFSET					0x802c
+  85:../../../device/inc/bc62xx.h **** #define	CORE_FLASH_READ_CMD				0x802f
+  86:../../../device/inc/bc62xx.h **** #define	CORE_I2S_CTRL							0x8030
+  87:../../../device/inc/bc62xx.h **** #define  CORE_I2S_CLKDIV        	0x8031
+  88:../../../device/inc/bc62xx.h **** #define	CORE_I2S_RX_SADDR					0x8032
+  89:../../../device/inc/bc62xx.h **** #define	CORE_I2S_TX_SADDR					0x8034
+  90:../../../device/inc/bc62xx.h **** #define	CORE_I2S_LEN							0x8036
+  91:../../../device/inc/bc62xx.h **** #define	CORE_ADCD_MAP						0x8038
+  92:../../../device/inc/bc62xx.h **** #define CORE_ADCD_DELAY						0x8039
+  93:../../../device/inc/bc62xx.h **** #define CORE_ADCD_CTRL                 	    0x803B
+  94:../../../device/inc/bc62xx.h **** #define	CORE_ADCD_SADDR						0x803c
+  95:../../../device/inc/bc62xx.h **** #define	CORE_ADCD_EADDR						0x803e
+  96:../../../device/inc/bc62xx.h **** #define	CORE_RTHALFSLOT						0x8040
+  97:../../../device/inc/bc62xx.h **** #define	CORE_CLKSEL								0x8042
+  98:../../../device/inc/bc62xx.h **** #define	CORE_CONFIG								0x8043
+  99:../../../device/inc/bc62xx.h **** #define CORE_UART_CLKSEL               		0X8043
+ 100:../../../device/inc/bc62xx.h **** #define	CORE_OTP_ADDR_SET					0x8044
+ 101:../../../device/inc/bc62xx.h **** #define	CORE_OTPD_CTRL						0x8046
+ 102:../../../device/inc/bc62xx.h **** #define	CORE_OTP_CTRL							0x8046
+ 103:../../../device/inc/bc62xx.h **** #define	CORE_OTPD_RXADDR					0x8048
+ 104:../../../device/inc/bc62xx.h **** #define	CORE_OTPD_RXLEN						0x804a
+ 105:../../../device/inc/bc62xx.h **** #define	CORE_LPM_REG							0x804c
+ 106:../../../device/inc/bc62xx.h **** #define	CORE_CLKOFF								0x8050
+ 107:../../../device/inc/bc62xx.h **** #define	CORE_UART_BAUD						0x8052
+ 108:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_SADDR				0x8054
+ 109:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_EADDR				0x8056
+ 110:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_RPTR					0x8058
+ 111:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_SADDR				0x805a
+ 112:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_EADDR				0x805c
+ 113:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_WPTR					0x805e
+ 114:../../../device/inc/bc62xx.h **** #define	CORE_UART_CTRL						0x8060
+ 115:../../../device/inc/bc62xx.h **** #define	CORE_GPIO_KEY							0x8061
+ 116:../../../device/inc/bc62xx.h **** #define	CORE_CORDIC_MODE					0x8063
+ 117:../../../device/inc/bc62xx.h **** #define	CORE_SUM_EN								0x8063
+ 118:../../../device/inc/bc62xx.h **** #define	CORE_ROWCOLUMN_NUM				0x8064
+ 119:../../../device/inc/bc62xx.h **** #define	CORE_SCANCYCLE_TIMER			0x8065
+ 120:../../../device/inc/bc62xx.h **** #define	CORE_U_DEBOUNCE						0x8066
+ 121:../../../device/inc/bc62xx.h **** #define	CORE_M_DEBOUNCE						0x8067
+ 122:../../../device/inc/bc62xx.h **** #define	CORE_MODKEY								0x8068
+ 123:../../../device/inc/bc62xx.h **** #define	CORE_KSCTRL								0x8070
+ 124:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_CTRL						0x8071
+ 125:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_BAUD						0x8072
+ 126:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_SADDR				0x8074
+ 127:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_EADDR				0x8076
+ 128:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_RPTR				0x8078
+ 129:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_SADDR				0x807a
+ 130:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_EADDR				0x807c
+ 131:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_WPTR				0x807e
+ 132:../../../device/inc/bc62xx.h **** #define	CORE_GPIO_CONF						0x8080
+ 133:../../../device/inc/bc62xx.h **** #define CORE_GPIO0_CONF                 				0X8080
+ 134:../../../device/inc/bc62xx.h **** #define CORE_GPIO1_CONF                 				0X8081
+ 135:../../../device/inc/bc62xx.h **** #define CORE_GPIO2_CONF                 				0X8082
+ 136:../../../device/inc/bc62xx.h **** #define CORE_GPIO3_CONF                 				0X8083
+ 137:../../../device/inc/bc62xx.h **** #define CORE_GPIO4_CONF                 				0X8084
+ 138:../../../device/inc/bc62xx.h **** #define CORE_GPIO5_CONF                 				0X8085
+ 139:../../../device/inc/bc62xx.h **** #define CORE_GPIO6_CONF                 				0X8086
+ 140:../../../device/inc/bc62xx.h **** #define CORE_GPIO7_CONF                 				0X8087
+ 141:../../../device/inc/bc62xx.h **** #define CORE_GPIO8_CONF                 				0X8088
+ 142:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_CTRL						0x80a0
+ 143:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_DELAY						0x80a1
+ 144:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_TXLEN						0x80a2
+ 145:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_TXADDR					0x80a4
+ 146:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_RXADDR					0x80a6
+ 147:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_RXLEN						0x80a8
+ 148:../../../device/inc/bc62xx.h **** #define	CORE_IICD_CTRL						0x80aa
+ 149:../../../device/inc/bc62xx.h **** #define  CORE_IICD_SCL_LOW              0x80ab
+ 150:../../../device/inc/bc62xx.h **** #define  CORE_IICD_SCL_HIGH             0x80ac
+ 151:../../../device/inc/bc62xx.h **** #define  CORE_IICD_START_SETUP          0x80ad
+ 152:../../../device/inc/bc62xx.h **** #define  CORE_IICD_START_HOLD           0x80ae
+ 153:../../../device/inc/bc62xx.h **** #define  CORE_IICD_STOP_SETUP           0x80af
+ 154:../../../device/inc/bc62xx.h **** #define  CORE_IICD_DATA_SETUP           0x80b0
+ 155:../../../device/inc/bc62xx.h **** #define  CORE_IICD_DATA_HOLD            0x80b1
+ 156:../../../device/inc/bc62xx.h **** #define	CORE_IICD_TXLEN								0x80b2
+ 157:../../../device/inc/bc62xx.h **** #define	CORE_IICD_TXADDR							0x80b4
+ 158:../../../device/inc/bc62xx.h **** #define	CORE_IICD_RXADDR							0x80b6
+ 159:../../../device/inc/bc62xx.h **** #define	CORE_IICD_RXLEN							0x80b8
+ 160:../../../device/inc/bc62xx.h **** #define	CORE_SPID_CTRL							0x80ba
+ 161:../../../device/inc/bc62xx.h **** #define	CORE_SPID_DELAY							0x80bb
+ 162:../../../device/inc/bc62xx.h **** #define	CORE_SPID_TXLEN						0x80bc
+ 163:../../../device/inc/bc62xx.h **** #define	CORE_SPID_TXADDR					0x80be
+ 164:../../../device/inc/bc62xx.h **** #define	CORE_SPID_RXADDR					0x80c0
+ 165:../../../device/inc/bc62xx.h **** #define	CORE_SPID_RXLEN						0x80c2
+ 166:../../../device/inc/bc62xx.h **** #define	CORE_CORDIC_A							0x80c4
+ 167:../../../device/inc/bc62xx.h **** #define	CORE_CORDIC_B							0x80c8
+ 168:../../../device/inc/bc62xx.h **** #define	CORE_BIST_CTRL_REG				0x80cc
+ 169:../../../device/inc/bc62xx.h **** #define	CORE_CCNT_BIT							0x80cc
+ 170:../../../device/inc/bc62xx.h **** #define  CORE_PWM0_PCNT                 0x80cd
+ 171:../../../device/inc/bc62xx.h **** #define  CORE_PWM0_NCNT                 0x80cf
+ 172:../../../device/inc/bc62xx.h **** #define	CORE_PWM0_CTRL						0x80d1
+ 173:../../../device/inc/bc62xx.h **** #define  CORE_PWM1_PCNT                 0x80d2
+ 174:../../../device/inc/bc62xx.h **** #define  CORE_PWM1_NCNT                 0x80d4
+ 175:../../../device/inc/bc62xx.h **** #define	CORE_PWM1_CTRL						0x80d6
+ 176:../../../device/inc/bc62xx.h **** #define  CORE_PWM2_PCNT                 0x80d7
+ 177:../../../device/inc/bc62xx.h **** #define  CORE_PWM2_NCNT                 0x80d9
+ 178:../../../device/inc/bc62xx.h **** #define	CORE_PWM2_CTRL						0x80db
+ 179:../../../device/inc/bc62xx.h **** #define  CORE_PWM3_PCNT                 0x80dc
+ 180:../../../device/inc/bc62xx.h **** #define  CORE_PWM3_NCNT                 0x80de
+ 181:../../../device/inc/bc62xx.h **** #define	CORE_PWM3_CTRL						0x80e0
+ 182:../../../device/inc/bc62xx.h **** #define  CORE_PWM4_PCNT                 0x80e1
+ 183:../../../device/inc/bc62xx.h **** #define  CORE_PWM4_NCNT                 0x80e3
+ 184:../../../device/inc/bc62xx.h **** #define	CORE_PWM4_CTRL						0x80e5
+ 185:../../../device/inc/bc62xx.h **** #define  CORE_PWM5_PCNT                 0x80e6
+ 186:../../../device/inc/bc62xx.h **** #define  CORE_PWM5_NCNT                 0x80e8
+ 187:../../../device/inc/bc62xx.h **** #define	CORE_PWM5_CTRL						0x80ea
+ 188:../../../device/inc/bc62xx.h **** #define  CORE_PWM6_PCNT                 0x80eb
+ 189:../../../device/inc/bc62xx.h **** #define  CORE_PWM6_NCNT                 0x80ed
+ 190:../../../device/inc/bc62xx.h **** #define	CORE_PWM6_CTRL						0x80ef
+ 191:../../../device/inc/bc62xx.h **** #define  CORE_PWM7_PCNT                 0x80f0
+ 192:../../../device/inc/bc62xx.h **** #define  CORE_PWM7_NCNT                 0x80f2
+ 193:../../../device/inc/bc62xx.h **** #define	CORE_PWM7_CTRL						0x80f4
+ 194:../../../device/inc/bc62xx.h **** #define	CORE_CVSD_CTRL						0x80f5
+ 195:../../../device/inc/bc62xx.h **** #define	CORE_CVSDIN_SADDR					0x80f6
+ 196:../../../device/inc/bc62xx.h **** #define	CORE_CVSDOUT_SADDR				0x80f8
+ 197:../../../device/inc/bc62xx.h **** #define	CORE_CVSD_LEN							0x80fa
+ 198:../../../device/inc/bc62xx.h **** #define	CORE_PCMIN_SADDR					0x80fc
+ 199:../../../device/inc/bc62xx.h **** #define	CORE_PCMOUT_SADDR					0x80fe
+ 200:../../../device/inc/bc62xx.h **** #define	CORE_DAC_SADDR						0x8100
+ 201:../../../device/inc/bc62xx.h **** #define	CORE_DAC_LEN							0x8102
+ 202:../../../device/inc/bc62xx.h **** #define	CORE_DAC_CTRL							0x8104
+ 203:../../../device/inc/bc62xx.h **** #define	CORE_VOL_TEST							0x8105
+ 204:../../../device/inc/bc62xx.h **** #define	CORE_THRESHOLD_GAIN				0x8106
+ 205:../../../device/inc/bc62xx.h **** #define	CORE_THRESHOLD_MAX				0x8108
+ 206:../../../device/inc/bc62xx.h **** #define	CORE_VOX_TIMER_WINDOW			0x810a
+ 207:../../../device/inc/bc62xx.h **** #define	CORE_VOX_CTRL							0x810b
+ 208:../../../device/inc/bc62xx.h **** #define	CORE_DS_COEF_A						0x810c
+ 209:../../../device/inc/bc62xx.h **** #define	CORE_CALIBRATION_WINDOW		0x810f
+ 210:../../../device/inc/bc62xx.h **** #define	CORE_CLKN									0x8300
+ 211:../../../device/inc/bc62xx.h **** #define	CORE_EXTMCLK							0x8304
+ 212:../../../device/inc/bc62xx.h **** #define	CORE_MISC_STATUS					0x8308
+ 213:../../../device/inc/bc62xx.h **** #define	CORE_REG_ZW_COUNTER				0x8309
+ 214:../../../device/inc/bc62xx.h **** #define	CORE_UART_STATUS					0x830c
+ 215:../../../device/inc/bc62xx.h **** #define	CORE_UART_RBAUD						0x830c
+ 216:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_ITEMS				0x830e
+ 217:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_RPTR					0x8310
+ 218:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_ITEMS				0x8312
+ 219:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_WPTR					0x8314
+ 220:../../../device/inc/bc62xx.h **** #define	CORE_ADCD_ADDR						0x8316
+ 221:../../../device/inc/bc62xx.h **** #define	CORE_KEY_STAT							0x8318
+ 222:../../../device/inc/bc62xx.h **** #define	CORE_KEY_EVENT						0x8319
+ 223:../../../device/inc/bc62xx.h **** #define	CORE_KEY_EVENT_NUM				0x831a
+ 224:../../../device/inc/bc62xx.h **** #define	CORE_DEBUG_BAUD						0x831b
+ 225:../../../device/inc/bc62xx.h **** #define	CORE_GPIO_IN							0x831c
+ 226:../../../device/inc/bc62xx.h **** #define	CORE_I2S_WRPTR						0x8320
+ 227:../../../device/inc/bc62xx.h **** #define	CORE_I2S_RDPTR						0x8322
+ 228:../../../device/inc/bc62xx.h **** #define	CORE_SPID_REMAIN					0x8324
+ 229:../../../device/inc/bc62xx.h **** #define	CORE_OTPD_REMAIN					0x8326
+ 230:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_REMAIN					0x8328
+ 231:../../../device/inc/bc62xx.h **** #define	CORE_IICD_REMAIN					0x832a
+ 232:../../../device/inc/bc62xx.h **** #define	CORE_SARDATA							0x832c
+ 233:../../../device/inc/bc62xx.h **** #define	CORE_OTP_ADDR							0x832e
+ 234:../../../device/inc/bc62xx.h **** #define	CORE_DMA_STATUS						0x8330
+ 235:../../../device/inc/bc62xx.h **** #define	CORE_PERF_STATUS					0x8331
+ 236:../../../device/inc/bc62xx.h **** #define	CORE_CORDIC_OUT						0x8332
+ 237:../../../device/inc/bc62xx.h **** #define	CORE_LPM_CTRL							0x8336
+ 238:../../../device/inc/bc62xx.h **** #define	CORE_LPM_STATUS						0x8342
+ 239:../../../device/inc/bc62xx.h **** #define	CORE_CCNT_COUNTER					0x834b
+ 240:../../../device/inc/bc62xx.h **** #define	CORE_BIST_DONE						0x834e
+ 241:../../../device/inc/bc62xx.h **** #define	CORE_BIST_FAIL						0x8350
+ 242:../../../device/inc/bc62xx.h **** #define	CORE_SUMDATA							0x8352
+ 243:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_STATUS					0x8354
+ 244:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RBAUD					0x8354
+ 245:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_ITEMS				0x8356
+ 246:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_RPTR				0x8358
+ 247:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_ITEMS				0x835a
+ 248:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_WPTR				0x835c
+ 249:../../../device/inc/bc62xx.h **** #define	CORE_SCS_RDATA						0x835e
+ 250:../../../device/inc/bc62xx.h **** #define	CORE_PCMIN_PTR						0x8362
+ 251:../../../device/inc/bc62xx.h **** #define	CORE_PCMOUT_PTR						0x8364
+ 252:../../../device/inc/bc62xx.h **** #define	CORE_CVSDIN_PTR						0x8366
+ 253:../../../device/inc/bc62xx.h **** #define	CORE_CVSDOUT_PTR					0x8368
+ 254:../../../device/inc/bc62xx.h **** #define CORE_DAC_OUTPUT_PTR					0x836a
+ 255:../../../device/inc/bc62xx.h **** 
+ 256:../../../device/inc/bc62xx.h **** #define CORE_SARADC_CONFIG1				0x8971
+ 257:../../../device/inc/bc62xx.h **** #define CORE_SARADC_CONFIG2				0x8972
+ 258:../../../device/inc/bc62xx.h **** #define CORE_SARADC_CONFIG3				0x8973
+ 259:../../../device/inc/bc62xx.h **** #define CORE_SARADC_CONFIG4				0x8974
+ 260:../../../device/inc/bc62xx.h **** #define CORE_RF_ADC_CONFIG				0x8906
+ 261:../../../device/inc/bc62xx.h **** //high pass filter
+ 262:../../../device/inc/bc62xx.h **** #define CORE_MIC_HPF   						0x8114
+ 263:../../../device/inc/bc62xx.h **** #define CORE_MIC_HPF_CTR					0x8115
+ 264:../../../device/inc/bc62xx.h **** 
+ 265:../../../device/inc/bc62xx.h **** 
+ 266:../../../device/inc/bc62xx.h **** #define CORE_SBC_SADDR 0x810a 
+ 267:../../../device/inc/bc62xx.h **** #define CORE_SBC_DADDR 0x810c 
+ 268:../../../device/inc/bc62xx.h **** #define CORE_SBC_SLEN  0x810e 
+ 269:../../../device/inc/bc62xx.h **** #define CORE_SBC_DLEN  0x8110 
+ 270:../../../device/inc/bc62xx.h **** #define CORE_SBC_SWP   0x8112 
+ 271:../../../device/inc/bc62xx.h **** #define CORE_SBC_SRP   0x836c 
+ 272:../../../device/inc/bc62xx.h **** #define CORE_SBC_DWP   0x836e 
+ 273:../../../device/inc/bc62xx.h **** #define CORE_EXE_ADDR  0x8370 
+ 274:../../../device/inc/bc62xx.h **** #define CORE_SBC_CTRL    0x8064
+ 275:../../../device/inc/bc62xx.h **** #define CORE_SBC_CRL    0x800b
+ 276:../../../device/inc/bc62xx.h **** 
+ 277:../../../device/inc/bc62xx.h **** 
+ 278:../../../device/inc/bc62xx.h **** #define CORE_USB_CONFIG 		 0x8c00
+ 279:../../../device/inc/bc62xx.h **** #define CORE_USB_INT_MASK  		 0x8c01
+ 280:../../../device/inc/bc62xx.h **** #define CORE_USB_ADDR  			 0x8c04
+ 281:../../../device/inc/bc62xx.h **** #define CORE_USB_TRIG  			 0x8c10
+ 282:../../../device/inc/bc62xx.h **** #define CORE_USB_STALL			 0x8c11
+ 283:../../../device/inc/bc62xx.h **** #define CORE_USB_CLEAR  		 0x8c12
+ 284:../../../device/inc/bc62xx.h **** #define CORE_USB_EP				 0X8C18
+ 285:../../../device/inc/bc62xx.h **** #define CORE_USB_DFIFO(x)   			 (0x8c18+x)
+ 286:../../../device/inc/bc62xx.h **** #define CORE_USB_EP_LEN  		 0x8c20
+ 287:../../../device/inc/bc62xx.h **** 
+ 288:../../../device/inc/bc62xx.h **** #define CORE_USB_STATUS 		 0x8c26
+ 289:../../../device/inc/bc62xx.h **** #define CORE_USB_FIFO_EMPTY 	 0x8c27
+ 290:../../../device/inc/bc62xx.h **** 
+ 291:../../../device/inc/bc62xx.h **** 
+ 292:../../../device/inc/bc62xx.h **** //************************************************************************************************
+ 293:../../../device/inc/bc62xx.h **** //end define reg address
+ 294:../../../device/inc/bc62xx.h **** //************************************************************************************************
+ 295:../../../device/inc/bc62xx.h **** 
+ 296:../../../device/inc/bc62xx.h **** //*****************************************************************************
+ 297:../../../device/inc/bc62xx.h **** //config gpio selected function
+ 298:../../../device/inc/bc62xx.h **** //*****************************************************************************
+ 299:../../../device/inc/bc62xx.h **** #define  GPCFG_INPUT			0  
+ 300:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_NCS        	2  
+ 301:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_SCK        	3  
+ 302:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_IO0        		4  
+ 303:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_IO1        		5  
+ 304:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_IO2        		6  
+ 305:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_IO3        		7  
+ 306:../../../device/inc/bc62xx.h **** #define  GPCFG_UART_TXD        	8  
+ 307:../../../device/inc/bc62xx.h **** #define  GPCFG_UART_RXD        	9  
+ 308:../../../device/inc/bc62xx.h **** #define  GPCFG_UART_RTS        	10 
+ 309:../../../device/inc/bc62xx.h **** #define  GPCFG_UART_CTS        	11 
+ 310:../../../device/inc/bc62xx.h **** #define  GPCFG_UARTB_TXD       	12 
+ 311:../../../device/inc/bc62xx.h **** #define  GPCFG_UARTB_RXD       	13 
+ 312:../../../device/inc/bc62xx.h **** #define  GPCFG_UARTB_RTS       	14 
+ 313:../../../device/inc/bc62xx.h **** #define  GPCFG_UARTB_CTS       	15 
+ 314:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT0        	16 
+ 315:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT1        	17 
+ 316:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT2        	18 
+ 317:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT3        	19 
+ 318:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT4        	20 
+ 319:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT5        	21 
+ 320:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT6        	22 
+ 321:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT7        	23 
+ 322:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_DOUT        	24 
+ 323:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_LRCKOUT     	25 
+ 324:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_CLKOUT      	26 
+ 325:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_DIN         		28 
+ 326:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_LRCKIN      	29 
+ 327:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_CLKIN       		30 
+ 328:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_MISO       	31 
+ 329:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_NCS        	32 
+ 330:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_SCK        	33 
+ 331:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_MOSI       	34 
+ 332:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_SDIO       	35 
+ 333:../../../device/inc/bc62xx.h **** #define  GPCFG_JTAG_SWCLK      	36 
+ 334:../../../device/inc/bc62xx.h **** #define  GPCFG_JTAG_SWDAT      	37 
+ 335:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_X0         	38 
+ 336:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_X1         	39 
+ 337:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_Y0         	40 
+ 338:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_Y1         	41 
+ 339:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_Z0         		42 
+ 340:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_Z1         		43 
+ 341:../../../device/inc/bc62xx.h **** #define  GPCFG_IIC_SCL         		44 
+ 342:../../../device/inc/bc62xx.h **** #define  GPCFG_IIC_SDA        		45 
+ 343:../../../device/inc/bc62xx.h **** #define  GPCFG_OUTPUT_LOW      	62 
+ 344:../../../device/inc/bc62xx.h **** #define  GPCFG_OUTPUT_HIGH     	63
+ 345:../../../device/inc/bc62xx.h **** #define  GPCFG_PULLUP			0x40 
+ 346:../../../device/inc/bc62xx.h **** #define  GPCFG_PULLDOWN        	0x80 
+ 347:../../../device/inc/bc62xx.h **** #define  GPCFG_NO_IE           		0xc0
+ 348:../../../device/inc/bc62xx.h **** //*****************************************************************************
+ 349:../../../device/inc/bc62xx.h **** //end config gpio selected function
+ 350:../../../device/inc/bc62xx.h **** //*****************************************************************************
+ 351:../../../device/inc/bc62xx.h **** 
+ 352:../../../device/inc/bc62xx.h **** 
+ 353:../../../device/inc/bc62xx.h **** //*************************************************************************************
+ 354:../../../device/inc/bc62xx.h **** //interrupt id
+ 355:../../../device/inc/bc62xx.h **** //*************************************************************************************
+ 356:../../../device/inc/bc62xx.h **** #define	USB_INTID		0
+ 357:../../../device/inc/bc62xx.h **** #define	IICD_INTID		1
+ 358:../../../device/inc/bc62xx.h **** #define	QSPI_INTID		2
+ 359:../../../device/inc/bc62xx.h **** #define	SPID_INTID		3
+ 360:../../../device/inc/bc62xx.h **** #define	KEY_INTID		4
+ 361:../../../device/inc/bc62xx.h **** #define	UART_INTID		5
+ 362:../../../device/inc/bc62xx.h **** #define	UARTB_INTID	6
+ 363:../../../device/inc/bc62xx.h **** #define	ADCD_INTID		7
+ 364:../../../device/inc/bc62xx.h **** #define	I2S_INTID		8
+ 365:../../../device/inc/bc62xx.h **** #define	BT_INTID		9
+ 366:../../../device/inc/bc62xx.h **** #define	RSA_INTID		10
+ 367:../../../device/inc/bc62xx.h **** //*************************************************************************************
+ 368:../../../device/inc/bc62xx.h **** //end interrupt id
+ 369:../../../device/inc/bc62xx.h **** //*************************************************************************************
+ 370:../../../device/inc/bc62xx.h **** 
+ 371:../../../device/inc/bc62xx.h **** 
+ 372:../../../device/inc/bc62xx.h **** #define reg_map(reg)		((int)(reg) | 0x10000000)
+ 373:../../../device/inc/bc62xx.h **** #define reg_map_m0(reg)	((int)(reg) | 0x10010000)
+ 374:../../../device/inc/bc62xx.h **** #define PREFETCH_LINE(addr)	*(volatile int*)0x20000000 = addr
+ 375:../../../device/inc/bc62xx.h **** #define des_ctrl			*(volatile uint8_t*)0x30000002
+ 376:../../../device/inc/bc62xx.h **** #define des_key(x)		*(volatile uint8_t*)(0x30000003 + x)
+ 377:../../../device/inc/bc62xx.h **** #define des_in(x)			*(volatile uint8_t*)(0x30000018 + x)
+ 378:../../../device/inc/bc62xx.h **** #define crypt_status		*(volatile uint8_t*)0x30010000
+ 379:../../../device/inc/bc62xx.h **** #define des_out(x)			*(volatile uint8_t*)(0x30010004 + x)
+ 380:../../../device/inc/bc62xx.h **** #define des_start			*(volatile uint8_t*)0x30008000
+ 381:../../../device/inc/bc62xx.h **** #define rsa_exp(x)			*(volatile int32_t*)(0x30020000 + x*4)
+ 382:../../../device/inc/bc62xx.h **** #define rsa_out(x)			*(volatile int32_t*)(0x30020000 + x*4)
+ 383:../../../device/inc/bc62xx.h **** #define rsa_in(x)			*(volatile int32_t*)(0x30020080 + x*4)
+ 384:../../../device/inc/bc62xx.h **** #define rsa_mod(x)		*(volatile int32_t*)(0x30020100 + x*4)
+ 385:../../../device/inc/bc62xx.h **** #define rsa_ctrl			*(volatile int32_t*)0x30020180
+ 386:../../../device/inc/bc62xx.h **** 
+ 387:../../../device/inc/bc62xx.h **** #define NVIC_SETENA		*(volatile int32_t*)0xe000e100
+ 388:../../../device/inc/bc62xx.h **** #define NVIC_CLRENA		*(volatile int32_t*)0xe000e180
+ 389:../../../device/inc/bc62xx.h **** #define NVIC_ISPR		*(volatile int32_t*)0xe000e200
+ 390:../../../device/inc/bc62xx.h **** #define NVIC_ICPR		*(volatile int32_t*)0xe000e280
+ 391:../../../device/inc/bc62xx.h **** #define NVIC_SETPEND      *(volatile int32_t*)0xe000e200
+ 392:../../../device/inc/bc62xx.h **** #define NVIC_CLRPEND      *(volatile int32_t*)0xe000e280
+ 393:../../../device/inc/bc62xx.h **** #define NVIC_00_03_IPR		*(volatile int32_t*)0xe000e400
+ 394:../../../device/inc/bc62xx.h **** #define NVIC_04_07_IPR		*(volatile int32_t*)0xe000e404
+ 395:../../../device/inc/bc62xx.h **** #define NVIC_08_11_IPR		*(volatile int32_t*)0xe000e408
+ 396:../../../device/inc/bc62xx.h **** #define NVIC_12_15_IPR		*(volatile int32_t*)0xe000e40C
+ 397:../../../device/inc/bc62xx.h **** #define NVIC_16_19_IPR		*(volatile int32_t*)0xe000e410
+ 398:../../../device/inc/bc62xx.h **** #define NVIC_20_23_IPR		*(volatile int32_t*)0xe000e414
+ 399:../../../device/inc/bc62xx.h **** #define NVIC_24_27_IPR		*(volatile int32_t*)0xe000e418
+ 400:../../../device/inc/bc62xx.h **** #define NVIC_28_31_IPR		*(volatile int32_t*)0xe000e40C
+ 401:../../../device/inc/bc62xx.h **** 
+ 402:../../../device/inc/bc62xx.h **** #define CPU_MHZ        (48*1000000)
+ 403:../../../device/inc/bc62xx.h **** /* SysTick registers */  
+ 404:../../../device/inc/bc62xx.h **** /* SysTick control & status */ 
+ 405:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR     ((volatile unsigned int *)0xE000E010)
+ 406:../../../device/inc/bc62xx.h **** /* SysTick Reload value */ 
+ 407:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_RVR     ((volatile unsigned int *)0xE000E014)
+ 408:../../../device/inc/bc62xx.h **** /* SysTick Current value */ 
+ 409:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CVR     ((volatile unsigned int *)0xE000E018)
+ 410:../../../device/inc/bc62xx.h **** /* SysTick CSR register bits */ 
+ 411:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR_COUNTFLAG (1 << 16)
+ 412:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR_CLKSOURCE (1 << 2)
+ 413:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR_TICKINT   (1 << 1)
+ 414:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR_ENABLE    (1 << 0)
+ 415:../../../device/inc/bc62xx.h **** 
+ 416:../../../device/inc/bc62xx.h **** static inline void enable_intr(int intid)   { NVIC_SETENA |= 1 << intid;}
+ 417:../../../device/inc/bc62xx.h **** static inline void disable_intr(int intid)  { NVIC_CLRENA |= 1 << intid;}
+ 418:../../../device/inc/bc62xx.h **** 
+ 419:../../../device/inc/bc62xx.h **** typedef unsigned char byte;
+ 420:../../../device/inc/bc62xx.h **** typedef unsigned short word;
+ 421:../../../device/inc/bc62xx.h **** 
+ 422:../../../device/inc/bc62xx.h **** void _nop() __attribute__((optimize("O0")));
+ 423:../../../device/inc/bc62xx.h **** 
+ 424:../../../device/inc/bc62xx.h **** #define TO_16BIT_ADDR(A) (((int)A)&0xFFFF)
+ 425:../../../device/inc/bc62xx.h **** 
+ 426:../../../device/inc/bc62xx.h **** #define HREAD(reg)		*(volatile byte*)(reg_map(reg))
+ 427:../../../device/inc/bc62xx.h **** #define HREADW(reg)		(int)HREAD(reg) | HREAD(reg + 1) << 8
+ 428:../../../device/inc/bc62xx.h **** #define HWRITE(reg, val)	HREAD(reg) = (byte)(val)
+ 429:../../../device/inc/bc62xx.h **** #define HWRITEW(reg, val)	do { HWRITE(reg, (int)(val));HWRITE(reg + 1, (int)(val) >> 8); }while(0)
+ 430:../../../device/inc/bc62xx.h **** 
+ 431:../../../device/inc/bc62xx.h **** #define HWRITE24BIT(reg,val) do { HWRITE(reg, (int)(val));HWRITE(reg + 1, (int)(val) >> 8); HWRITE(
+ 432:../../../device/inc/bc62xx.h **** //#define HWOR(reg, val)	HWRITE(reg, HREAD(reg) | (val))
+ 433:../../../device/inc/bc62xx.h **** 
+ 434:../../../device/inc/bc62xx.h **** #define HWOR(reg, val)	HWRITE(reg, ((HREAD(reg) )| (val)))
+ 435:../../../device/inc/bc62xx.h **** #define HWCOR(reg, val)	HWRITE(reg, HREAD(reg) & ~(val))
+ 436:../../../device/inc/bc62xx.h **** 
+ 437:../../../device/inc/bc62xx.h **** //#define SETBIT(reg, val)	HWRITE(reg, HREAD(reg) | (val))
+ 438:../../../device/inc/bc62xx.h **** //#define CLRBIT(reg, val)	HWRITE(reg, HREAD(reg) & ~(val))
+ 439:../../../device/inc/bc62xx.h **** 
+ 440:../../../device/inc/bc62xx.h **** #define BW(addr)			(int)*(addr) << 24 | (int)*(addr + 1) << 16 | (int)*(addr + 2) << 8 | *(addr + 3
+ 441:../../../device/inc/bc62xx.h **** 
+ 442:../../../device/inc/bc62xx.h **** static inline void hw_delay() 
+ 443:../../../device/inc/bc62xx.h **** {
+ 444:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  38              		.loc 2 444 0
+  39              		.syntax divided
+  40              	@ 444 "../../../device/inc/bc62xx.h" 1
+  41 0004 C046     		nop
+  42              	@ 0 "" 2
+ 445:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  43              		.loc 2 445 0
+  44              	@ 445 "../../../device/inc/bc62xx.h" 1
+  45 0006 C046     		nop
+  46              	@ 0 "" 2
+ 446:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  47              		.loc 2 446 0
+  48              	@ 446 "../../../device/inc/bc62xx.h" 1
+  49 0008 C046     		nop
+  50              	@ 0 "" 2
+ 447:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  51              		.loc 2 447 0
+  52              	@ 447 "../../../device/inc/bc62xx.h" 1
+  53 000a C046     		nop
+  54              	@ 0 "" 2
+ 448:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  55              		.loc 2 448 0
+  56              	@ 448 "../../../device/inc/bc62xx.h" 1
+  57 000c C046     		nop
+  58              	@ 0 "" 2
+  59              		.thumb
+  60              		.syntax unified
+  61              	.LBE5:
+  62              	.LBE4:
+  25:../../../device/inc/common.h ****     hw_delay();
+  26:../../../device/inc/common.h ****     HW_REG_8BIT(reg + 1,(word >> 8));
+  63              		.loc 1 26 0
+  64 000e 090A     		lsrs	r1, r1, #8
+  65              	.LVL1:
+  66 0010 4170     		strb	r1, [r0, #1]
+  27:../../../device/inc/common.h **** }
+  67              		.loc 1 27 0
+  68              		@ sp needed
+  69 0012 7047     		bx	lr
+  70              		.cfi_endproc
+  71              	.LFE38:
+  73              		.comm	GPIO_FUNC,1,1
+  74              		.align	1
+  75              		.global	PWM_Init
+  76              		.code	16
+  77              		.thumb_func
+  79              	PWM_Init:
+  80              	.LFB41:
+  81              		.file 3 "../../../drivers/hal/bc62xx_pwm.c"
+   1:../../../drivers/hal/bc62xx_pwm.c **** #include "bc62xx_pwm.h"
+   2:../../../drivers/hal/bc62xx_pwm.c **** 
+   3:../../../drivers/hal/bc62xx_pwm.c **** union PWM_CTRL_REG {
+   4:../../../drivers/hal/bc62xx_pwm.c **** 	uint8_t all;
+   5:../../../drivers/hal/bc62xx_pwm.c **** 	struct PWM_CTRL_BITS bits;
+   6:../../../drivers/hal/bc62xx_pwm.c **** };
+   7:../../../drivers/hal/bc62xx_pwm.c **** 
+   8:../../../drivers/hal/bc62xx_pwm.c **** typedef struct {
+   9:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P0PCNT;
+  10:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P0NCNT;
+  11:../../../drivers/hal/bc62xx_pwm.c **** 	__IO union PWM_CTRL_REG PWM0;
+  12:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P1PCNT;
+  13:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P1NCNT;
+  14:../../../drivers/hal/bc62xx_pwm.c **** 	__IO union PWM_CTRL_REG PWM1;
+  15:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P2PCNT;
+  16:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P2NCNT;
+  17:../../../drivers/hal/bc62xx_pwm.c **** 	__IO union PWM_CTRL_REG PWM2;
+  18:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P3PCNT;
+  19:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P3NCNT;
+  20:../../../drivers/hal/bc62xx_pwm.c **** 	__IO union PWM_CTRL_REG PWM3;
+  21:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P4PCNT;
+  22:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P4NCNT;
+  23:../../../drivers/hal/bc62xx_pwm.c **** 	__IO union PWM_CTRL_REG PWM4;
+  24:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P5PCNT;
+  25:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P5NCNT;
+  26:../../../drivers/hal/bc62xx_pwm.c **** 	__IO union PWM_CTRL_REG PWM5;
+  27:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P6PCNT;
+  28:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P6NCNT;
+  29:../../../drivers/hal/bc62xx_pwm.c **** 	__IO union PWM_CTRL_REG PWM6;
+  30:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P7PCNT;
+  31:../../../drivers/hal/bc62xx_pwm.c **** 	uint16_t P7NCNT;
+  32:../../../drivers/hal/bc62xx_pwm.c **** 	__IO union PWM_CTRL_REG PWM7;
+  33:../../../drivers/hal/bc62xx_pwm.c **** }__packed tPWM_CTRL_REG_GRP;
+  34:../../../drivers/hal/bc62xx_pwm.c **** 
+  35:../../../drivers/hal/bc62xx_pwm.c **** void PWM_Init(uint8_t channel, struct PWM_CTRL_BITS *bits)
+  36:../../../drivers/hal/bc62xx_pwm.c **** {
+  82              		.loc 3 36 0
+  83              		.cfi_startproc
+  84              		@ args = 0, pretend = 0, frame = 0
+  85              		@ frame_needed = 0, uses_anonymous_args = 0
+  86              		@ link register save eliminated.
+  87              	.LVL2:
+  37:../../../drivers/hal/bc62xx_pwm.c **** 	tPWM_CTRL_REG_GRP *pwm = (tPWM_CTRL_REG_GRP *)(reg_map(PWM_BASE));
+  38:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm0
+  39:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH0)	pwm ->PWM0.bits = *bits;
+  88              		.loc 3 39 0
+  89 0014 C307     		lsls	r3, r0, #31
+  90 0016 02D5     		bpl	.L3
+  91              		.loc 3 39 0 is_stmt 0 discriminator 1
+  92 0018 0A78     		ldrb	r2, [r1]
+  93 001a 134B     		ldr	r3, .L33
+  94 001c 1A71     		strb	r2, [r3, #4]
+  95              	.L3:
+  40:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm1
+  41:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH1)	pwm ->PWM1.bits = *bits;
+  96              		.loc 3 41 0 is_stmt 1
+  97 001e 8307     		lsls	r3, r0, #30
+  98 0020 02D5     		bpl	.L4
+  99              		.loc 3 41 0 is_stmt 0 discriminator 1
+ 100 0022 0A78     		ldrb	r2, [r1]
+ 101 0024 104B     		ldr	r3, .L33
+ 102 0026 5A72     		strb	r2, [r3, #9]
+ 103              	.L4:
+  42:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm2
+  43:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH2)	pwm ->PWM2.bits = *bits;
+ 104              		.loc 3 43 0 is_stmt 1
+ 105 0028 4307     		lsls	r3, r0, #29
+ 106 002a 02D5     		bpl	.L5
+ 107              		.loc 3 43 0 is_stmt 0 discriminator 1
+ 108 002c 0A78     		ldrb	r2, [r1]
+ 109 002e 0E4B     		ldr	r3, .L33
+ 110 0030 9A73     		strb	r2, [r3, #14]
+ 111              	.L5:
+  44:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm3
+  45:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH3)	pwm ->PWM3.bits = *bits;
+ 112              		.loc 3 45 0 is_stmt 1
+ 113 0032 0307     		lsls	r3, r0, #28
+ 114 0034 02D5     		bpl	.L6
+ 115              		.loc 3 45 0 is_stmt 0 discriminator 1
+ 116 0036 0A78     		ldrb	r2, [r1]
+ 117 0038 0B4B     		ldr	r3, .L33
+ 118 003a DA74     		strb	r2, [r3, #19]
+ 119              	.L6:
+  46:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm4
+  47:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH4)	pwm ->PWM4.bits = *bits;
+ 120              		.loc 3 47 0 is_stmt 1
+ 121 003c C306     		lsls	r3, r0, #27
+ 122 003e 02D5     		bpl	.L7
+ 123              		.loc 3 47 0 is_stmt 0 discriminator 1
+ 124 0040 0A78     		ldrb	r2, [r1]
+ 125 0042 094B     		ldr	r3, .L33
+ 126 0044 1A76     		strb	r2, [r3, #24]
+ 127              	.L7:
+  48:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm5
+  49:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH5)	pwm ->PWM5.bits = *bits;
+ 128              		.loc 3 49 0 is_stmt 1
+ 129 0046 8306     		lsls	r3, r0, #26
+ 130 0048 02D5     		bpl	.L8
+ 131              		.loc 3 49 0 is_stmt 0 discriminator 1
+ 132 004a 0A78     		ldrb	r2, [r1]
+ 133 004c 064B     		ldr	r3, .L33
+ 134 004e 5A77     		strb	r2, [r3, #29]
+ 135              	.L8:
+  50:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm6
+  51:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH6)	pwm ->PWM6.bits = *bits;
+ 136              		.loc 3 51 0 is_stmt 1
+ 137 0050 4306     		lsls	r3, r0, #25
+ 138 0052 02D5     		bpl	.L9
+ 139              		.loc 3 51 0 is_stmt 0 discriminator 1
+ 140 0054 0A78     		ldrb	r2, [r1]
+ 141 0056 054B     		ldr	r3, .L33+4
+ 142 0058 DA77     		strb	r2, [r3, #31]
+ 143              	.L9:
+  52:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm7
+  53:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH7)	pwm ->PWM7.bits = *bits;
+ 144              		.loc 3 53 0 is_stmt 1
+ 145 005a 40B2     		sxtb	r0, r0
+ 146 005c 0028     		cmp	r0, #0
+ 147 005e 02DA     		bge	.L2
+ 148              		.loc 3 53 0 is_stmt 0 discriminator 1
+ 149 0060 0A78     		ldrb	r2, [r1]
+ 150 0062 034B     		ldr	r3, .L33+8
+ 151 0064 DA77     		strb	r2, [r3, #31]
+ 152              	.L2:
+  54:../../../drivers/hal/bc62xx_pwm.c **** }
+ 153              		.loc 3 54 0 is_stmt 1
+ 154              		@ sp needed
+ 155 0066 7047     		bx	lr
+ 156              	.L34:
+ 157              		.align	2
+ 158              	.L33:
+ 159 0068 CD800010 		.word	268468429
+ 160 006c D0800010 		.word	268468432
+ 161 0070 D5800010 		.word	268468437
+ 162              		.cfi_endproc
+ 163              	.LFE41:
+ 165              		.align	1
+ 166              		.global	PWM_DeInit
+ 167              		.code	16
+ 168              		.thumb_func
+ 170              	PWM_DeInit:
+ 171              	.LFB42:
+  55:../../../drivers/hal/bc62xx_pwm.c **** 
+  56:../../../drivers/hal/bc62xx_pwm.c **** void PWM_DeInit(uint8_t channel)
+  57:../../../drivers/hal/bc62xx_pwm.c **** {
+ 172              		.loc 3 57 0
+ 173              		.cfi_startproc
+ 174              		@ args = 0, pretend = 0, frame = 0
+ 175              		@ frame_needed = 0, uses_anonymous_args = 0
+ 176              		@ link register save eliminated.
+ 177              	.LVL3:
+  58:../../../drivers/hal/bc62xx_pwm.c **** 	tPWM_CTRL_REG_GRP *pwm = (tPWM_CTRL_REG_GRP *)(reg_map(PWM_BASE));
+  59:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm0
+  60:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH0)	pwm ->PWM0.bits.ENABLE = PWM_DISABLE;
+ 178              		.loc 3 60 0
+ 179 0074 C307     		lsls	r3, r0, #31
+ 180 0076 04D5     		bpl	.L36
+ 181              		.loc 3 60 0 is_stmt 0 discriminator 1
+ 182 0078 2021     		movs	r1, #32
+ 183 007a 1B4A     		ldr	r2, .L65
+ 184 007c 1379     		ldrb	r3, [r2, #4]
+ 185 007e 8B43     		bics	r3, r1
+ 186 0080 1371     		strb	r3, [r2, #4]
+ 187              	.L36:
+  61:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm1
+  62:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH1)	pwm ->PWM1.bits.ENABLE = PWM_DISABLE;
+ 188              		.loc 3 62 0 is_stmt 1
+ 189 0082 8307     		lsls	r3, r0, #30
+ 190 0084 04D5     		bpl	.L37
+ 191              		.loc 3 62 0 is_stmt 0 discriminator 1
+ 192 0086 2021     		movs	r1, #32
+ 193 0088 174A     		ldr	r2, .L65
+ 194 008a 537A     		ldrb	r3, [r2, #9]
+ 195 008c 8B43     		bics	r3, r1
+ 196 008e 5372     		strb	r3, [r2, #9]
+ 197              	.L37:
+  63:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm2
+  64:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH2)	pwm ->PWM2.bits.ENABLE = PWM_DISABLE;
+ 198              		.loc 3 64 0 is_stmt 1
+ 199 0090 4307     		lsls	r3, r0, #29
+ 200 0092 04D5     		bpl	.L38
+ 201              		.loc 3 64 0 is_stmt 0 discriminator 1
+ 202 0094 2021     		movs	r1, #32
+ 203 0096 144A     		ldr	r2, .L65
+ 204 0098 937B     		ldrb	r3, [r2, #14]
+ 205 009a 8B43     		bics	r3, r1
+ 206 009c 9373     		strb	r3, [r2, #14]
+ 207              	.L38:
+  65:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm3
+  66:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH3)	pwm ->PWM3.bits.ENABLE = PWM_DISABLE;
+ 208              		.loc 3 66 0 is_stmt 1
+ 209 009e 0307     		lsls	r3, r0, #28
+ 210 00a0 04D5     		bpl	.L39
+ 211              		.loc 3 66 0 is_stmt 0 discriminator 1
+ 212 00a2 2021     		movs	r1, #32
+ 213 00a4 104A     		ldr	r2, .L65
+ 214 00a6 D37C     		ldrb	r3, [r2, #19]
+ 215 00a8 8B43     		bics	r3, r1
+ 216 00aa D374     		strb	r3, [r2, #19]
+ 217              	.L39:
+  67:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm4
+  68:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH4)	pwm ->PWM4.bits.ENABLE = PWM_DISABLE;
+ 218              		.loc 3 68 0 is_stmt 1
+ 219 00ac C306     		lsls	r3, r0, #27
+ 220 00ae 04D5     		bpl	.L40
+ 221              		.loc 3 68 0 is_stmt 0 discriminator 1
+ 222 00b0 2021     		movs	r1, #32
+ 223 00b2 0D4A     		ldr	r2, .L65
+ 224 00b4 137E     		ldrb	r3, [r2, #24]
+ 225 00b6 8B43     		bics	r3, r1
+ 226 00b8 1376     		strb	r3, [r2, #24]
+ 227              	.L40:
+  69:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm5
+  70:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH5)	pwm ->PWM5.bits.ENABLE = PWM_DISABLE;
+ 228              		.loc 3 70 0 is_stmt 1
+ 229 00ba 2021     		movs	r1, #32
+ 230 00bc 0842     		tst	r0, r1
+ 231 00be 03D0     		beq	.L41
+ 232              		.loc 3 70 0 is_stmt 0 discriminator 1
+ 233 00c0 094A     		ldr	r2, .L65
+ 234 00c2 537F     		ldrb	r3, [r2, #29]
+ 235 00c4 8B43     		bics	r3, r1
+ 236 00c6 5377     		strb	r3, [r2, #29]
+ 237              	.L41:
+  71:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm6
+  72:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH6)	pwm ->PWM6.bits.ENABLE = PWM_DISABLE;
+ 238              		.loc 3 72 0 is_stmt 1
+ 239 00c8 4306     		lsls	r3, r0, #25
+ 240 00ca 04D5     		bpl	.L42
+ 241              		.loc 3 72 0 is_stmt 0 discriminator 1
+ 242 00cc 2021     		movs	r1, #32
+ 243 00ce 074A     		ldr	r2, .L65+4
+ 244 00d0 D37F     		ldrb	r3, [r2, #31]
+ 245 00d2 8B43     		bics	r3, r1
+ 246 00d4 D377     		strb	r3, [r2, #31]
+ 247              	.L42:
+  73:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm7
+  74:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH7)	pwm ->PWM7.bits.ENABLE = PWM_DISABLE;
+ 248              		.loc 3 74 0 is_stmt 1
+ 249 00d6 40B2     		sxtb	r0, r0
+ 250 00d8 0028     		cmp	r0, #0
+ 251 00da 04DA     		bge	.L35
+ 252              		.loc 3 74 0 is_stmt 0 discriminator 1
+ 253 00dc 2021     		movs	r1, #32
+ 254 00de 044A     		ldr	r2, .L65+8
+ 255 00e0 D37F     		ldrb	r3, [r2, #31]
+ 256 00e2 8B43     		bics	r3, r1
+ 257 00e4 D377     		strb	r3, [r2, #31]
+ 258              	.L35:
+  75:../../../drivers/hal/bc62xx_pwm.c **** }
+ 259              		.loc 3 75 0 is_stmt 1
+ 260              		@ sp needed
+ 261 00e6 7047     		bx	lr
+ 262              	.L66:
+ 263              		.align	2
+ 264              	.L65:
+ 265 00e8 CD800010 		.word	268468429
+ 266 00ec D0800010 		.word	268468432
+ 267 00f0 D5800010 		.word	268468437
+ 268              		.cfi_endproc
+ 269              	.LFE42:
+ 271              		.align	1
+ 272              		.global	PWM_Start
+ 273              		.code	16
+ 274              		.thumb_func
+ 276              	PWM_Start:
+ 277              	.LFB43:
+  76:../../../drivers/hal/bc62xx_pwm.c **** 
+  77:../../../drivers/hal/bc62xx_pwm.c **** void PWM_Start(uint8_t channel)
+  78:../../../drivers/hal/bc62xx_pwm.c **** {
+ 278              		.loc 3 78 0
+ 279              		.cfi_startproc
+ 280              		@ args = 0, pretend = 0, frame = 0
+ 281              		@ frame_needed = 0, uses_anonymous_args = 0
+ 282              		@ link register save eliminated.
+ 283              	.LVL4:
+  79:../../../drivers/hal/bc62xx_pwm.c **** 	tPWM_CTRL_REG_GRP *pwm = (tPWM_CTRL_REG_GRP *)(reg_map(PWM_BASE));
+  80:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm0
+  81:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH0)	pwm ->PWM0.bits.ENABLE = PWM_ENABLE;
+ 284              		.loc 3 81 0
+ 285 00f4 C307     		lsls	r3, r0, #31
+ 286 00f6 04D5     		bpl	.L68
+ 287              		.loc 3 81 0 is_stmt 0 discriminator 1
+ 288 00f8 2021     		movs	r1, #32
+ 289 00fa 1B4A     		ldr	r2, .L97
+ 290 00fc 1379     		ldrb	r3, [r2, #4]
+ 291 00fe 0B43     		orrs	r3, r1
+ 292 0100 1371     		strb	r3, [r2, #4]
+ 293              	.L68:
+  82:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm1
+  83:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH1)	pwm ->PWM1.bits.ENABLE = PWM_ENABLE;
+ 294              		.loc 3 83 0 is_stmt 1
+ 295 0102 8307     		lsls	r3, r0, #30
+ 296 0104 04D5     		bpl	.L69
+ 297              		.loc 3 83 0 is_stmt 0 discriminator 1
+ 298 0106 2021     		movs	r1, #32
+ 299 0108 174A     		ldr	r2, .L97
+ 300 010a 537A     		ldrb	r3, [r2, #9]
+ 301 010c 0B43     		orrs	r3, r1
+ 302 010e 5372     		strb	r3, [r2, #9]
+ 303              	.L69:
+  84:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm2
+  85:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH2)	pwm ->PWM2.bits.ENABLE = PWM_ENABLE;
+ 304              		.loc 3 85 0 is_stmt 1
+ 305 0110 4307     		lsls	r3, r0, #29
+ 306 0112 04D5     		bpl	.L70
+ 307              		.loc 3 85 0 is_stmt 0 discriminator 1
+ 308 0114 2021     		movs	r1, #32
+ 309 0116 144A     		ldr	r2, .L97
+ 310 0118 937B     		ldrb	r3, [r2, #14]
+ 311 011a 0B43     		orrs	r3, r1
+ 312 011c 9373     		strb	r3, [r2, #14]
+ 313              	.L70:
+  86:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm3
+  87:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH3)	pwm ->PWM3.bits.ENABLE = PWM_ENABLE;
+ 314              		.loc 3 87 0 is_stmt 1
+ 315 011e 0307     		lsls	r3, r0, #28
+ 316 0120 04D5     		bpl	.L71
+ 317              		.loc 3 87 0 is_stmt 0 discriminator 1
+ 318 0122 2021     		movs	r1, #32
+ 319 0124 104A     		ldr	r2, .L97
+ 320 0126 D37C     		ldrb	r3, [r2, #19]
+ 321 0128 0B43     		orrs	r3, r1
+ 322 012a D374     		strb	r3, [r2, #19]
+ 323              	.L71:
+  88:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm4
+  89:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH4)	pwm ->PWM4.bits.ENABLE = PWM_ENABLE;
+ 324              		.loc 3 89 0 is_stmt 1
+ 325 012c C306     		lsls	r3, r0, #27
+ 326 012e 04D5     		bpl	.L72
+ 327              		.loc 3 89 0 is_stmt 0 discriminator 1
+ 328 0130 2021     		movs	r1, #32
+ 329 0132 0D4A     		ldr	r2, .L97
+ 330 0134 137E     		ldrb	r3, [r2, #24]
+ 331 0136 0B43     		orrs	r3, r1
+ 332 0138 1376     		strb	r3, [r2, #24]
+ 333              	.L72:
+  90:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm5
+  91:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH5)	pwm ->PWM5.bits.ENABLE = PWM_ENABLE;
+ 334              		.loc 3 91 0 is_stmt 1
+ 335 013a 2021     		movs	r1, #32
+ 336 013c 0842     		tst	r0, r1
+ 337 013e 03D0     		beq	.L73
+ 338              		.loc 3 91 0 is_stmt 0 discriminator 1
+ 339 0140 094A     		ldr	r2, .L97
+ 340 0142 537F     		ldrb	r3, [r2, #29]
+ 341 0144 0B43     		orrs	r3, r1
+ 342 0146 5377     		strb	r3, [r2, #29]
+ 343              	.L73:
+  92:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm6
+  93:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH6)	pwm ->PWM6.bits.ENABLE = PWM_ENABLE;
+ 344              		.loc 3 93 0 is_stmt 1
+ 345 0148 4306     		lsls	r3, r0, #25
+ 346 014a 04D5     		bpl	.L74
+ 347              		.loc 3 93 0 is_stmt 0 discriminator 1
+ 348 014c 2021     		movs	r1, #32
+ 349 014e 074A     		ldr	r2, .L97+4
+ 350 0150 D37F     		ldrb	r3, [r2, #31]
+ 351 0152 0B43     		orrs	r3, r1
+ 352 0154 D377     		strb	r3, [r2, #31]
+ 353              	.L74:
+  94:../../../drivers/hal/bc62xx_pwm.c **** 	//pwm7
+  95:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH7)	pwm ->PWM7.bits.ENABLE = PWM_ENABLE;
+ 354              		.loc 3 95 0 is_stmt 1
+ 355 0156 40B2     		sxtb	r0, r0
+ 356 0158 0028     		cmp	r0, #0
+ 357 015a 04DA     		bge	.L67
+ 358              		.loc 3 95 0 is_stmt 0 discriminator 1
+ 359 015c 2021     		movs	r1, #32
+ 360 015e 044A     		ldr	r2, .L97+8
+ 361 0160 D37F     		ldrb	r3, [r2, #31]
+ 362 0162 0B43     		orrs	r3, r1
+ 363 0164 D377     		strb	r3, [r2, #31]
+ 364              	.L67:
+  96:../../../drivers/hal/bc62xx_pwm.c **** }
+ 365              		.loc 3 96 0 is_stmt 1
+ 366              		@ sp needed
+ 367 0166 7047     		bx	lr
+ 368              	.L98:
+ 369              		.align	2
+ 370              	.L97:
+ 371 0168 CD800010 		.word	268468429
+ 372 016c D0800010 		.word	268468432
+ 373 0170 D5800010 		.word	268468437
+ 374              		.cfi_endproc
+ 375              	.LFE43:
+ 377              		.align	1
+ 378              		.global	PWM_SetPnCnt
+ 379              		.code	16
+ 380              		.thumb_func
+ 382              	PWM_SetPnCnt:
+ 383              	.LFB44:
+  97:../../../drivers/hal/bc62xx_pwm.c **** 
+  98:../../../drivers/hal/bc62xx_pwm.c **** 
+  99:../../../drivers/hal/bc62xx_pwm.c **** void PWM_SetPnCnt(uint8_t channel, uint16_t pcnt, uint16_t ncnt)
+ 100:../../../drivers/hal/bc62xx_pwm.c **** {
+ 384              		.loc 3 100 0
+ 385              		.cfi_startproc
+ 386              		@ args = 0, pretend = 0, frame = 0
+ 387              		@ frame_needed = 0, uses_anonymous_args = 0
+ 388              	.LVL5:
+ 389 0174 70B5     		push	{r4, r5, r6, lr}
+ 390              	.LCFI0:
+ 391              		.cfi_def_cfa_offset 16
+ 392              		.cfi_offset 4, -16
+ 393              		.cfi_offset 5, -12
+ 394              		.cfi_offset 6, -8
+ 395              		.cfi_offset 14, -4
+ 396              		.loc 3 100 0
+ 397 0176 0400     		movs	r4, r0
+ 398 0178 0D00     		movs	r5, r1
+ 399 017a 1600     		movs	r6, r2
+ 101:../../../drivers/hal/bc62xx_pwm.c **** 	//tPWM_CTRL_REG_GRP *pwm = (tPWM_CTRL_REG_GRP *)(reg_map(PWM_BASE));
+ 102:../../../drivers/hal/bc62xx_pwm.c **** 
+ 103:../../../drivers/hal/bc62xx_pwm.c **** 	
+ 104:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH0) {
+ 400              		.loc 3 104 0
+ 401 017c C307     		lsls	r3, r0, #31
+ 402 017e 07D5     		bpl	.L100
+ 105:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM0_NCNT), ncnt);
+ 403              		.loc 3 105 0
+ 404 0180 1100     		movs	r1, r2
+ 405              	.LVL6:
+ 406 0182 2748     		ldr	r0, .L129
+ 407              	.LVL7:
+ 408 0184 FFF73CFF 		bl	HW_REG_16BIT
+ 409              	.LVL8:
+ 106:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM0_PCNT), pcnt);
+ 410              		.loc 3 106 0
+ 411 0188 2900     		movs	r1, r5
+ 412 018a 2648     		ldr	r0, .L129+4
+ 413 018c FFF738FF 		bl	HW_REG_16BIT
+ 414              	.LVL9:
+ 415              	.L100:
+ 107:../../../drivers/hal/bc62xx_pwm.c **** 	}
+ 108:../../../drivers/hal/bc62xx_pwm.c **** 
+ 109:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH1) {
+ 416              		.loc 3 109 0
+ 417 0190 A307     		lsls	r3, r4, #30
+ 418 0192 07D5     		bpl	.L101
+ 110:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM1_NCNT), ncnt);
+ 419              		.loc 3 110 0
+ 420 0194 3100     		movs	r1, r6
+ 421 0196 2448     		ldr	r0, .L129+8
+ 422 0198 FFF732FF 		bl	HW_REG_16BIT
+ 423              	.LVL10:
+ 111:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM1_PCNT), pcnt);
+ 424              		.loc 3 111 0
+ 425 019c 2900     		movs	r1, r5
+ 426 019e 2348     		ldr	r0, .L129+12
+ 427 01a0 FFF72EFF 		bl	HW_REG_16BIT
+ 428              	.LVL11:
+ 429              	.L101:
+ 112:../../../drivers/hal/bc62xx_pwm.c **** 	}
+ 113:../../../drivers/hal/bc62xx_pwm.c **** 
+ 114:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH2) {
+ 430              		.loc 3 114 0
+ 431 01a4 6307     		lsls	r3, r4, #29
+ 432 01a6 07D5     		bpl	.L102
+ 115:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM2_NCNT), ncnt);
+ 433              		.loc 3 115 0
+ 434 01a8 3100     		movs	r1, r6
+ 435 01aa 2148     		ldr	r0, .L129+16
+ 436 01ac FFF728FF 		bl	HW_REG_16BIT
+ 437              	.LVL12:
+ 116:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM2_PCNT), pcnt);
+ 438              		.loc 3 116 0
+ 439 01b0 2900     		movs	r1, r5
+ 440 01b2 2048     		ldr	r0, .L129+20
+ 441 01b4 FFF724FF 		bl	HW_REG_16BIT
+ 442              	.LVL13:
+ 443              	.L102:
+ 117:../../../drivers/hal/bc62xx_pwm.c **** 	}
+ 118:../../../drivers/hal/bc62xx_pwm.c **** 
+ 119:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH3) {
+ 444              		.loc 3 119 0
+ 445 01b8 2307     		lsls	r3, r4, #28
+ 446 01ba 07D5     		bpl	.L103
+ 120:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM3_NCNT), ncnt);
+ 447              		.loc 3 120 0
+ 448 01bc 3100     		movs	r1, r6
+ 449 01be 1E48     		ldr	r0, .L129+24
+ 450 01c0 FFF71EFF 		bl	HW_REG_16BIT
+ 451              	.LVL14:
+ 121:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM3_PCNT), pcnt);
+ 452              		.loc 3 121 0
+ 453 01c4 2900     		movs	r1, r5
+ 454 01c6 1D48     		ldr	r0, .L129+28
+ 455 01c8 FFF71AFF 		bl	HW_REG_16BIT
+ 456              	.LVL15:
+ 457              	.L103:
+ 122:../../../drivers/hal/bc62xx_pwm.c **** 	}
+ 123:../../../drivers/hal/bc62xx_pwm.c **** 
+ 124:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH4) {
+ 458              		.loc 3 124 0
+ 459 01cc E306     		lsls	r3, r4, #27
+ 460 01ce 07D5     		bpl	.L104
+ 125:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM4_NCNT), ncnt);
+ 461              		.loc 3 125 0
+ 462 01d0 3100     		movs	r1, r6
+ 463 01d2 1B48     		ldr	r0, .L129+32
+ 464 01d4 FFF714FF 		bl	HW_REG_16BIT
+ 465              	.LVL16:
+ 126:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM4_PCNT), pcnt);
+ 466              		.loc 3 126 0
+ 467 01d8 2900     		movs	r1, r5
+ 468 01da 1A48     		ldr	r0, .L129+36
+ 469 01dc FFF710FF 		bl	HW_REG_16BIT
+ 470              	.LVL17:
+ 471              	.L104:
+ 127:../../../drivers/hal/bc62xx_pwm.c **** 	}
+ 128:../../../drivers/hal/bc62xx_pwm.c **** 
+ 129:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH5) {
+ 472              		.loc 3 129 0
+ 473 01e0 A306     		lsls	r3, r4, #26
+ 474 01e2 07D5     		bpl	.L105
+ 130:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM5_NCNT), ncnt);
+ 475              		.loc 3 130 0
+ 476 01e4 3100     		movs	r1, r6
+ 477 01e6 1848     		ldr	r0, .L129+40
+ 478 01e8 FFF70AFF 		bl	HW_REG_16BIT
+ 479              	.LVL18:
+ 131:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM5_PCNT), pcnt);
+ 480              		.loc 3 131 0
+ 481 01ec 2900     		movs	r1, r5
+ 482 01ee 1748     		ldr	r0, .L129+44
+ 483 01f0 FFF706FF 		bl	HW_REG_16BIT
+ 484              	.LVL19:
+ 485              	.L105:
+ 132:../../../drivers/hal/bc62xx_pwm.c **** 	}
+ 133:../../../drivers/hal/bc62xx_pwm.c **** 
+ 134:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH6) {
+ 486              		.loc 3 134 0
+ 487 01f4 6306     		lsls	r3, r4, #25
+ 488 01f6 07D5     		bpl	.L106
+ 135:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM6_NCNT), ncnt);
+ 489              		.loc 3 135 0
+ 490 01f8 3100     		movs	r1, r6
+ 491 01fa 1548     		ldr	r0, .L129+48
+ 492 01fc FFF700FF 		bl	HW_REG_16BIT
+ 493              	.LVL20:
+ 136:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM6_PCNT), pcnt);
+ 494              		.loc 3 136 0
+ 495 0200 2900     		movs	r1, r5
+ 496 0202 1448     		ldr	r0, .L129+52
+ 497 0204 FFF7FCFE 		bl	HW_REG_16BIT
+ 498              	.LVL21:
+ 499              	.L106:
+ 137:../../../drivers/hal/bc62xx_pwm.c **** 	}
+ 138:../../../drivers/hal/bc62xx_pwm.c **** 
+ 139:../../../drivers/hal/bc62xx_pwm.c **** 	if (channel&PWM_CH7) {
+ 500              		.loc 3 139 0
+ 501 0208 64B2     		sxtb	r4, r4
+ 502 020a 002C     		cmp	r4, #0
+ 503 020c 07DA     		bge	.L99
+ 140:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM7_NCNT), ncnt);
+ 504              		.loc 3 140 0
+ 505 020e 3100     		movs	r1, r6
+ 506 0210 1148     		ldr	r0, .L129+56
+ 507 0212 FFF7F5FE 		bl	HW_REG_16BIT
+ 508              	.LVL22:
+ 141:../../../drivers/hal/bc62xx_pwm.c **** 		HW_REG_16BIT(reg_map(CORE_PWM7_PCNT), pcnt);
+ 509              		.loc 3 141 0
+ 510 0216 2900     		movs	r1, r5
+ 511 0218 1048     		ldr	r0, .L129+60
+ 512 021a FFF7F1FE 		bl	HW_REG_16BIT
+ 513              	.LVL23:
+ 514              	.L99:
+ 142:../../../drivers/hal/bc62xx_pwm.c **** 	}
+ 143:../../../drivers/hal/bc62xx_pwm.c **** 
+ 144:../../../drivers/hal/bc62xx_pwm.c **** }
+ 515              		.loc 3 144 0
+ 516              		@ sp needed
+ 517 021e 70BD     		pop	{r4, r5, r6, pc}
+ 518              	.L130:
+ 519              		.align	2
+ 520              	.L129:
+ 521 0220 CF800010 		.word	268468431
+ 522 0224 CD800010 		.word	268468429
+ 523 0228 D4800010 		.word	268468436
+ 524 022c D2800010 		.word	268468434
+ 525 0230 D9800010 		.word	268468441
+ 526 0234 D7800010 		.word	268468439
+ 527 0238 DE800010 		.word	268468446
+ 528 023c DC800010 		.word	268468444
+ 529 0240 E3800010 		.word	268468451
+ 530 0244 E1800010 		.word	268468449
+ 531 0248 E8800010 		.word	268468456
+ 532 024c E6800010 		.word	268468454
+ 533 0250 ED800010 		.word	268468461
+ 534 0254 EB800010 		.word	268468459
+ 535 0258 F2800010 		.word	268468466
+ 536 025c F0800010 		.word	268468464
+ 537              		.cfi_endproc
+ 538              	.LFE44:
+ 540              	.Letext0:
+ 541              		.file 4 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 542              		.file 5 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 543              		.file 6 "../../../drivers/hal/inc/bc62xx_pwm.h"
+ 544              		.file 7 "../../../drivers/hal/inc/bc62xx_gpio.h"

@@ -1,0 +1,1751 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"bc62xx_timer.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.comm	pheader,4,4
+  20              		.comm	header_Timer,24,4
+  21              		.comm	sys_tick_count,4,4
+  22              		.comm	sys_Timer_Check_Flag,1,1
+  23              		.align	1
+  24              		.global	SYS_TimerExpireDefaultHandle
+  25              		.code	16
+  26              		.thumb_func
+  28              	SYS_TimerExpireDefaultHandle:
+  29              	.LFB41:
+  30              		.file 1 "../../../drivers/hal/bc62xx_timer.c"
+   1:../../../drivers/hal/bc62xx_timer.c **** #include "bc62xx_timer.h"
+   2:../../../drivers/hal/bc62xx_timer.c **** 
+   3:../../../drivers/hal/bc62xx_timer.c **** SYS_TIMER_TYPE *pheader;
+   4:../../../drivers/hal/bc62xx_timer.c **** SYS_TIMER_TYPE header_Timer;
+   5:../../../drivers/hal/bc62xx_timer.c **** uint32_t sys_tick_count;
+   6:../../../drivers/hal/bc62xx_timer.c **** uint8_t  sys_Timer_Check_Flag;
+   7:../../../drivers/hal/bc62xx_timer.c **** 
+   8:../../../drivers/hal/bc62xx_timer.c **** static uint32_t tmpCnt;
+   9:../../../drivers/hal/bc62xx_timer.c **** 
+  10:../../../drivers/hal/bc62xx_timer.c **** void SYS_TimerExpireDefaultHandle(int params)
+  11:../../../drivers/hal/bc62xx_timer.c **** {
+  31              		.loc 1 11 0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		@ link register save eliminated.
+  36              	.LVL0:
+  12:../../../drivers/hal/bc62xx_timer.c **** 	// YC_LOG_ERROR("default timer expire !\r\n");
+  13:../../../drivers/hal/bc62xx_timer.c **** 	while(0);
+  14:../../../drivers/hal/bc62xx_timer.c **** }
+  37              		.loc 1 14 0
+  38              		@ sp needed
+  39 0000 7047     		bx	lr
+  40              		.cfi_endproc
+  41              	.LFE41:
+  43              		.align	1
+  44              		.global	SYS_TimerInit
+  45              		.code	16
+  46              		.thumb_func
+  48              	SYS_TimerInit:
+  49              	.LFB42:
+  15:../../../drivers/hal/bc62xx_timer.c **** 
+  16:../../../drivers/hal/bc62xx_timer.c **** void SYS_TimerInit()
+  17:../../../drivers/hal/bc62xx_timer.c **** {
+  50              		.loc 1 17 0
+  51              		.cfi_startproc
+  52              		@ args = 0, pretend = 0, frame = 0
+  53              		@ frame_needed = 0, uses_anonymous_args = 0
+  18:../../../drivers/hal/bc62xx_timer.c **** 	//initial timer lists
+  19:../../../drivers/hal/bc62xx_timer.c **** 	pheader = &header_Timer;
+  54              		.loc 1 19 0
+  55 0002 0D4B     		ldr	r3, .L3
+  56 0004 0D4A     		ldr	r2, .L3+4
+  17:../../../drivers/hal/bc62xx_timer.c **** 	//initial timer lists
+  57              		.loc 1 17 0
+  58 0006 10B5     		push	{r4, lr}
+  59              	.LCFI0:
+  60              		.cfi_def_cfa_offset 8
+  61              		.cfi_offset 4, -8
+  62              		.cfi_offset 14, -4
+  63              		.loc 1 19 0
+  64 0008 1360     		str	r3, [r2]
+  20:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pNextTimer = NULL;
+  21:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pfExpireCb = SYS_TimerExpireDefaultHandle;
+  65              		.loc 1 21 0
+  66 000a 0D4A     		ldr	r2, .L3+8
+  20:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pNextTimer = NULL;
+  67              		.loc 1 20 0
+  68 000c 0021     		movs	r1, #0
+  69              		.loc 1 21 0
+  70 000e DA60     		str	r2, [r3, #12]
+  22:../../../drivers/hal/bc62xx_timer.c **** 	pheader->mTimerStatus = TIMER_START;
+  71              		.loc 1 22 0
+  72 0010 0122     		movs	r2, #1
+  73              	.LBB14:
+  74              	.LBB15:
+  75              	.LBB16:
+  76              	.LBB17:
+  77              		.file 2 "../../../cmsis/core_cm0.h"
+   1:../../../cmsis/core_cm0.h **** /**************************************************************************//**
+   2:../../../cmsis/core_cm0.h ****  * @file     core_cm0.h
+   3:../../../cmsis/core_cm0.h ****  * @brief    CMSIS Cortex-M0 Core Peripheral Access Layer Header File
+   4:../../../cmsis/core_cm0.h ****  * @version  V4.30
+   5:../../../cmsis/core_cm0.h ****  * @date     20. October 2015
+   6:../../../cmsis/core_cm0.h ****  ******************************************************************************/
+   7:../../../cmsis/core_cm0.h **** /* Copyright (c) 2009 - 2015 ARM LIMITED
+   8:../../../cmsis/core_cm0.h **** 
+   9:../../../cmsis/core_cm0.h ****    All rights reserved.
+  10:../../../cmsis/core_cm0.h ****    Redistribution and use in source and binary forms, with or without
+  11:../../../cmsis/core_cm0.h ****    modification, are permitted provided that the following conditions are met:
+  12:../../../cmsis/core_cm0.h ****    - Redistributions of source code must retain the above copyright
+  13:../../../cmsis/core_cm0.h ****      notice, this list of conditions and the following disclaimer.
+  14:../../../cmsis/core_cm0.h ****    - Redistributions in binary form must reproduce the above copyright
+  15:../../../cmsis/core_cm0.h ****      notice, this list of conditions and the following disclaimer in the
+  16:../../../cmsis/core_cm0.h ****      documentation and/or other materials provided with the distribution.
+  17:../../../cmsis/core_cm0.h ****    - Neither the name of ARM nor the names of its contributors may be used
+  18:../../../cmsis/core_cm0.h ****      to endorse or promote products derived from this software without
+  19:../../../cmsis/core_cm0.h ****      specific prior written permission.
+  20:../../../cmsis/core_cm0.h ****    *
+  21:../../../cmsis/core_cm0.h ****    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:../../../cmsis/core_cm0.h ****    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:../../../cmsis/core_cm0.h ****    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:../../../cmsis/core_cm0.h ****    ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
+  25:../../../cmsis/core_cm0.h ****    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:../../../cmsis/core_cm0.h ****    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:../../../cmsis/core_cm0.h ****    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:../../../cmsis/core_cm0.h ****    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:../../../cmsis/core_cm0.h ****    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:../../../cmsis/core_cm0.h ****    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:../../../cmsis/core_cm0.h ****    POSSIBILITY OF SUCH DAMAGE.
+  32:../../../cmsis/core_cm0.h ****    ---------------------------------------------------------------------------*/
+  33:../../../cmsis/core_cm0.h **** 
+  34:../../../cmsis/core_cm0.h **** 
+  35:../../../cmsis/core_cm0.h **** #if   defined ( __ICCARM__ )
+  36:../../../cmsis/core_cm0.h ****  #pragma system_include         /* treat file as system include file for MISRA check */
+  37:../../../cmsis/core_cm0.h **** #elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+  38:../../../cmsis/core_cm0.h ****   #pragma clang system_header   /* treat file as system include file */
+  39:../../../cmsis/core_cm0.h **** #endif
+  40:../../../cmsis/core_cm0.h **** 
+  41:../../../cmsis/core_cm0.h **** #ifndef __CORE_CM0_H_GENERIC
+  42:../../../cmsis/core_cm0.h **** #define __CORE_CM0_H_GENERIC
+  43:../../../cmsis/core_cm0.h **** 
+  44:../../../cmsis/core_cm0.h **** #include <stdint.h>
+  45:../../../cmsis/core_cm0.h **** 
+  46:../../../cmsis/core_cm0.h **** #ifdef __cplusplus
+  47:../../../cmsis/core_cm0.h ****  extern "C" {
+  48:../../../cmsis/core_cm0.h **** #endif
+  49:../../../cmsis/core_cm0.h **** 
+  50:../../../cmsis/core_cm0.h **** /**
+  51:../../../cmsis/core_cm0.h ****   \page CMSIS_MISRA_Exceptions  MISRA-C:2004 Compliance Exceptions
+  52:../../../cmsis/core_cm0.h ****   CMSIS violates the following MISRA-C:2004 rules:
+  53:../../../cmsis/core_cm0.h **** 
+  54:../../../cmsis/core_cm0.h ****    \li Required Rule 8.5, object/function definition in header file.<br>
+  55:../../../cmsis/core_cm0.h ****      Function definitions in header files are used to allow 'inlining'.
+  56:../../../cmsis/core_cm0.h **** 
+  57:../../../cmsis/core_cm0.h ****    \li Required Rule 18.4, declaration of union type or object of union type: '{...}'.<br>
+  58:../../../cmsis/core_cm0.h ****      Unions are used for effective representation of core registers.
+  59:../../../cmsis/core_cm0.h **** 
+  60:../../../cmsis/core_cm0.h ****    \li Advisory Rule 19.7, Function-like macro defined.<br>
+  61:../../../cmsis/core_cm0.h ****      Function-like macros are used to allow more efficient code.
+  62:../../../cmsis/core_cm0.h ****  */
+  63:../../../cmsis/core_cm0.h **** 
+  64:../../../cmsis/core_cm0.h **** 
+  65:../../../cmsis/core_cm0.h **** /*******************************************************************************
+  66:../../../cmsis/core_cm0.h ****  *                 CMSIS definitions
+  67:../../../cmsis/core_cm0.h ****  ******************************************************************************/
+  68:../../../cmsis/core_cm0.h **** /**
+  69:../../../cmsis/core_cm0.h ****   \ingroup Cortex_M0
+  70:../../../cmsis/core_cm0.h ****   @{
+  71:../../../cmsis/core_cm0.h ****  */
+  72:../../../cmsis/core_cm0.h **** 
+  73:../../../cmsis/core_cm0.h **** /*  CMSIS CM0 definitions */
+  74:../../../cmsis/core_cm0.h **** #define __CM0_CMSIS_VERSION_MAIN  (0x04U)                                      /*!< [31:16] CMSIS H
+  75:../../../cmsis/core_cm0.h **** #define __CM0_CMSIS_VERSION_SUB   (0x1EU)                                      /*!< [15:0]  CMSIS H
+  76:../../../cmsis/core_cm0.h **** #define __CM0_CMSIS_VERSION       ((__CM0_CMSIS_VERSION_MAIN << 16U) | \
+  77:../../../cmsis/core_cm0.h ****                                     __CM0_CMSIS_VERSION_SUB           )        /*!< CMSIS HAL versi
+  78:../../../cmsis/core_cm0.h **** 
+  79:../../../cmsis/core_cm0.h **** #define __CORTEX_M                (0x00U)                                      /*!< Cortex-M Core *
+  80:../../../cmsis/core_cm0.h **** 
+  81:../../../cmsis/core_cm0.h **** 
+  82:../../../cmsis/core_cm0.h **** #if   defined ( __CC_ARM )
+  83:../../../cmsis/core_cm0.h ****   #define __ASM            __asm                                      /*!< asm keyword for ARM Comp
+  84:../../../cmsis/core_cm0.h ****   #define __INLINE         __inline                                   /*!< inline keyword for ARM C
+  85:../../../cmsis/core_cm0.h ****   #define __STATIC_INLINE  static __inline
+  86:../../../cmsis/core_cm0.h **** 
+  87:../../../cmsis/core_cm0.h **** #elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+  88:../../../cmsis/core_cm0.h ****   #define __ASM            __asm                                      /*!< asm keyword for ARM Comp
+  89:../../../cmsis/core_cm0.h ****   #define __INLINE         __inline                                   /*!< inline keyword for ARM C
+  90:../../../cmsis/core_cm0.h ****   #define __STATIC_INLINE  static __inline
+  91:../../../cmsis/core_cm0.h **** 
+  92:../../../cmsis/core_cm0.h **** #elif defined ( __GNUC__ )
+  93:../../../cmsis/core_cm0.h ****   #define __ASM            __asm                                      /*!< asm keyword for GNU Comp
+  94:../../../cmsis/core_cm0.h ****   #define __INLINE         inline                                     /*!< inline keyword for GNU C
+  95:../../../cmsis/core_cm0.h ****   #define __STATIC_INLINE  static inline
+  96:../../../cmsis/core_cm0.h **** 
+  97:../../../cmsis/core_cm0.h **** #elif defined ( __ICCARM__ )
+  98:../../../cmsis/core_cm0.h ****   #define __ASM            __asm                                      /*!< asm keyword for IAR Comp
+  99:../../../cmsis/core_cm0.h ****   #define __INLINE         inline                                     /*!< inline keyword for IAR C
+ 100:../../../cmsis/core_cm0.h ****   #define __STATIC_INLINE  static inline
+ 101:../../../cmsis/core_cm0.h **** 
+ 102:../../../cmsis/core_cm0.h **** #elif defined ( __TMS470__ )
+ 103:../../../cmsis/core_cm0.h ****   #define __ASM            __asm                                      /*!< asm keyword for TI CCS C
+ 104:../../../cmsis/core_cm0.h ****   #define __STATIC_INLINE  static inline
+ 105:../../../cmsis/core_cm0.h **** 
+ 106:../../../cmsis/core_cm0.h **** #elif defined ( __TASKING__ )
+ 107:../../../cmsis/core_cm0.h ****   #define __ASM            __asm                                      /*!< asm keyword for TASKING 
+ 108:../../../cmsis/core_cm0.h ****   #define __INLINE         inline                                     /*!< inline keyword for TASKI
+ 109:../../../cmsis/core_cm0.h ****   #define __STATIC_INLINE  static inline
+ 110:../../../cmsis/core_cm0.h **** 
+ 111:../../../cmsis/core_cm0.h **** #elif defined ( __CSMC__ )
+ 112:../../../cmsis/core_cm0.h ****   #define __packed
+ 113:../../../cmsis/core_cm0.h ****   #define __ASM            _asm                                      /*!< asm keyword for COSMIC Co
+ 114:../../../cmsis/core_cm0.h ****   #define __INLINE         inline                                    /*!< inline keyword for COSMIC
+ 115:../../../cmsis/core_cm0.h ****   #define __STATIC_INLINE  static inline
+ 116:../../../cmsis/core_cm0.h **** 
+ 117:../../../cmsis/core_cm0.h **** #else
+ 118:../../../cmsis/core_cm0.h ****   #error Unknown compiler
+ 119:../../../cmsis/core_cm0.h **** #endif
+ 120:../../../cmsis/core_cm0.h **** 
+ 121:../../../cmsis/core_cm0.h **** /** __FPU_USED indicates whether an FPU is used or not.
+ 122:../../../cmsis/core_cm0.h ****     This core does not support an FPU at all
+ 123:../../../cmsis/core_cm0.h **** */
+ 124:../../../cmsis/core_cm0.h **** #define __FPU_USED       0U
+ 125:../../../cmsis/core_cm0.h **** 
+ 126:../../../cmsis/core_cm0.h **** #if defined ( __CC_ARM )
+ 127:../../../cmsis/core_cm0.h ****   #if defined __TARGET_FPU_VFP
+ 128:../../../cmsis/core_cm0.h ****     #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
+ 129:../../../cmsis/core_cm0.h ****   #endif
+ 130:../../../cmsis/core_cm0.h **** 
+ 131:../../../cmsis/core_cm0.h **** #elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+ 132:../../../cmsis/core_cm0.h ****   #if defined __ARM_PCS_VFP
+ 133:../../../cmsis/core_cm0.h ****     #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
+ 134:../../../cmsis/core_cm0.h ****   #endif
+ 135:../../../cmsis/core_cm0.h **** 
+ 136:../../../cmsis/core_cm0.h **** #elif defined ( __GNUC__ )
+ 137:../../../cmsis/core_cm0.h ****   #if defined (__VFP_FP__) && !defined(__SOFTFP__)
+ 138:../../../cmsis/core_cm0.h ****     #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
+ 139:../../../cmsis/core_cm0.h ****   #endif
+ 140:../../../cmsis/core_cm0.h **** 
+ 141:../../../cmsis/core_cm0.h **** #elif defined ( __ICCARM__ )
+ 142:../../../cmsis/core_cm0.h ****   #if defined __ARMVFP__
+ 143:../../../cmsis/core_cm0.h ****     #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
+ 144:../../../cmsis/core_cm0.h ****   #endif
+ 145:../../../cmsis/core_cm0.h **** 
+ 146:../../../cmsis/core_cm0.h **** #elif defined ( __TMS470__ )
+ 147:../../../cmsis/core_cm0.h ****   #if defined __TI_VFP_SUPPORT__
+ 148:../../../cmsis/core_cm0.h ****     #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
+ 149:../../../cmsis/core_cm0.h ****   #endif
+ 150:../../../cmsis/core_cm0.h **** 
+ 151:../../../cmsis/core_cm0.h **** #elif defined ( __TASKING__ )
+ 152:../../../cmsis/core_cm0.h ****   #if defined __FPU_VFP__
+ 153:../../../cmsis/core_cm0.h ****     #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
+ 154:../../../cmsis/core_cm0.h ****   #endif
+ 155:../../../cmsis/core_cm0.h **** 
+ 156:../../../cmsis/core_cm0.h **** #elif defined ( __CSMC__ )
+ 157:../../../cmsis/core_cm0.h ****   #if ( __CSMC__ & 0x400U)
+ 158:../../../cmsis/core_cm0.h ****     #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
+ 159:../../../cmsis/core_cm0.h ****   #endif
+ 160:../../../cmsis/core_cm0.h **** 
+ 161:../../../cmsis/core_cm0.h **** #endif
+ 162:../../../cmsis/core_cm0.h **** 
+ 163:../../../cmsis/core_cm0.h **** #include "core_cmInstr.h"                /* Core Instruction Access */
+ 164:../../../cmsis/core_cm0.h **** #include "core_cmFunc.h"                 /* Core Function Access */
+ 165:../../../cmsis/core_cm0.h **** 
+ 166:../../../cmsis/core_cm0.h **** #ifdef __cplusplus
+ 167:../../../cmsis/core_cm0.h **** }
+ 168:../../../cmsis/core_cm0.h **** #endif
+ 169:../../../cmsis/core_cm0.h **** 
+ 170:../../../cmsis/core_cm0.h **** #endif /* __CORE_CM0_H_GENERIC */
+ 171:../../../cmsis/core_cm0.h **** 
+ 172:../../../cmsis/core_cm0.h **** #ifndef __CMSIS_GENERIC
+ 173:../../../cmsis/core_cm0.h **** 
+ 174:../../../cmsis/core_cm0.h **** #ifndef __CORE_CM0_H_DEPENDANT
+ 175:../../../cmsis/core_cm0.h **** #define __CORE_CM0_H_DEPENDANT
+ 176:../../../cmsis/core_cm0.h **** 
+ 177:../../../cmsis/core_cm0.h **** #ifdef __cplusplus
+ 178:../../../cmsis/core_cm0.h ****  extern "C" {
+ 179:../../../cmsis/core_cm0.h **** #endif
+ 180:../../../cmsis/core_cm0.h **** 
+ 181:../../../cmsis/core_cm0.h **** /* check device defines and use defaults */
+ 182:../../../cmsis/core_cm0.h **** #if defined __CHECK_DEVICE_DEFINES
+ 183:../../../cmsis/core_cm0.h ****   #ifndef __CM0_REV
+ 184:../../../cmsis/core_cm0.h ****     #define __CM0_REV               0x0000U
+ 185:../../../cmsis/core_cm0.h ****     #warning "__CM0_REV not defined in device header file; using default!"
+ 186:../../../cmsis/core_cm0.h ****   #endif
+ 187:../../../cmsis/core_cm0.h **** 
+ 188:../../../cmsis/core_cm0.h ****   #ifndef __NVIC_PRIO_BITS
+ 189:../../../cmsis/core_cm0.h ****     #define __NVIC_PRIO_BITS          2U
+ 190:../../../cmsis/core_cm0.h ****     #warning "__NVIC_PRIO_BITS not defined in device header file; using default!"
+ 191:../../../cmsis/core_cm0.h ****   #endif
+ 192:../../../cmsis/core_cm0.h **** 
+ 193:../../../cmsis/core_cm0.h ****   #ifndef __Vendor_SysTickConfig
+ 194:../../../cmsis/core_cm0.h ****     #define __Vendor_SysTickConfig    0U
+ 195:../../../cmsis/core_cm0.h ****     #warning "__Vendor_SysTickConfig not defined in device header file; using default!"
+ 196:../../../cmsis/core_cm0.h ****   #endif
+ 197:../../../cmsis/core_cm0.h **** #endif
+ 198:../../../cmsis/core_cm0.h **** 
+ 199:../../../cmsis/core_cm0.h **** /* IO definitions (access restrictions to peripheral registers) */
+ 200:../../../cmsis/core_cm0.h **** /**
+ 201:../../../cmsis/core_cm0.h ****     \defgroup CMSIS_glob_defs CMSIS Global Defines
+ 202:../../../cmsis/core_cm0.h **** 
+ 203:../../../cmsis/core_cm0.h ****     <strong>IO Type Qualifiers</strong> are used
+ 204:../../../cmsis/core_cm0.h ****     \li to specify the access to peripheral variables.
+ 205:../../../cmsis/core_cm0.h ****     \li for automatic generation of peripheral register debug information.
+ 206:../../../cmsis/core_cm0.h **** */
+ 207:../../../cmsis/core_cm0.h **** #ifdef __cplusplus
+ 208:../../../cmsis/core_cm0.h ****   #define   __I     volatile             /*!< Defines 'read only' permissions */
+ 209:../../../cmsis/core_cm0.h **** #else
+ 210:../../../cmsis/core_cm0.h ****   #define   __I     volatile const       /*!< Defines 'read only' permissions */
+ 211:../../../cmsis/core_cm0.h **** #endif
+ 212:../../../cmsis/core_cm0.h **** #define     __O     volatile             /*!< Defines 'write only' permissions */
+ 213:../../../cmsis/core_cm0.h **** #define     __IO    volatile             /*!< Defines 'read / write' permissions */
+ 214:../../../cmsis/core_cm0.h **** 
+ 215:../../../cmsis/core_cm0.h **** /* following defines should be used for structure members */
+ 216:../../../cmsis/core_cm0.h **** #define     __IM     volatile const      /*! Defines 'read only' structure member permissions */
+ 217:../../../cmsis/core_cm0.h **** #define     __OM     volatile            /*! Defines 'write only' structure member permissions */
+ 218:../../../cmsis/core_cm0.h **** #define     __IOM    volatile            /*! Defines 'read / write' structure member permissions */
+ 219:../../../cmsis/core_cm0.h **** 
+ 220:../../../cmsis/core_cm0.h **** /*@} end of group Cortex_M0 */
+ 221:../../../cmsis/core_cm0.h **** 
+ 222:../../../cmsis/core_cm0.h **** 
+ 223:../../../cmsis/core_cm0.h **** 
+ 224:../../../cmsis/core_cm0.h **** /*******************************************************************************
+ 225:../../../cmsis/core_cm0.h ****  *                 Register Abstraction
+ 226:../../../cmsis/core_cm0.h ****   Core Register contain:
+ 227:../../../cmsis/core_cm0.h ****   - Core Register
+ 228:../../../cmsis/core_cm0.h ****   - Core NVIC Register
+ 229:../../../cmsis/core_cm0.h ****   - Core SCB Register
+ 230:../../../cmsis/core_cm0.h ****   - Core SysTick Register
+ 231:../../../cmsis/core_cm0.h ****  ******************************************************************************/
+ 232:../../../cmsis/core_cm0.h **** /**
+ 233:../../../cmsis/core_cm0.h ****   \defgroup CMSIS_core_register Defines and Type Definitions
+ 234:../../../cmsis/core_cm0.h ****   \brief Type definitions and defines for Cortex-M processor based devices.
+ 235:../../../cmsis/core_cm0.h **** */
+ 236:../../../cmsis/core_cm0.h **** 
+ 237:../../../cmsis/core_cm0.h **** /**
+ 238:../../../cmsis/core_cm0.h ****   \ingroup    CMSIS_core_register
+ 239:../../../cmsis/core_cm0.h ****   \defgroup   CMSIS_CORE  Status and Control Registers
+ 240:../../../cmsis/core_cm0.h ****   \brief      Core Register type definitions.
+ 241:../../../cmsis/core_cm0.h ****   @{
+ 242:../../../cmsis/core_cm0.h ****  */
+ 243:../../../cmsis/core_cm0.h **** 
+ 244:../../../cmsis/core_cm0.h **** /**
+ 245:../../../cmsis/core_cm0.h ****   \brief  Union type to access the Application Program Status Register (APSR).
+ 246:../../../cmsis/core_cm0.h ****  */
+ 247:../../../cmsis/core_cm0.h **** typedef union
+ 248:../../../cmsis/core_cm0.h **** {
+ 249:../../../cmsis/core_cm0.h ****   struct
+ 250:../../../cmsis/core_cm0.h ****   {
+ 251:../../../cmsis/core_cm0.h ****     uint32_t _reserved0:28;              /*!< bit:  0..27  Reserved */
+ 252:../../../cmsis/core_cm0.h ****     uint32_t V:1;                        /*!< bit:     28  Overflow condition code flag */
+ 253:../../../cmsis/core_cm0.h ****     uint32_t C:1;                        /*!< bit:     29  Carry condition code flag */
+ 254:../../../cmsis/core_cm0.h ****     uint32_t Z:1;                        /*!< bit:     30  Zero condition code flag */
+ 255:../../../cmsis/core_cm0.h ****     uint32_t N:1;                        /*!< bit:     31  Negative condition code flag */
+ 256:../../../cmsis/core_cm0.h ****   } b;                                   /*!< Structure used for bit  access */
+ 257:../../../cmsis/core_cm0.h ****   uint32_t w;                            /*!< Type      used for word access */
+ 258:../../../cmsis/core_cm0.h **** } APSR_Type;
+ 259:../../../cmsis/core_cm0.h **** 
+ 260:../../../cmsis/core_cm0.h **** /* APSR Register Definitions */
+ 261:../../../cmsis/core_cm0.h **** #define APSR_N_Pos                         31U                                            /*!< APSR
+ 262:../../../cmsis/core_cm0.h **** #define APSR_N_Msk                         (1UL << APSR_N_Pos)                            /*!< APSR
+ 263:../../../cmsis/core_cm0.h **** 
+ 264:../../../cmsis/core_cm0.h **** #define APSR_Z_Pos                         30U                                            /*!< APSR
+ 265:../../../cmsis/core_cm0.h **** #define APSR_Z_Msk                         (1UL << APSR_Z_Pos)                            /*!< APSR
+ 266:../../../cmsis/core_cm0.h **** 
+ 267:../../../cmsis/core_cm0.h **** #define APSR_C_Pos                         29U                                            /*!< APSR
+ 268:../../../cmsis/core_cm0.h **** #define APSR_C_Msk                         (1UL << APSR_C_Pos)                            /*!< APSR
+ 269:../../../cmsis/core_cm0.h **** 
+ 270:../../../cmsis/core_cm0.h **** #define APSR_V_Pos                         28U                                            /*!< APSR
+ 271:../../../cmsis/core_cm0.h **** #define APSR_V_Msk                         (1UL << APSR_V_Pos)                            /*!< APSR
+ 272:../../../cmsis/core_cm0.h **** 
+ 273:../../../cmsis/core_cm0.h **** 
+ 274:../../../cmsis/core_cm0.h **** /**
+ 275:../../../cmsis/core_cm0.h ****   \brief  Union type to access the Interrupt Program Status Register (IPSR).
+ 276:../../../cmsis/core_cm0.h ****  */
+ 277:../../../cmsis/core_cm0.h **** typedef union
+ 278:../../../cmsis/core_cm0.h **** {
+ 279:../../../cmsis/core_cm0.h ****   struct
+ 280:../../../cmsis/core_cm0.h ****   {
+ 281:../../../cmsis/core_cm0.h ****     uint32_t ISR:9;                      /*!< bit:  0.. 8  Exception number */
+ 282:../../../cmsis/core_cm0.h ****     uint32_t _reserved0:23;              /*!< bit:  9..31  Reserved */
+ 283:../../../cmsis/core_cm0.h ****   } b;                                   /*!< Structure used for bit  access */
+ 284:../../../cmsis/core_cm0.h ****   uint32_t w;                            /*!< Type      used for word access */
+ 285:../../../cmsis/core_cm0.h **** } IPSR_Type;
+ 286:../../../cmsis/core_cm0.h **** 
+ 287:../../../cmsis/core_cm0.h **** /* IPSR Register Definitions */
+ 288:../../../cmsis/core_cm0.h **** #define IPSR_ISR_Pos                        0U                                            /*!< IPSR
+ 289:../../../cmsis/core_cm0.h **** #define IPSR_ISR_Msk                       (0x1FFUL /*<< IPSR_ISR_Pos*/)                  /*!< IPSR
+ 290:../../../cmsis/core_cm0.h **** 
+ 291:../../../cmsis/core_cm0.h **** 
+ 292:../../../cmsis/core_cm0.h **** /**
+ 293:../../../cmsis/core_cm0.h ****   \brief  Union type to access the Special-Purpose Program Status Registers (xPSR).
+ 294:../../../cmsis/core_cm0.h ****  */
+ 295:../../../cmsis/core_cm0.h **** typedef union
+ 296:../../../cmsis/core_cm0.h **** {
+ 297:../../../cmsis/core_cm0.h ****   struct
+ 298:../../../cmsis/core_cm0.h ****   {
+ 299:../../../cmsis/core_cm0.h ****     uint32_t ISR:9;                      /*!< bit:  0.. 8  Exception number */
+ 300:../../../cmsis/core_cm0.h ****     uint32_t _reserved0:15;              /*!< bit:  9..23  Reserved */
+ 301:../../../cmsis/core_cm0.h ****     uint32_t T:1;                        /*!< bit:     24  Thumb bit        (read 0) */
+ 302:../../../cmsis/core_cm0.h ****     uint32_t _reserved1:3;               /*!< bit: 25..27  Reserved */
+ 303:../../../cmsis/core_cm0.h ****     uint32_t V:1;                        /*!< bit:     28  Overflow condition code flag */
+ 304:../../../cmsis/core_cm0.h ****     uint32_t C:1;                        /*!< bit:     29  Carry condition code flag */
+ 305:../../../cmsis/core_cm0.h ****     uint32_t Z:1;                        /*!< bit:     30  Zero condition code flag */
+ 306:../../../cmsis/core_cm0.h ****     uint32_t N:1;                        /*!< bit:     31  Negative condition code flag */
+ 307:../../../cmsis/core_cm0.h ****   } b;                                   /*!< Structure used for bit  access */
+ 308:../../../cmsis/core_cm0.h ****   uint32_t w;                            /*!< Type      used for word access */
+ 309:../../../cmsis/core_cm0.h **** } xPSR_Type;
+ 310:../../../cmsis/core_cm0.h **** 
+ 311:../../../cmsis/core_cm0.h **** /* xPSR Register Definitions */
+ 312:../../../cmsis/core_cm0.h **** #define xPSR_N_Pos                         31U                                            /*!< xPSR
+ 313:../../../cmsis/core_cm0.h **** #define xPSR_N_Msk                         (1UL << xPSR_N_Pos)                            /*!< xPSR
+ 314:../../../cmsis/core_cm0.h **** 
+ 315:../../../cmsis/core_cm0.h **** #define xPSR_Z_Pos                         30U                                            /*!< xPSR
+ 316:../../../cmsis/core_cm0.h **** #define xPSR_Z_Msk                         (1UL << xPSR_Z_Pos)                            /*!< xPSR
+ 317:../../../cmsis/core_cm0.h **** 
+ 318:../../../cmsis/core_cm0.h **** #define xPSR_C_Pos                         29U                                            /*!< xPSR
+ 319:../../../cmsis/core_cm0.h **** #define xPSR_C_Msk                         (1UL << xPSR_C_Pos)                            /*!< xPSR
+ 320:../../../cmsis/core_cm0.h **** 
+ 321:../../../cmsis/core_cm0.h **** #define xPSR_V_Pos                         28U                                            /*!< xPSR
+ 322:../../../cmsis/core_cm0.h **** #define xPSR_V_Msk                         (1UL << xPSR_V_Pos)                            /*!< xPSR
+ 323:../../../cmsis/core_cm0.h **** 
+ 324:../../../cmsis/core_cm0.h **** #define xPSR_T_Pos                         24U                                            /*!< xPSR
+ 325:../../../cmsis/core_cm0.h **** #define xPSR_T_Msk                         (1UL << xPSR_T_Pos)                            /*!< xPSR
+ 326:../../../cmsis/core_cm0.h **** 
+ 327:../../../cmsis/core_cm0.h **** #define xPSR_ISR_Pos                        0U                                            /*!< xPSR
+ 328:../../../cmsis/core_cm0.h **** #define xPSR_ISR_Msk                       (0x1FFUL /*<< xPSR_ISR_Pos*/)                  /*!< xPSR
+ 329:../../../cmsis/core_cm0.h **** 
+ 330:../../../cmsis/core_cm0.h **** 
+ 331:../../../cmsis/core_cm0.h **** /**
+ 332:../../../cmsis/core_cm0.h ****   \brief  Union type to access the Control Registers (CONTROL).
+ 333:../../../cmsis/core_cm0.h ****  */
+ 334:../../../cmsis/core_cm0.h **** typedef union
+ 335:../../../cmsis/core_cm0.h **** {
+ 336:../../../cmsis/core_cm0.h ****   struct
+ 337:../../../cmsis/core_cm0.h ****   {
+ 338:../../../cmsis/core_cm0.h ****     uint32_t _reserved0:1;               /*!< bit:      0  Reserved */
+ 339:../../../cmsis/core_cm0.h ****     uint32_t SPSEL:1;                    /*!< bit:      1  Stack to be used */
+ 340:../../../cmsis/core_cm0.h ****     uint32_t _reserved1:30;              /*!< bit:  2..31  Reserved */
+ 341:../../../cmsis/core_cm0.h ****   } b;                                   /*!< Structure used for bit  access */
+ 342:../../../cmsis/core_cm0.h ****   uint32_t w;                            /*!< Type      used for word access */
+ 343:../../../cmsis/core_cm0.h **** } CONTROL_Type;
+ 344:../../../cmsis/core_cm0.h **** 
+ 345:../../../cmsis/core_cm0.h **** /* CONTROL Register Definitions */
+ 346:../../../cmsis/core_cm0.h **** #define CONTROL_SPSEL_Pos                   1U                                            /*!< CONT
+ 347:../../../cmsis/core_cm0.h **** #define CONTROL_SPSEL_Msk                  (1UL << CONTROL_SPSEL_Pos)                     /*!< CONT
+ 348:../../../cmsis/core_cm0.h **** 
+ 349:../../../cmsis/core_cm0.h **** /*@} end of group CMSIS_CORE */
+ 350:../../../cmsis/core_cm0.h **** 
+ 351:../../../cmsis/core_cm0.h **** 
+ 352:../../../cmsis/core_cm0.h **** /**
+ 353:../../../cmsis/core_cm0.h ****   \ingroup    CMSIS_core_register
+ 354:../../../cmsis/core_cm0.h ****   \defgroup   CMSIS_NVIC  Nested Vectored Interrupt Controller (NVIC)
+ 355:../../../cmsis/core_cm0.h ****   \brief      Type definitions for the NVIC Registers
+ 356:../../../cmsis/core_cm0.h ****   @{
+ 357:../../../cmsis/core_cm0.h ****  */
+ 358:../../../cmsis/core_cm0.h **** 
+ 359:../../../cmsis/core_cm0.h **** /**
+ 360:../../../cmsis/core_cm0.h ****   \brief  Structure type to access the Nested Vectored Interrupt Controller (NVIC).
+ 361:../../../cmsis/core_cm0.h ****  */
+ 362:../../../cmsis/core_cm0.h **** typedef struct
+ 363:../../../cmsis/core_cm0.h **** {
+ 364:../../../cmsis/core_cm0.h ****   __IOM uint32_t ISER[1U];               /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
+ 365:../../../cmsis/core_cm0.h ****         uint32_t RESERVED0[31U];
+ 366:../../../cmsis/core_cm0.h ****   __IOM uint32_t ICER[1U];               /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register 
+ 367:../../../cmsis/core_cm0.h ****         uint32_t RSERVED1[31U];
+ 368:../../../cmsis/core_cm0.h ****   __IOM uint32_t ISPR[1U];               /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register *
+ 369:../../../cmsis/core_cm0.h ****         uint32_t RESERVED2[31U];
+ 370:../../../cmsis/core_cm0.h ****   __IOM uint32_t ICPR[1U];               /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register
+ 371:../../../cmsis/core_cm0.h ****         uint32_t RESERVED3[31U];
+ 372:../../../cmsis/core_cm0.h ****         uint32_t RESERVED4[64U];
+ 373:../../../cmsis/core_cm0.h ****   __IOM uint32_t IP[8U];                 /*!< Offset: 0x300 (R/W)  Interrupt Priority Register */
+ 374:../../../cmsis/core_cm0.h **** }  NVIC_Type;
+ 375:../../../cmsis/core_cm0.h **** 
+ 376:../../../cmsis/core_cm0.h **** /*@} end of group CMSIS_NVIC */
+ 377:../../../cmsis/core_cm0.h **** 
+ 378:../../../cmsis/core_cm0.h **** 
+ 379:../../../cmsis/core_cm0.h **** /**
+ 380:../../../cmsis/core_cm0.h ****   \ingroup  CMSIS_core_register
+ 381:../../../cmsis/core_cm0.h ****   \defgroup CMSIS_SCB     System Control Block (SCB)
+ 382:../../../cmsis/core_cm0.h ****   \brief    Type definitions for the System Control Block Registers
+ 383:../../../cmsis/core_cm0.h ****   @{
+ 384:../../../cmsis/core_cm0.h ****  */
+ 385:../../../cmsis/core_cm0.h **** 
+ 386:../../../cmsis/core_cm0.h **** /**
+ 387:../../../cmsis/core_cm0.h ****   \brief  Structure type to access the System Control Block (SCB).
+ 388:../../../cmsis/core_cm0.h ****  */
+ 389:../../../cmsis/core_cm0.h **** typedef struct
+ 390:../../../cmsis/core_cm0.h **** {
+ 391:../../../cmsis/core_cm0.h ****   __IM  uint32_t CPUID;                  /*!< Offset: 0x000 (R/ )  CPUID Base Register */
+ 392:../../../cmsis/core_cm0.h ****   __IOM uint32_t ICSR;                   /*!< Offset: 0x004 (R/W)  Interrupt Control and State Regi
+ 393:../../../cmsis/core_cm0.h ****         uint32_t RESERVED0;
+ 394:../../../cmsis/core_cm0.h ****   __IOM uint32_t AIRCR;                  /*!< Offset: 0x00C (R/W)  Application Interrupt and Reset 
+ 395:../../../cmsis/core_cm0.h ****   __IOM uint32_t SCR;                    /*!< Offset: 0x010 (R/W)  System Control Register */
+ 396:../../../cmsis/core_cm0.h ****   __IOM uint32_t CCR;                    /*!< Offset: 0x014 (R/W)  Configuration Control Register *
+ 397:../../../cmsis/core_cm0.h ****         uint32_t RESERVED1;
+ 398:../../../cmsis/core_cm0.h ****   __IOM uint32_t SHP[2U];                /*!< Offset: 0x01C (R/W)  System Handlers Priority Registe
+ 399:../../../cmsis/core_cm0.h ****   __IOM uint32_t SHCSR;                  /*!< Offset: 0x024 (R/W)  System Handler Control and State
+ 400:../../../cmsis/core_cm0.h **** } SCB_Type;
+ 401:../../../cmsis/core_cm0.h **** 
+ 402:../../../cmsis/core_cm0.h **** /* SCB CPUID Register Definitions */
+ 403:../../../cmsis/core_cm0.h **** #define SCB_CPUID_IMPLEMENTER_Pos          24U                                            /*!< SCB 
+ 404:../../../cmsis/core_cm0.h **** #define SCB_CPUID_IMPLEMENTER_Msk          (0xFFUL << SCB_CPUID_IMPLEMENTER_Pos)          /*!< SCB 
+ 405:../../../cmsis/core_cm0.h **** 
+ 406:../../../cmsis/core_cm0.h **** #define SCB_CPUID_VARIANT_Pos              20U                                            /*!< SCB 
+ 407:../../../cmsis/core_cm0.h **** #define SCB_CPUID_VARIANT_Msk              (0xFUL << SCB_CPUID_VARIANT_Pos)               /*!< SCB 
+ 408:../../../cmsis/core_cm0.h **** 
+ 409:../../../cmsis/core_cm0.h **** #define SCB_CPUID_ARCHITECTURE_Pos         16U                                            /*!< SCB 
+ 410:../../../cmsis/core_cm0.h **** #define SCB_CPUID_ARCHITECTURE_Msk         (0xFUL << SCB_CPUID_ARCHITECTURE_Pos)          /*!< SCB 
+ 411:../../../cmsis/core_cm0.h **** 
+ 412:../../../cmsis/core_cm0.h **** #define SCB_CPUID_PARTNO_Pos                4U                                            /*!< SCB 
+ 413:../../../cmsis/core_cm0.h **** #define SCB_CPUID_PARTNO_Msk               (0xFFFUL << SCB_CPUID_PARTNO_Pos)              /*!< SCB 
+ 414:../../../cmsis/core_cm0.h **** 
+ 415:../../../cmsis/core_cm0.h **** #define SCB_CPUID_REVISION_Pos              0U                                            /*!< SCB 
+ 416:../../../cmsis/core_cm0.h **** #define SCB_CPUID_REVISION_Msk             (0xFUL /*<< SCB_CPUID_REVISION_Pos*/)          /*!< SCB 
+ 417:../../../cmsis/core_cm0.h **** 
+ 418:../../../cmsis/core_cm0.h **** /* SCB Interrupt Control State Register Definitions */
+ 419:../../../cmsis/core_cm0.h **** #define SCB_ICSR_NMIPENDSET_Pos            31U                                            /*!< SCB 
+ 420:../../../cmsis/core_cm0.h **** #define SCB_ICSR_NMIPENDSET_Msk            (1UL << SCB_ICSR_NMIPENDSET_Pos)               /*!< SCB 
+ 421:../../../cmsis/core_cm0.h **** 
+ 422:../../../cmsis/core_cm0.h **** #define SCB_ICSR_PENDSVSET_Pos             28U                                            /*!< SCB 
+ 423:../../../cmsis/core_cm0.h **** #define SCB_ICSR_PENDSVSET_Msk             (1UL << SCB_ICSR_PENDSVSET_Pos)                /*!< SCB 
+ 424:../../../cmsis/core_cm0.h **** 
+ 425:../../../cmsis/core_cm0.h **** #define SCB_ICSR_PENDSVCLR_Pos             27U                                            /*!< SCB 
+ 426:../../../cmsis/core_cm0.h **** #define SCB_ICSR_PENDSVCLR_Msk             (1UL << SCB_ICSR_PENDSVCLR_Pos)                /*!< SCB 
+ 427:../../../cmsis/core_cm0.h **** 
+ 428:../../../cmsis/core_cm0.h **** #define SCB_ICSR_PENDSTSET_Pos             26U                                            /*!< SCB 
+ 429:../../../cmsis/core_cm0.h **** #define SCB_ICSR_PENDSTSET_Msk             (1UL << SCB_ICSR_PENDSTSET_Pos)                /*!< SCB 
+ 430:../../../cmsis/core_cm0.h **** 
+ 431:../../../cmsis/core_cm0.h **** #define SCB_ICSR_PENDSTCLR_Pos             25U                                            /*!< SCB 
+ 432:../../../cmsis/core_cm0.h **** #define SCB_ICSR_PENDSTCLR_Msk             (1UL << SCB_ICSR_PENDSTCLR_Pos)                /*!< SCB 
+ 433:../../../cmsis/core_cm0.h **** 
+ 434:../../../cmsis/core_cm0.h **** #define SCB_ICSR_ISRPREEMPT_Pos            23U                                            /*!< SCB 
+ 435:../../../cmsis/core_cm0.h **** #define SCB_ICSR_ISRPREEMPT_Msk            (1UL << SCB_ICSR_ISRPREEMPT_Pos)               /*!< SCB 
+ 436:../../../cmsis/core_cm0.h **** 
+ 437:../../../cmsis/core_cm0.h **** #define SCB_ICSR_ISRPENDING_Pos            22U                                            /*!< SCB 
+ 438:../../../cmsis/core_cm0.h **** #define SCB_ICSR_ISRPENDING_Msk            (1UL << SCB_ICSR_ISRPENDING_Pos)               /*!< SCB 
+ 439:../../../cmsis/core_cm0.h **** 
+ 440:../../../cmsis/core_cm0.h **** #define SCB_ICSR_VECTPENDING_Pos           12U                                            /*!< SCB 
+ 441:../../../cmsis/core_cm0.h **** #define SCB_ICSR_VECTPENDING_Msk           (0x1FFUL << SCB_ICSR_VECTPENDING_Pos)          /*!< SCB 
+ 442:../../../cmsis/core_cm0.h **** 
+ 443:../../../cmsis/core_cm0.h **** #define SCB_ICSR_VECTACTIVE_Pos             0U                                            /*!< SCB 
+ 444:../../../cmsis/core_cm0.h **** #define SCB_ICSR_VECTACTIVE_Msk            (0x1FFUL /*<< SCB_ICSR_VECTACTIVE_Pos*/)       /*!< SCB 
+ 445:../../../cmsis/core_cm0.h **** 
+ 446:../../../cmsis/core_cm0.h **** /* SCB Application Interrupt and Reset Control Register Definitions */
+ 447:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_VECTKEY_Pos              16U                                            /*!< SCB 
+ 448:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_VECTKEY_Msk              (0xFFFFUL << SCB_AIRCR_VECTKEY_Pos)            /*!< SCB 
+ 449:../../../cmsis/core_cm0.h **** 
+ 450:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_VECTKEYSTAT_Pos          16U                                            /*!< SCB 
+ 451:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_VECTKEYSTAT_Msk          (0xFFFFUL << SCB_AIRCR_VECTKEYSTAT_Pos)        /*!< SCB 
+ 452:../../../cmsis/core_cm0.h **** 
+ 453:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_ENDIANESS_Pos            15U                                            /*!< SCB 
+ 454:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_ENDIANESS_Msk            (1UL << SCB_AIRCR_ENDIANESS_Pos)               /*!< SCB 
+ 455:../../../cmsis/core_cm0.h **** 
+ 456:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_SYSRESETREQ_Pos           2U                                            /*!< SCB 
+ 457:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_SYSRESETREQ_Msk          (1UL << SCB_AIRCR_SYSRESETREQ_Pos)             /*!< SCB 
+ 458:../../../cmsis/core_cm0.h **** 
+ 459:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_VECTCLRACTIVE_Pos         1U                                            /*!< SCB 
+ 460:../../../cmsis/core_cm0.h **** #define SCB_AIRCR_VECTCLRACTIVE_Msk        (1UL << SCB_AIRCR_VECTCLRACTIVE_Pos)           /*!< SCB 
+ 461:../../../cmsis/core_cm0.h **** 
+ 462:../../../cmsis/core_cm0.h **** /* SCB System Control Register Definitions */
+ 463:../../../cmsis/core_cm0.h **** #define SCB_SCR_SEVONPEND_Pos               4U                                            /*!< SCB 
+ 464:../../../cmsis/core_cm0.h **** #define SCB_SCR_SEVONPEND_Msk              (1UL << SCB_SCR_SEVONPEND_Pos)                 /*!< SCB 
+ 465:../../../cmsis/core_cm0.h **** 
+ 466:../../../cmsis/core_cm0.h **** #define SCB_SCR_SLEEPDEEP_Pos               2U                                            /*!< SCB 
+ 467:../../../cmsis/core_cm0.h **** #define SCB_SCR_SLEEPDEEP_Msk              (1UL << SCB_SCR_SLEEPDEEP_Pos)                 /*!< SCB 
+ 468:../../../cmsis/core_cm0.h **** 
+ 469:../../../cmsis/core_cm0.h **** #define SCB_SCR_SLEEPONEXIT_Pos             1U                                            /*!< SCB 
+ 470:../../../cmsis/core_cm0.h **** #define SCB_SCR_SLEEPONEXIT_Msk            (1UL << SCB_SCR_SLEEPONEXIT_Pos)               /*!< SCB 
+ 471:../../../cmsis/core_cm0.h **** 
+ 472:../../../cmsis/core_cm0.h **** /* SCB Configuration Control Register Definitions */
+ 473:../../../cmsis/core_cm0.h **** #define SCB_CCR_STKALIGN_Pos                9U                                            /*!< SCB 
+ 474:../../../cmsis/core_cm0.h **** #define SCB_CCR_STKALIGN_Msk               (1UL << SCB_CCR_STKALIGN_Pos)                  /*!< SCB 
+ 475:../../../cmsis/core_cm0.h **** 
+ 476:../../../cmsis/core_cm0.h **** #define SCB_CCR_UNALIGN_TRP_Pos             3U                                            /*!< SCB 
+ 477:../../../cmsis/core_cm0.h **** #define SCB_CCR_UNALIGN_TRP_Msk            (1UL << SCB_CCR_UNALIGN_TRP_Pos)               /*!< SCB 
+ 478:../../../cmsis/core_cm0.h **** 
+ 479:../../../cmsis/core_cm0.h **** /* SCB System Handler Control and State Register Definitions */
+ 480:../../../cmsis/core_cm0.h **** #define SCB_SHCSR_SVCALLPENDED_Pos         15U                                            /*!< SCB 
+ 481:../../../cmsis/core_cm0.h **** #define SCB_SHCSR_SVCALLPENDED_Msk         (1UL << SCB_SHCSR_SVCALLPENDED_Pos)            /*!< SCB 
+ 482:../../../cmsis/core_cm0.h **** 
+ 483:../../../cmsis/core_cm0.h **** /*@} end of group CMSIS_SCB */
+ 484:../../../cmsis/core_cm0.h **** 
+ 485:../../../cmsis/core_cm0.h **** 
+ 486:../../../cmsis/core_cm0.h **** /**
+ 487:../../../cmsis/core_cm0.h ****   \ingroup  CMSIS_core_register
+ 488:../../../cmsis/core_cm0.h ****   \defgroup CMSIS_SysTick     System Tick Timer (SysTick)
+ 489:../../../cmsis/core_cm0.h ****   \brief    Type definitions for the System Timer Registers.
+ 490:../../../cmsis/core_cm0.h ****   @{
+ 491:../../../cmsis/core_cm0.h ****  */
+ 492:../../../cmsis/core_cm0.h **** 
+ 493:../../../cmsis/core_cm0.h **** /**
+ 494:../../../cmsis/core_cm0.h ****   \brief  Structure type to access the System Timer (SysTick).
+ 495:../../../cmsis/core_cm0.h ****  */
+ 496:../../../cmsis/core_cm0.h **** typedef struct
+ 497:../../../cmsis/core_cm0.h **** {
+ 498:../../../cmsis/core_cm0.h ****   __IOM uint32_t CTRL;                   /*!< Offset: 0x000 (R/W)  SysTick Control and Status Regis
+ 499:../../../cmsis/core_cm0.h ****   __IOM uint32_t LOAD;                   /*!< Offset: 0x004 (R/W)  SysTick Reload Value Register */
+ 500:../../../cmsis/core_cm0.h ****   __IOM uint32_t VAL;                    /*!< Offset: 0x008 (R/W)  SysTick Current Value Register *
+ 501:../../../cmsis/core_cm0.h ****   __IM  uint32_t CALIB;                  /*!< Offset: 0x00C (R/ )  SysTick Calibration Register */
+ 502:../../../cmsis/core_cm0.h **** } SysTick_Type;
+ 503:../../../cmsis/core_cm0.h **** 
+ 504:../../../cmsis/core_cm0.h **** /* SysTick Control / Status Register Definitions */
+ 505:../../../cmsis/core_cm0.h **** #define SysTick_CTRL_COUNTFLAG_Pos         16U                                            /*!< SysT
+ 506:../../../cmsis/core_cm0.h **** #define SysTick_CTRL_COUNTFLAG_Msk         (1UL << SysTick_CTRL_COUNTFLAG_Pos)            /*!< SysT
+ 507:../../../cmsis/core_cm0.h **** 
+ 508:../../../cmsis/core_cm0.h **** #define SysTick_CTRL_CLKSOURCE_Pos          2U                                            /*!< SysT
+ 509:../../../cmsis/core_cm0.h **** #define SysTick_CTRL_CLKSOURCE_Msk         (1UL << SysTick_CTRL_CLKSOURCE_Pos)            /*!< SysT
+ 510:../../../cmsis/core_cm0.h **** 
+ 511:../../../cmsis/core_cm0.h **** #define SysTick_CTRL_TICKINT_Pos            1U                                            /*!< SysT
+ 512:../../../cmsis/core_cm0.h **** #define SysTick_CTRL_TICKINT_Msk           (1UL << SysTick_CTRL_TICKINT_Pos)              /*!< SysT
+ 513:../../../cmsis/core_cm0.h **** 
+ 514:../../../cmsis/core_cm0.h **** #define SysTick_CTRL_ENABLE_Pos             0U                                            /*!< SysT
+ 515:../../../cmsis/core_cm0.h **** #define SysTick_CTRL_ENABLE_Msk            (1UL /*<< SysTick_CTRL_ENABLE_Pos*/)           /*!< SysT
+ 516:../../../cmsis/core_cm0.h **** 
+ 517:../../../cmsis/core_cm0.h **** /* SysTick Reload Register Definitions */
+ 518:../../../cmsis/core_cm0.h **** #define SysTick_LOAD_RELOAD_Pos             0U                                            /*!< SysT
+ 519:../../../cmsis/core_cm0.h **** #define SysTick_LOAD_RELOAD_Msk            (0xFFFFFFUL /*<< SysTick_LOAD_RELOAD_Pos*/)    /*!< SysT
+ 520:../../../cmsis/core_cm0.h **** 
+ 521:../../../cmsis/core_cm0.h **** /* SysTick Current Register Definitions */
+ 522:../../../cmsis/core_cm0.h **** #define SysTick_VAL_CURRENT_Pos             0U                                            /*!< SysT
+ 523:../../../cmsis/core_cm0.h **** #define SysTick_VAL_CURRENT_Msk            (0xFFFFFFUL /*<< SysTick_VAL_CURRENT_Pos*/)    /*!< SysT
+ 524:../../../cmsis/core_cm0.h **** 
+ 525:../../../cmsis/core_cm0.h **** /* SysTick Calibration Register Definitions */
+ 526:../../../cmsis/core_cm0.h **** #define SysTick_CALIB_NOREF_Pos            31U                                            /*!< SysT
+ 527:../../../cmsis/core_cm0.h **** #define SysTick_CALIB_NOREF_Msk            (1UL << SysTick_CALIB_NOREF_Pos)               /*!< SysT
+ 528:../../../cmsis/core_cm0.h **** 
+ 529:../../../cmsis/core_cm0.h **** #define SysTick_CALIB_SKEW_Pos             30U                                            /*!< SysT
+ 530:../../../cmsis/core_cm0.h **** #define SysTick_CALIB_SKEW_Msk             (1UL << SysTick_CALIB_SKEW_Pos)                /*!< SysT
+ 531:../../../cmsis/core_cm0.h **** 
+ 532:../../../cmsis/core_cm0.h **** #define SysTick_CALIB_TENMS_Pos             0U                                            /*!< SysT
+ 533:../../../cmsis/core_cm0.h **** #define SysTick_CALIB_TENMS_Msk            (0xFFFFFFUL /*<< SysTick_CALIB_TENMS_Pos*/)    /*!< SysT
+ 534:../../../cmsis/core_cm0.h **** 
+ 535:../../../cmsis/core_cm0.h **** /*@} end of group CMSIS_SysTick */
+ 536:../../../cmsis/core_cm0.h **** 
+ 537:../../../cmsis/core_cm0.h **** 
+ 538:../../../cmsis/core_cm0.h **** /**
+ 539:../../../cmsis/core_cm0.h ****   \ingroup  CMSIS_core_register
+ 540:../../../cmsis/core_cm0.h ****   \defgroup CMSIS_CoreDebug       Core Debug Registers (CoreDebug)
+ 541:../../../cmsis/core_cm0.h ****   \brief    Cortex-M0 Core Debug Registers (DCB registers, SHCSR, and DFSR) are only accessible ove
+ 542:../../../cmsis/core_cm0.h ****             Therefore they are not covered by the Cortex-M0 header file.
+ 543:../../../cmsis/core_cm0.h ****   @{
+ 544:../../../cmsis/core_cm0.h ****  */
+ 545:../../../cmsis/core_cm0.h **** /*@} end of group CMSIS_CoreDebug */
+ 546:../../../cmsis/core_cm0.h **** 
+ 547:../../../cmsis/core_cm0.h **** 
+ 548:../../../cmsis/core_cm0.h **** /**
+ 549:../../../cmsis/core_cm0.h ****   \ingroup    CMSIS_core_register
+ 550:../../../cmsis/core_cm0.h ****   \defgroup   CMSIS_core_bitfield     Core register bit field macros
+ 551:../../../cmsis/core_cm0.h ****   \brief      Macros for use with bit field definitions (xxx_Pos, xxx_Msk).
+ 552:../../../cmsis/core_cm0.h ****   @{
+ 553:../../../cmsis/core_cm0.h ****  */
+ 554:../../../cmsis/core_cm0.h **** 
+ 555:../../../cmsis/core_cm0.h **** /**
+ 556:../../../cmsis/core_cm0.h ****   \brief   Mask and shift a bit field value for use in a register bit range.
+ 557:../../../cmsis/core_cm0.h ****   \param[in] field  Name of the register bit field.
+ 558:../../../cmsis/core_cm0.h ****   \param[in] value  Value of the bit field.
+ 559:../../../cmsis/core_cm0.h ****   \return           Masked and shifted value.
+ 560:../../../cmsis/core_cm0.h **** */
+ 561:../../../cmsis/core_cm0.h **** #define _VAL2FLD(field, value)    ((value << field ## _Pos) & field ## _Msk)
+ 562:../../../cmsis/core_cm0.h **** 
+ 563:../../../cmsis/core_cm0.h **** /**
+ 564:../../../cmsis/core_cm0.h ****   \brief     Mask and shift a register value to extract a bit filed value.
+ 565:../../../cmsis/core_cm0.h ****   \param[in] field  Name of the register bit field.
+ 566:../../../cmsis/core_cm0.h ****   \param[in] value  Value of register.
+ 567:../../../cmsis/core_cm0.h ****   \return           Masked and shifted bit field value.
+ 568:../../../cmsis/core_cm0.h **** */
+ 569:../../../cmsis/core_cm0.h **** #define _FLD2VAL(field, value)    ((value & field ## _Msk) >> field ## _Pos)
+ 570:../../../cmsis/core_cm0.h **** 
+ 571:../../../cmsis/core_cm0.h **** /*@} end of group CMSIS_core_bitfield */
+ 572:../../../cmsis/core_cm0.h **** 
+ 573:../../../cmsis/core_cm0.h **** 
+ 574:../../../cmsis/core_cm0.h **** /**
+ 575:../../../cmsis/core_cm0.h ****   \ingroup    CMSIS_core_register
+ 576:../../../cmsis/core_cm0.h ****   \defgroup   CMSIS_core_base     Core Definitions
+ 577:../../../cmsis/core_cm0.h ****   \brief      Definitions for base addresses, unions, and structures.
+ 578:../../../cmsis/core_cm0.h ****   @{
+ 579:../../../cmsis/core_cm0.h ****  */
+ 580:../../../cmsis/core_cm0.h **** 
+ 581:../../../cmsis/core_cm0.h **** /* Memory mapping of Cortex-M0 Hardware */
+ 582:../../../cmsis/core_cm0.h **** #define SCS_BASE            (0xE000E000UL)                            /*!< System Control Space Bas
+ 583:../../../cmsis/core_cm0.h **** #define SysTick_BASE        (SCS_BASE +  0x0010UL)                    /*!< SysTick Base Address */
+ 584:../../../cmsis/core_cm0.h **** #define NVIC_BASE           (SCS_BASE +  0x0100UL)                    /*!< NVIC Base Address */
+ 585:../../../cmsis/core_cm0.h **** #define SCB_BASE            (SCS_BASE +  0x0D00UL)                    /*!< System Control Block Bas
+ 586:../../../cmsis/core_cm0.h **** 
+ 587:../../../cmsis/core_cm0.h **** #define SCB                 ((SCB_Type       *)     SCB_BASE      )   /*!< SCB configuration struct
+ 588:../../../cmsis/core_cm0.h **** #define SysTick             ((SysTick_Type   *)     SysTick_BASE  )   /*!< SysTick configuration st
+ 589:../../../cmsis/core_cm0.h **** #define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struc
+ 590:../../../cmsis/core_cm0.h **** 
+ 591:../../../cmsis/core_cm0.h **** 
+ 592:../../../cmsis/core_cm0.h **** /*@} */
+ 593:../../../cmsis/core_cm0.h **** 
+ 594:../../../cmsis/core_cm0.h **** 
+ 595:../../../cmsis/core_cm0.h **** 
+ 596:../../../cmsis/core_cm0.h **** /*******************************************************************************
+ 597:../../../cmsis/core_cm0.h ****  *                Hardware Abstraction Layer
+ 598:../../../cmsis/core_cm0.h ****   Core Function Interface contains:
+ 599:../../../cmsis/core_cm0.h ****   - Core NVIC Functions
+ 600:../../../cmsis/core_cm0.h ****   - Core SysTick Functions
+ 601:../../../cmsis/core_cm0.h ****   - Core Register Access Functions
+ 602:../../../cmsis/core_cm0.h ****  ******************************************************************************/
+ 603:../../../cmsis/core_cm0.h **** /**
+ 604:../../../cmsis/core_cm0.h ****   \defgroup CMSIS_Core_FunctionInterface Functions and Instructions Reference
+ 605:../../../cmsis/core_cm0.h **** */
+ 606:../../../cmsis/core_cm0.h **** 
+ 607:../../../cmsis/core_cm0.h **** 
+ 608:../../../cmsis/core_cm0.h **** 
+ 609:../../../cmsis/core_cm0.h **** /* ##########################   NVIC functions  #################################### */
+ 610:../../../cmsis/core_cm0.h **** /**
+ 611:../../../cmsis/core_cm0.h ****   \ingroup  CMSIS_Core_FunctionInterface
+ 612:../../../cmsis/core_cm0.h ****   \defgroup CMSIS_Core_NVICFunctions NVIC Functions
+ 613:../../../cmsis/core_cm0.h ****   \brief    Functions that manage interrupts and exceptions via the NVIC.
+ 614:../../../cmsis/core_cm0.h ****   @{
+ 615:../../../cmsis/core_cm0.h ****  */
+ 616:../../../cmsis/core_cm0.h **** 
+ 617:../../../cmsis/core_cm0.h **** /* Interrupt Priorities are WORD accessible only under ARMv6M                   */
+ 618:../../../cmsis/core_cm0.h **** /* The following MACROS handle generation of the register offset and byte masks */
+ 619:../../../cmsis/core_cm0.h **** #define _BIT_SHIFT(IRQn)         (  ((((uint32_t)(int32_t)(IRQn))         )      &  0x03UL) * 8UL)
+ 620:../../../cmsis/core_cm0.h **** #define _SHP_IDX(IRQn)           ( (((((uint32_t)(int32_t)(IRQn)) & 0x0FUL)-8UL) >>    2UL)      )
+ 621:../../../cmsis/core_cm0.h **** #define _IP_IDX(IRQn)            (   (((uint32_t)(int32_t)(IRQn))                >>    2UL)      )
+ 622:../../../cmsis/core_cm0.h **** 
+ 623:../../../cmsis/core_cm0.h **** 
+ 624:../../../cmsis/core_cm0.h **** /**
+ 625:../../../cmsis/core_cm0.h ****   \brief   Enable External Interrupt
+ 626:../../../cmsis/core_cm0.h ****   \details Enables a device-specific interrupt in the NVIC interrupt controller.
+ 627:../../../cmsis/core_cm0.h ****   \param [in]      IRQn  External interrupt number. Value cannot be negative.
+ 628:../../../cmsis/core_cm0.h ****  */
+ 629:../../../cmsis/core_cm0.h **** __STATIC_INLINE void NVIC_EnableIRQ(IRQn_Type IRQn)
+ 630:../../../cmsis/core_cm0.h **** {
+ 631:../../../cmsis/core_cm0.h ****   NVIC->ISER[0U] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
+ 632:../../../cmsis/core_cm0.h **** }
+ 633:../../../cmsis/core_cm0.h **** 
+ 634:../../../cmsis/core_cm0.h **** 
+ 635:../../../cmsis/core_cm0.h **** /**
+ 636:../../../cmsis/core_cm0.h ****   \brief   Disable External Interrupt
+ 637:../../../cmsis/core_cm0.h ****   \details Disables a device-specific interrupt in the NVIC interrupt controller.
+ 638:../../../cmsis/core_cm0.h ****   \param [in]      IRQn  External interrupt number. Value cannot be negative.
+ 639:../../../cmsis/core_cm0.h ****  */
+ 640:../../../cmsis/core_cm0.h **** __STATIC_INLINE void NVIC_DisableIRQ(IRQn_Type IRQn)
+ 641:../../../cmsis/core_cm0.h **** {
+ 642:../../../cmsis/core_cm0.h ****   NVIC->ICER[0U] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
+ 643:../../../cmsis/core_cm0.h **** }
+ 644:../../../cmsis/core_cm0.h **** 
+ 645:../../../cmsis/core_cm0.h **** 
+ 646:../../../cmsis/core_cm0.h **** /**
+ 647:../../../cmsis/core_cm0.h ****   \brief   Get Pending Interrupt
+ 648:../../../cmsis/core_cm0.h ****   \details Reads the pending register in the NVIC and returns the pending bit for the specified int
+ 649:../../../cmsis/core_cm0.h ****   \param [in]      IRQn  Interrupt number.
+ 650:../../../cmsis/core_cm0.h ****   \return             0  Interrupt status is not pending.
+ 651:../../../cmsis/core_cm0.h ****   \return             1  Interrupt status is pending.
+ 652:../../../cmsis/core_cm0.h ****  */
+ 653:../../../cmsis/core_cm0.h **** __STATIC_INLINE uint32_t NVIC_GetPendingIRQ(IRQn_Type IRQn)
+ 654:../../../cmsis/core_cm0.h **** {
+ 655:../../../cmsis/core_cm0.h ****   return((uint32_t)(((NVIC->ISPR[0U] & (1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL))) != 0UL) ? 1UL
+ 656:../../../cmsis/core_cm0.h **** }
+ 657:../../../cmsis/core_cm0.h **** 
+ 658:../../../cmsis/core_cm0.h **** 
+ 659:../../../cmsis/core_cm0.h **** /**
+ 660:../../../cmsis/core_cm0.h ****   \brief   Set Pending Interrupt
+ 661:../../../cmsis/core_cm0.h ****   \details Sets the pending bit of an external interrupt.
+ 662:../../../cmsis/core_cm0.h ****   \param [in]      IRQn  Interrupt number. Value cannot be negative.
+ 663:../../../cmsis/core_cm0.h ****  */
+ 664:../../../cmsis/core_cm0.h **** __STATIC_INLINE void NVIC_SetPendingIRQ(IRQn_Type IRQn)
+ 665:../../../cmsis/core_cm0.h **** {
+ 666:../../../cmsis/core_cm0.h ****   NVIC->ISPR[0U] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
+ 667:../../../cmsis/core_cm0.h **** }
+ 668:../../../cmsis/core_cm0.h **** 
+ 669:../../../cmsis/core_cm0.h **** 
+ 670:../../../cmsis/core_cm0.h **** /**
+ 671:../../../cmsis/core_cm0.h ****   \brief   Clear Pending Interrupt
+ 672:../../../cmsis/core_cm0.h ****   \details Clears the pending bit of an external interrupt.
+ 673:../../../cmsis/core_cm0.h ****   \param [in]      IRQn  External interrupt number. Value cannot be negative.
+ 674:../../../cmsis/core_cm0.h ****  */
+ 675:../../../cmsis/core_cm0.h **** __STATIC_INLINE void NVIC_ClearPendingIRQ(IRQn_Type IRQn)
+ 676:../../../cmsis/core_cm0.h **** {
+ 677:../../../cmsis/core_cm0.h ****   NVIC->ICPR[0U] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
+ 678:../../../cmsis/core_cm0.h **** }
+ 679:../../../cmsis/core_cm0.h **** 
+ 680:../../../cmsis/core_cm0.h **** 
+ 681:../../../cmsis/core_cm0.h **** /**
+ 682:../../../cmsis/core_cm0.h ****   \brief   Set Interrupt Priority
+ 683:../../../cmsis/core_cm0.h ****   \details Sets the priority of an interrupt.
+ 684:../../../cmsis/core_cm0.h ****   \note    The priority cannot be set for every core interrupt.
+ 685:../../../cmsis/core_cm0.h ****   \param [in]      IRQn  Interrupt number.
+ 686:../../../cmsis/core_cm0.h ****   \param [in]  priority  Priority to set.
+ 687:../../../cmsis/core_cm0.h ****  */
+ 688:../../../cmsis/core_cm0.h **** __STATIC_INLINE void NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority)
+ 689:../../../cmsis/core_cm0.h **** {
+ 690:../../../cmsis/core_cm0.h ****   if ((int32_t)(IRQn) < 0)
+ 691:../../../cmsis/core_cm0.h ****   {
+ 692:../../../cmsis/core_cm0.h ****     SCB->SHP[_SHP_IDX(IRQn)] = ((uint32_t)(SCB->SHP[_SHP_IDX(IRQn)] & ~(0xFFUL << _BIT_SHIFT(IRQn))
+  78              		.loc 2 692 0
+  79 0012 C024     		movs	r4, #192
+  80              	.LBE17:
+  81              	.LBE16:
+  82              	.LBE15:
+  83              	.LBE14:
+  84              		.loc 1 22 0
+  85 0014 1A72     		strb	r2, [r3, #8]
+  23:../../../drivers/hal/bc62xx_timer.c **** 	pheader->mTimerValue = 0;
+  86              		.loc 1 23 0
+  87 0016 1960     		str	r1, [r3]
+  88              	.LVL1:
+  20:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pfExpireCb = SYS_TimerExpireDefaultHandle;
+  89              		.loc 1 20 0
+  90 0018 1961     		str	r1, [r3, #16]
+  91              	.LBB24:
+  92              	.LBB22:
+ 693:../../../cmsis/core_cm0.h ****        (((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL) << _BIT_SHIFT(IRQn)));
+ 694:../../../cmsis/core_cm0.h ****   }
+ 695:../../../cmsis/core_cm0.h ****   else
+ 696:../../../cmsis/core_cm0.h ****   {
+ 697:../../../cmsis/core_cm0.h ****     NVIC->IP[_IP_IDX(IRQn)]  = ((uint32_t)(NVIC->IP[_IP_IDX(IRQn)]  & ~(0xFFUL << _BIT_SHIFT(IRQn))
+ 698:../../../cmsis/core_cm0.h ****        (((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL) << _BIT_SHIFT(IRQn)));
+ 699:../../../cmsis/core_cm0.h ****   }
+ 700:../../../cmsis/core_cm0.h **** }
+ 701:../../../cmsis/core_cm0.h **** 
+ 702:../../../cmsis/core_cm0.h **** 
+ 703:../../../cmsis/core_cm0.h **** /**
+ 704:../../../cmsis/core_cm0.h ****   \brief   Get Interrupt Priority
+ 705:../../../cmsis/core_cm0.h ****   \details Reads the priority of an interrupt.
+ 706:../../../cmsis/core_cm0.h ****            The interrupt number can be positive to specify an external (device specific) interrupt,
+ 707:../../../cmsis/core_cm0.h ****            or negative to specify an internal (core) interrupt.
+ 708:../../../cmsis/core_cm0.h ****   \param [in]   IRQn  Interrupt number.
+ 709:../../../cmsis/core_cm0.h ****   \return             Interrupt Priority.
+ 710:../../../cmsis/core_cm0.h ****                       Value is aligned automatically to the implemented priority bits of the microc
+ 711:../../../cmsis/core_cm0.h ****  */
+ 712:../../../cmsis/core_cm0.h **** __STATIC_INLINE uint32_t NVIC_GetPriority(IRQn_Type IRQn)
+ 713:../../../cmsis/core_cm0.h **** {
+ 714:../../../cmsis/core_cm0.h **** 
+ 715:../../../cmsis/core_cm0.h ****   if ((int32_t)(IRQn) < 0)
+ 716:../../../cmsis/core_cm0.h ****   {
+ 717:../../../cmsis/core_cm0.h ****     return((uint32_t)(((SCB->SHP[_SHP_IDX(IRQn)] >> _BIT_SHIFT(IRQn) ) & (uint32_t)0xFFUL) >> (8U -
+ 718:../../../cmsis/core_cm0.h ****   }
+ 719:../../../cmsis/core_cm0.h ****   else
+ 720:../../../cmsis/core_cm0.h ****   {
+ 721:../../../cmsis/core_cm0.h ****     return((uint32_t)(((NVIC->IP[ _IP_IDX(IRQn)] >> _BIT_SHIFT(IRQn) ) & (uint32_t)0xFFUL) >> (8U -
+ 722:../../../cmsis/core_cm0.h ****   }
+ 723:../../../cmsis/core_cm0.h **** }
+ 724:../../../cmsis/core_cm0.h **** 
+ 725:../../../cmsis/core_cm0.h **** 
+ 726:../../../cmsis/core_cm0.h **** /**
+ 727:../../../cmsis/core_cm0.h ****   \brief   System Reset
+ 728:../../../cmsis/core_cm0.h ****   \details Initiates a system reset request to reset the MCU.
+ 729:../../../cmsis/core_cm0.h ****  */
+ 730:../../../cmsis/core_cm0.h **** __STATIC_INLINE void NVIC_SystemReset(void)
+ 731:../../../cmsis/core_cm0.h **** {
+ 732:../../../cmsis/core_cm0.h ****   __DSB();                                                          /* Ensure all outstanding memor
+ 733:../../../cmsis/core_cm0.h ****                                                                        buffered write are completed
+ 734:../../../cmsis/core_cm0.h ****   SCB->AIRCR  = ((0x5FAUL << SCB_AIRCR_VECTKEY_Pos) |
+ 735:../../../cmsis/core_cm0.h ****                  SCB_AIRCR_SYSRESETREQ_Msk);
+ 736:../../../cmsis/core_cm0.h ****   __DSB();                                                          /* Ensure completion of memory 
+ 737:../../../cmsis/core_cm0.h **** 
+ 738:../../../cmsis/core_cm0.h ****   for (;;)                                                           /* wait until reset */
+ 739:../../../cmsis/core_cm0.h ****   {
+ 740:../../../cmsis/core_cm0.h ****     __NOP();
+ 741:../../../cmsis/core_cm0.h ****   }
+ 742:../../../cmsis/core_cm0.h **** }
+ 743:../../../cmsis/core_cm0.h **** 
+ 744:../../../cmsis/core_cm0.h **** /*@} end of CMSIS_Core_NVICFunctions */
+ 745:../../../cmsis/core_cm0.h **** 
+ 746:../../../cmsis/core_cm0.h **** 
+ 747:../../../cmsis/core_cm0.h **** 
+ 748:../../../cmsis/core_cm0.h **** /* ##################################    SysTick function  ########################################
+ 749:../../../cmsis/core_cm0.h **** /**
+ 750:../../../cmsis/core_cm0.h ****   \ingroup  CMSIS_Core_FunctionInterface
+ 751:../../../cmsis/core_cm0.h ****   \defgroup CMSIS_Core_SysTickFunctions SysTick Functions
+ 752:../../../cmsis/core_cm0.h ****   \brief    Functions that configure the System.
+ 753:../../../cmsis/core_cm0.h ****   @{
+ 754:../../../cmsis/core_cm0.h ****  */
+ 755:../../../cmsis/core_cm0.h **** 
+ 756:../../../cmsis/core_cm0.h **** #if (__Vendor_SysTickConfig == 0U)
+ 757:../../../cmsis/core_cm0.h **** 
+ 758:../../../cmsis/core_cm0.h **** /**
+ 759:../../../cmsis/core_cm0.h ****   \brief   System Tick Configuration
+ 760:../../../cmsis/core_cm0.h ****   \details Initializes the System Timer and its interrupt, and starts the System Tick Timer.
+ 761:../../../cmsis/core_cm0.h ****            Counter is in free running mode to generate periodic interrupts.
+ 762:../../../cmsis/core_cm0.h ****   \param [in]  ticks  Number of ticks between two interrupts.
+ 763:../../../cmsis/core_cm0.h ****   \return          0  Function succeeded.
+ 764:../../../cmsis/core_cm0.h ****   \return          1  Function failed.
+ 765:../../../cmsis/core_cm0.h ****   \note    When the variable <b>__Vendor_SysTickConfig</b> is set to 1, then the
+ 766:../../../cmsis/core_cm0.h ****            function <b>SysTick_Config</b> is not included. In this case, the file <b><i>device</i>.
+ 767:../../../cmsis/core_cm0.h ****            must contain a vendor-specific implementation of this function.
+ 768:../../../cmsis/core_cm0.h ****  */
+ 769:../../../cmsis/core_cm0.h **** __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
+ 770:../../../cmsis/core_cm0.h **** {
+ 771:../../../cmsis/core_cm0.h ****   if ((ticks - 1UL) > SysTick_LOAD_RELOAD_Msk)
+ 772:../../../cmsis/core_cm0.h ****   {
+ 773:../../../cmsis/core_cm0.h ****     return (1UL);                                                   /* Reload value impossible */
+ 774:../../../cmsis/core_cm0.h ****   }
+ 775:../../../cmsis/core_cm0.h **** 
+ 776:../../../cmsis/core_cm0.h ****   SysTick->LOAD  = (uint32_t)(ticks - 1UL);                         /* set reload register */
+  93              		.loc 2 776 0
+  94 001a 0A4A     		ldr	r2, .L3+12
+  95 001c 0A4B     		ldr	r3, .L3+16
+  96              	.LBB20:
+  97              	.LBB18:
+ 692:../../../cmsis/core_cm0.h ****        (((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL) << _BIT_SHIFT(IRQn)));
+  98              		.loc 2 692 0
+  99 001e 0B48     		ldr	r0, .L3+20
+ 100              	.LBE18:
+ 101              	.LBE20:
+ 102              		.loc 2 776 0
+ 103 0020 5360     		str	r3, [r2, #4]
+ 104              	.LVL2:
+ 105              	.LBB21:
+ 106              	.LBB19:
+ 692:../../../cmsis/core_cm0.h ****        (((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL) << _BIT_SHIFT(IRQn)));
+ 107              		.loc 2 692 0
+ 108 0022 036A     		ldr	r3, [r0, #32]
+ 109 0024 2406     		lsls	r4, r4, #24
+ 110 0026 1B02     		lsls	r3, r3, #8
+ 111 0028 1B0A     		lsrs	r3, r3, #8
+ 112 002a 2343     		orrs	r3, r4
+ 113 002c 0362     		str	r3, [r0, #32]
+ 114              	.LVL3:
+ 115              	.LBE19:
+ 116              	.LBE21:
+ 777:../../../cmsis/core_cm0.h ****   NVIC_SetPriority (SysTick_IRQn, (1UL << __NVIC_PRIO_BITS) - 1UL); /* set Priority for Systick Int
+ 778:../../../cmsis/core_cm0.h ****   SysTick->VAL   = 0UL;                                             /* Load the SysTick Counter Val
+ 779:../../../cmsis/core_cm0.h ****   SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
+ 117              		.loc 2 779 0
+ 118 002e 0723     		movs	r3, #7
+ 778:../../../cmsis/core_cm0.h ****   SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
+ 119              		.loc 2 778 0
+ 120 0030 9160     		str	r1, [r2, #8]
+ 121              	.LBE22:
+ 122              	.LBE24:
+  24:../../../drivers/hal/bc62xx_timer.c **** 
+  25:../../../drivers/hal/bc62xx_timer.c **** 	SysTick_Config(SYSTEM_CLOCK/1000); //each  systick interrupt is 1ms
+  26:../../../drivers/hal/bc62xx_timer.c **** }
+ 123              		.loc 1 26 0
+ 124              		@ sp needed
+ 125              	.LBB25:
+ 126              	.LBB23:
+ 127              		.loc 2 779 0
+ 128 0032 1360     		str	r3, [r2]
+ 129              	.LVL4:
+ 130              	.LBE23:
+ 131              	.LBE25:
+ 132              		.loc 1 26 0
+ 133 0034 10BD     		pop	{r4, pc}
+ 134              	.L4:
+ 135 0036 C046     		.align	2
+ 136              	.L3:
+ 137 0038 00000000 		.word	header_Timer
+ 138 003c 00000000 		.word	pheader
+ 139 0040 00000000 		.word	SYS_TimerExpireDefaultHandle
+ 140 0044 10E000E0 		.word	-536813552
+ 141 0048 BF5D0000 		.word	23999
+ 142 004c 00ED00E0 		.word	-536810240
+ 143              		.cfi_endproc
+ 144              	.LFE42:
+ 146              		.align	1
+ 147              		.global	SYS_SetTimer
+ 148              		.code	16
+ 149              		.thumb_func
+ 151              	SYS_SetTimer:
+ 152              	.LFB43:
+  27:../../../drivers/hal/bc62xx_timer.c **** 
+  28:../../../drivers/hal/bc62xx_timer.c **** 
+  29:../../../drivers/hal/bc62xx_timer.c **** //union is 10ms
+  30:../../../drivers/hal/bc62xx_timer.c **** bool SYS_SetTimer(SYS_TIMER_TYPE *pTimer, int tick,TIMER_TYPE isSingle,Timer_Expire_CB pfExpire_CB)
+  31:../../../drivers/hal/bc62xx_timer.c **** {
+ 153              		.loc 1 31 0
+ 154              		.cfi_startproc
+ 155              		@ args = 0, pretend = 0, frame = 0
+ 156              		@ frame_needed = 0, uses_anonymous_args = 0
+ 157              	.LVL5:
+ 158 0050 70B5     		push	{r4, r5, r6, lr}
+ 159              	.LCFI1:
+ 160              		.cfi_def_cfa_offset 16
+ 161              		.cfi_offset 4, -16
+ 162              		.cfi_offset 5, -12
+ 163              		.cfi_offset 6, -8
+ 164              		.cfi_offset 14, -4
+ 165              		.loc 1 31 0
+ 166 0052 041E     		subs	r4, r0, #0
+  32:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
+  33:../../../drivers/hal/bc62xx_timer.c **** 	if(pTimer == NULL)
+ 167              		.loc 1 33 0
+ 168 0054 1CD0     		beq	.L6
+  34:../../../drivers/hal/bc62xx_timer.c **** 	{
+  35:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+  36:../../../drivers/hal/bc62xx_timer.c **** 	}
+  37:../../../drivers/hal/bc62xx_timer.c **** 	
+  38:../../../drivers/hal/bc62xx_timer.c **** 	if (pfExpire_CB == NULL)
+ 169              		.loc 1 38 0
+ 170 0056 002B     		cmp	r3, #0
+ 171 0058 02D1     		bne	.L7
+  39:../../../drivers/hal/bc62xx_timer.c **** 	{
+  40:../../../drivers/hal/bc62xx_timer.c **** 		pTimer->pfExpireCb = SYS_TimerExpireDefaultHandle;
+ 172              		.loc 1 40 0
+ 173 005a 0E4B     		ldr	r3, .L11
+ 174              	.LVL6:
+ 175 005c C360     		str	r3, [r0, #12]
+ 176 005e 00E0     		b	.L8
+ 177              	.LVL7:
+ 178              	.L7:
+  41:../../../drivers/hal/bc62xx_timer.c **** 	}
+  42:../../../drivers/hal/bc62xx_timer.c **** 	else
+  43:../../../drivers/hal/bc62xx_timer.c **** 	{
+  44:../../../drivers/hal/bc62xx_timer.c **** 		pTimer->pfExpireCb = pfExpire_CB;
+ 179              		.loc 1 44 0
+ 180 0060 C360     		str	r3, [r0, #12]
+ 181              	.LVL8:
+ 182              	.L8:
+ 183              	.LBB26:
+ 184              	.LBB27:
+ 185              		.file 3 "../../../cmsis/cmsis_gcc.h"
+   1:../../../cmsis/cmsis_gcc.h **** /**************************************************************************//**
+   2:../../../cmsis/cmsis_gcc.h ****  * @file     cmsis_gcc.h
+   3:../../../cmsis/cmsis_gcc.h ****  * @brief    CMSIS Cortex-M Core Function/Instruction Header File
+   4:../../../cmsis/cmsis_gcc.h ****  * @version  V4.30
+   5:../../../cmsis/cmsis_gcc.h ****  * @date     20. October 2015
+   6:../../../cmsis/cmsis_gcc.h ****  ******************************************************************************/
+   7:../../../cmsis/cmsis_gcc.h **** /* Copyright (c) 2009 - 2015 ARM LIMITED
+   8:../../../cmsis/cmsis_gcc.h **** 
+   9:../../../cmsis/cmsis_gcc.h ****    All rights reserved.
+  10:../../../cmsis/cmsis_gcc.h ****    Redistribution and use in source and binary forms, with or without
+  11:../../../cmsis/cmsis_gcc.h ****    modification, are permitted provided that the following conditions are met:
+  12:../../../cmsis/cmsis_gcc.h ****    - Redistributions of source code must retain the above copyright
+  13:../../../cmsis/cmsis_gcc.h ****      notice, this list of conditions and the following disclaimer.
+  14:../../../cmsis/cmsis_gcc.h ****    - Redistributions in binary form must reproduce the above copyright
+  15:../../../cmsis/cmsis_gcc.h ****      notice, this list of conditions and the following disclaimer in the
+  16:../../../cmsis/cmsis_gcc.h ****      documentation and/or other materials provided with the distribution.
+  17:../../../cmsis/cmsis_gcc.h ****    - Neither the name of ARM nor the names of its contributors may be used
+  18:../../../cmsis/cmsis_gcc.h ****      to endorse or promote products derived from this software without
+  19:../../../cmsis/cmsis_gcc.h ****      specific prior written permission.
+  20:../../../cmsis/cmsis_gcc.h ****    *
+  21:../../../cmsis/cmsis_gcc.h ****    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:../../../cmsis/cmsis_gcc.h ****    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:../../../cmsis/cmsis_gcc.h ****    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:../../../cmsis/cmsis_gcc.h ****    ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
+  25:../../../cmsis/cmsis_gcc.h ****    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:../../../cmsis/cmsis_gcc.h ****    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:../../../cmsis/cmsis_gcc.h ****    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:../../../cmsis/cmsis_gcc.h ****    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:../../../cmsis/cmsis_gcc.h ****    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:../../../cmsis/cmsis_gcc.h ****    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:../../../cmsis/cmsis_gcc.h ****    POSSIBILITY OF SUCH DAMAGE.
+  32:../../../cmsis/cmsis_gcc.h ****    ---------------------------------------------------------------------------*/
+  33:../../../cmsis/cmsis_gcc.h **** 
+  34:../../../cmsis/cmsis_gcc.h **** 
+  35:../../../cmsis/cmsis_gcc.h **** #ifndef __CMSIS_GCC_H
+  36:../../../cmsis/cmsis_gcc.h **** #define __CMSIS_GCC_H
+  37:../../../cmsis/cmsis_gcc.h **** 
+  38:../../../cmsis/cmsis_gcc.h **** /* ignore some GCC warnings */
+  39:../../../cmsis/cmsis_gcc.h **** #if defined ( __GNUC__ )
+  40:../../../cmsis/cmsis_gcc.h **** #pragma GCC diagnostic push
+  41:../../../cmsis/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wsign-conversion"
+  42:../../../cmsis/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wconversion"
+  43:../../../cmsis/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wunused-parameter"
+  44:../../../cmsis/cmsis_gcc.h **** #endif
+  45:../../../cmsis/cmsis_gcc.h **** 
+  46:../../../cmsis/cmsis_gcc.h **** 
+  47:../../../cmsis/cmsis_gcc.h **** /* ###########################  Core Function Access  ########################### */
+  48:../../../cmsis/cmsis_gcc.h **** /** \ingroup  CMSIS_Core_FunctionInterface
+  49:../../../cmsis/cmsis_gcc.h ****     \defgroup CMSIS_Core_RegAccFunctions CMSIS Core Register Access Functions
+  50:../../../cmsis/cmsis_gcc.h ****   @{
+  51:../../../cmsis/cmsis_gcc.h ****  */
+  52:../../../cmsis/cmsis_gcc.h **** 
+  53:../../../cmsis/cmsis_gcc.h **** /**
+  54:../../../cmsis/cmsis_gcc.h ****   \brief   Enable IRQ Interrupts
+  55:../../../cmsis/cmsis_gcc.h ****   \details Enables IRQ interrupts by clearing the I-bit in the CPSR.
+  56:../../../cmsis/cmsis_gcc.h ****            Can only be executed in Privileged modes.
+  57:../../../cmsis/cmsis_gcc.h ****  */
+  58:../../../cmsis/cmsis_gcc.h **** __attribute__( ( always_inline ) ) __STATIC_INLINE void __enable_irq(void)
+  59:../../../cmsis/cmsis_gcc.h **** {
+  60:../../../cmsis/cmsis_gcc.h ****   __ASM volatile ("cpsie i" : : : "memory");
+  61:../../../cmsis/cmsis_gcc.h **** }
+  62:../../../cmsis/cmsis_gcc.h **** 
+  63:../../../cmsis/cmsis_gcc.h **** 
+  64:../../../cmsis/cmsis_gcc.h **** /**
+  65:../../../cmsis/cmsis_gcc.h ****   \brief   Disable IRQ Interrupts
+  66:../../../cmsis/cmsis_gcc.h ****   \details Disables IRQ interrupts by setting the I-bit in the CPSR.
+  67:../../../cmsis/cmsis_gcc.h ****   Can only be executed in Privileged modes.
+  68:../../../cmsis/cmsis_gcc.h ****  */
+  69:../../../cmsis/cmsis_gcc.h **** __attribute__( ( always_inline ) ) __STATIC_INLINE void __disable_irq(void)
+  70:../../../cmsis/cmsis_gcc.h **** {
+  71:../../../cmsis/cmsis_gcc.h ****   __ASM volatile ("cpsid i" : : : "memory");
+ 186              		.loc 3 71 0
+ 187              		.syntax divided
+ 188              	@ 71 "../../../cmsis/cmsis_gcc.h" 1
+ 189 0062 72B6     		cpsid i
+ 190              	@ 0 "" 2
+ 191              		.thumb
+ 192              		.syntax unified
+ 193              	.LBE27:
+ 194              	.LBE26:
+  45:../../../drivers/hal/bc62xx_timer.c **** 	}
+  46:../../../drivers/hal/bc62xx_timer.c **** 	OS_ENTER_CRITICAL();
+  47:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTick = tick;
+  48:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerValue = sys_tick_count+tick;
+  49:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
+ 195              		.loc 1 49 0
+ 196 0064 0125     		movs	r5, #1
+  48:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
+ 197              		.loc 1 48 0
+ 198 0066 0C4B     		ldr	r3, .L11+4
+  47:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerValue = sys_tick_count+tick;
+ 199              		.loc 1 47 0
+ 200 0068 6160     		str	r1, [r4, #4]
+  48:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
+ 201              		.loc 1 48 0
+ 202 006a 1B68     		ldr	r3, [r3]
+ 203              		.loc 1 49 0
+ 204 006c 2572     		strb	r5, [r4, #8]
+  48:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
+ 205              		.loc 1 48 0
+ 206 006e 5918     		adds	r1, r3, r1
+ 207              	.LVL9:
+ 208 0070 2160     		str	r1, [r4]
+  50:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mIsCycle = isSingle;
+ 209              		.loc 1 50 0
+ 210 0072 6272     		strb	r2, [r4, #9]
+  51:../../../drivers/hal/bc62xx_timer.c **** 
+  52:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->cbParams = (int32_t)pTimer;
+ 211              		.loc 1 52 0
+ 212 0074 6461     		str	r4, [r4, #20]
+ 213              	.LBB28:
+ 214              	.LBB29:
+  60:../../../cmsis/cmsis_gcc.h **** }
+ 215              		.loc 3 60 0
+ 216              		.syntax divided
+ 217              	@ 60 "../../../cmsis/cmsis_gcc.h" 1
+ 218 0076 62B6     		cpsie i
+ 219              	@ 0 "" 2
+ 220              		.thumb
+ 221              		.syntax unified
+ 222              	.LBE29:
+ 223              	.LBE28:
+  53:../../../drivers/hal/bc62xx_timer.c **** 	OS_EXIT_CRITICAL();
+  54:../../../drivers/hal/bc62xx_timer.c **** 	if (SYS_TimerisExist(pTimer))
+ 224              		.loc 1 54 0
+ 225 0078 2000     		movs	r0, r4
+ 226              	.LVL10:
+ 227 007a FFF7FEFF 		bl	SYS_TimerisExist
+ 228              	.LVL11:
+ 229 007e 0028     		cmp	r0, #0
+ 230 0080 06D1     		bne	.L6
+ 231              	.LBB30:
+ 232              	.LBB31:
+ 233              		.loc 3 71 0
+ 234              		.syntax divided
+ 235              	@ 71 "../../../cmsis/cmsis_gcc.h" 1
+ 236 0082 72B6     		cpsid i
+ 237              	@ 0 "" 2
+ 238              		.thumb
+ 239              		.syntax unified
+ 240              	.LBE31:
+ 241              	.LBE30:
+  55:../../../drivers/hal/bc62xx_timer.c **** 	{
+  56:../../../drivers/hal/bc62xx_timer.c **** 		//printf("timer exised and set timer success\r\n");
+  57:../../../drivers/hal/bc62xx_timer.c **** 		return true;
+  58:../../../drivers/hal/bc62xx_timer.c **** 	}
+  59:../../../drivers/hal/bc62xx_timer.c **** 	OS_ENTER_CRITICAL();
+  60:../../../drivers/hal/bc62xx_timer.c **** 	//insert to list
+  61:../../../drivers/hal/bc62xx_timer.c **** 	pTemp = pheader;
+ 242              		.loc 1 61 0
+ 243 0084 054B     		ldr	r3, .L11+8
+ 244 0086 1A68     		ldr	r2, [r3]
+  62:../../../drivers/hal/bc62xx_timer.c **** 	pheader = pTimer;
+ 245              		.loc 1 62 0
+ 246 0088 1C60     		str	r4, [r3]
+  61:../../../drivers/hal/bc62xx_timer.c **** 	pheader = pTimer;
+ 247              		.loc 1 61 0
+ 248 008a 2261     		str	r2, [r4, #16]
+ 249              	.LVL12:
+ 250              	.LBB32:
+ 251              	.LBB33:
+  60:../../../cmsis/cmsis_gcc.h **** }
+ 252              		.loc 3 60 0
+ 253              		.syntax divided
+ 254              	@ 60 "../../../cmsis/cmsis_gcc.h" 1
+ 255 008c 62B6     		cpsie i
+ 256              	@ 0 "" 2
+ 257              		.thumb
+ 258              		.syntax unified
+ 259              	.LBE33:
+ 260              	.LBE32:
+  63:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pNextTimer = pTemp;
+  64:../../../drivers/hal/bc62xx_timer.c **** 	OS_EXIT_CRITICAL();
+  65:../../../drivers/hal/bc62xx_timer.c **** 	//printf("set timer success\n");
+  66:../../../drivers/hal/bc62xx_timer.c **** 	//YC_LOG_INFO("set timer %d \r\n",pTimer->cbParams);
+  67:../../../drivers/hal/bc62xx_timer.c **** 	return true;
+ 261              		.loc 1 67 0
+ 262 008e 2800     		movs	r0, r5
+ 263              	.LVL13:
+ 264              	.L6:
+  68:../../../drivers/hal/bc62xx_timer.c **** }
+ 265              		.loc 1 68 0
+ 266              		@ sp needed
+ 267              	.LVL14:
+ 268 0090 70BD     		pop	{r4, r5, r6, pc}
+ 269              	.L12:
+ 270 0092 C046     		.align	2
+ 271              	.L11:
+ 272 0094 00000000 		.word	SYS_TimerExpireDefaultHandle
+ 273 0098 00000000 		.word	sys_tick_count
+ 274 009c 00000000 		.word	pheader
+ 275              		.cfi_endproc
+ 276              	.LFE43:
+ 278              		.align	1
+ 279              		.global	SYS_TimerisExist
+ 280              		.code	16
+ 281              		.thumb_func
+ 283              	SYS_TimerisExist:
+ 284              	.LFB44:
+  69:../../../drivers/hal/bc62xx_timer.c **** 
+  70:../../../drivers/hal/bc62xx_timer.c **** bool SYS_TimerisExist(SYS_TIMER_TYPE *pTimer)
+  71:../../../drivers/hal/bc62xx_timer.c **** {
+ 285              		.loc 1 71 0
+ 286              		.cfi_startproc
+ 287              		@ args = 0, pretend = 0, frame = 0
+ 288              		@ frame_needed = 0, uses_anonymous_args = 0
+ 289              		@ link register save eliminated.
+ 290              	.LVL15:
+ 291              		.loc 1 71 0
+ 292 00a0 011E     		subs	r1, r0, #0
+  72:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
+  73:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == NULL)
+ 293              		.loc 1 73 0
+ 294 00a2 0BD0     		beq	.L14
+  74:../../../drivers/hal/bc62xx_timer.c **** 	{
+  75:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+  76:../../../drivers/hal/bc62xx_timer.c **** 	}
+  77:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pheader; pTemp->pNextTimer != NULL; pTemp = pTemp->pNextTimer)
+ 295              		.loc 1 77 0
+ 296 00a4 064B     		ldr	r3, .L20
+ 297 00a6 1A68     		ldr	r2, [r3]
+ 298              	.LVL16:
+ 299              	.L15:
+ 300              		.loc 1 77 0 is_stmt 0 discriminator 1
+ 301 00a8 1369     		ldr	r3, [r2, #16]
+ 302 00aa 002B     		cmp	r3, #0
+ 303 00ac 03D0     		beq	.L19
+  78:../../../drivers/hal/bc62xx_timer.c **** 	{
+  79:../../../drivers/hal/bc62xx_timer.c **** 		if (pTimer == pTemp)
+ 304              		.loc 1 79 0 is_stmt 1
+ 305 00ae 8A42     		cmp	r2, r1
+ 306 00b0 03D0     		beq	.L18
+ 307 00b2 1A00     		movs	r2, r3
+ 308              	.LVL17:
+ 309 00b4 F8E7     		b	.L15
+ 310              	.LVL18:
+ 311              	.L19:
+  75:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 312              		.loc 1 75 0
+ 313 00b6 1800     		movs	r0, r3
+ 314              	.LVL19:
+ 315 00b8 00E0     		b	.L14
+ 316              	.LVL20:
+ 317              	.L18:
+  80:../../../drivers/hal/bc62xx_timer.c **** 		{
+  81:../../../drivers/hal/bc62xx_timer.c **** 			return true;
+ 318              		.loc 1 81 0
+ 319 00ba 0120     		movs	r0, #1
+ 320              	.LVL21:
+ 321              	.L14:
+  82:../../../drivers/hal/bc62xx_timer.c **** 		}
+  83:../../../drivers/hal/bc62xx_timer.c **** 	}
+  84:../../../drivers/hal/bc62xx_timer.c **** 	return false;
+  85:../../../drivers/hal/bc62xx_timer.c **** }
+ 322              		.loc 1 85 0
+ 323              		@ sp needed
+ 324 00bc 7047     		bx	lr
+ 325              	.L21:
+ 326 00be C046     		.align	2
+ 327              	.L20:
+ 328 00c0 00000000 		.word	pheader
+ 329              		.cfi_endproc
+ 330              	.LFE44:
+ 332              		.align	1
+ 333              		.global	SYS_ResetTimer
+ 334              		.code	16
+ 335              		.thumb_func
+ 337              	SYS_ResetTimer:
+ 338              	.LFB45:
+  86:../../../drivers/hal/bc62xx_timer.c **** 
+  87:../../../drivers/hal/bc62xx_timer.c **** 
+  88:../../../drivers/hal/bc62xx_timer.c **** bool SYS_ResetTimer(SYS_TIMER_TYPE *pTimer)
+  89:../../../drivers/hal/bc62xx_timer.c **** {
+ 339              		.loc 1 89 0
+ 340              		.cfi_startproc
+ 341              		@ args = 0, pretend = 0, frame = 0
+ 342              		@ frame_needed = 0, uses_anonymous_args = 0
+ 343              		@ link register save eliminated.
+ 344              	.LVL22:
+ 345              		.loc 1 89 0
+ 346 00c4 011E     		subs	r1, r0, #0
+  90:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
+  91:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == NULL)
+ 347              		.loc 1 91 0
+ 348 00c6 10D0     		beq	.L23
+  92:../../../drivers/hal/bc62xx_timer.c **** 	{
+  93:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+  94:../../../drivers/hal/bc62xx_timer.c **** 	}
+  95:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pheader; pTemp->pNextTimer != NULL; pTemp = pTemp->pNextTimer)
+ 349              		.loc 1 95 0
+ 350 00c8 084B     		ldr	r3, .L29
+ 351 00ca 1A68     		ldr	r2, [r3]
+ 352              	.LVL23:
+ 353              	.L24:
+ 354              		.loc 1 95 0 is_stmt 0 discriminator 1
+ 355 00cc 1369     		ldr	r3, [r2, #16]
+ 356 00ce 002B     		cmp	r3, #0
+ 357 00d0 0AD0     		beq	.L28
+  96:../../../drivers/hal/bc62xx_timer.c **** 	{
+  97:../../../drivers/hal/bc62xx_timer.c **** 		if (pTimer == pTemp)
+ 358              		.loc 1 97 0 is_stmt 1
+ 359 00d2 8A42     		cmp	r2, r1
+ 360 00d4 06D1     		bne	.L27
+  98:../../../drivers/hal/bc62xx_timer.c **** 		{
+  99:../../../drivers/hal/bc62xx_timer.c **** 			pTimer->mTimerValue = sys_tick_count+(pTimer->mTick);
+ 361              		.loc 1 99 0
+ 362 00d6 064B     		ldr	r3, .L29+4
+ 363 00d8 5168     		ldr	r1, [r2, #4]
+ 364 00da 1B68     		ldr	r3, [r3]
+ 100:../../../drivers/hal/bc62xx_timer.c **** 			return true;
+ 365              		.loc 1 100 0
+ 366 00dc 0120     		movs	r0, #1
+ 367              	.LVL24:
+  99:../../../drivers/hal/bc62xx_timer.c **** 			return true;
+ 368              		.loc 1 99 0
+ 369 00de CB18     		adds	r3, r1, r3
+ 370 00e0 1360     		str	r3, [r2]
+ 371              		.loc 1 100 0
+ 372 00e2 02E0     		b	.L23
+ 373              	.LVL25:
+ 374              	.L27:
+ 375 00e4 1A00     		movs	r2, r3
+ 376              	.LVL26:
+ 377 00e6 F1E7     		b	.L24
+ 378              	.LVL27:
+ 379              	.L28:
+  93:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 380              		.loc 1 93 0
+ 381 00e8 1800     		movs	r0, r3
+ 382              	.LVL28:
+ 383              	.L23:
+ 101:../../../drivers/hal/bc62xx_timer.c **** 		}
+ 102:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 103:../../../drivers/hal/bc62xx_timer.c **** 	return false;
+ 104:../../../drivers/hal/bc62xx_timer.c **** }
+ 384              		.loc 1 104 0
+ 385              		@ sp needed
+ 386 00ea 7047     		bx	lr
+ 387              	.L30:
+ 388              		.align	2
+ 389              	.L29:
+ 390 00ec 00000000 		.word	pheader
+ 391 00f0 00000000 		.word	sys_tick_count
+ 392              		.cfi_endproc
+ 393              	.LFE45:
+ 395              		.align	1
+ 396              		.global	SYS_TimerTest
+ 397              		.code	16
+ 398              		.thumb_func
+ 400              	SYS_TimerTest:
+ 401              	.LFB46:
+ 105:../../../drivers/hal/bc62xx_timer.c **** 
+ 106:../../../drivers/hal/bc62xx_timer.c **** 
+ 107:../../../drivers/hal/bc62xx_timer.c **** void SYS_TimerTest()
+ 108:../../../drivers/hal/bc62xx_timer.c **** {
+ 402              		.loc 1 108 0
+ 403              		.cfi_startproc
+ 404              		@ args = 0, pretend = 0, frame = 0
+ 405              		@ frame_needed = 0, uses_anonymous_args = 0
+ 406              		@ link register save eliminated.
+ 407              	.LVL29:
+ 109:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTimer;
+ 110:../../../drivers/hal/bc62xx_timer.c **** 	int i = 0;
+ 111:../../../drivers/hal/bc62xx_timer.c **** 	for (pTimer = pheader; pTimer->pNextTimer != NULL; pTimer = pTimer->pNextTimer)
+ 112:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 113:../../../drivers/hal/bc62xx_timer.c **** 		i++;
+ 114:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 115:../../../drivers/hal/bc62xx_timer.c **** 	//YC_LOG_INFO("timer count %d \r\n",i);
+ 116:../../../drivers/hal/bc62xx_timer.c **** }
+ 408              		.loc 1 116 0
+ 409              		@ sp needed
+ 410 00f4 7047     		bx	lr
+ 411              		.cfi_endproc
+ 412              	.LFE46:
+ 414              		.align	1
+ 415              		.global	SYS_timerPolling
+ 416              		.code	16
+ 417              		.thumb_func
+ 419              	SYS_timerPolling:
+ 420              	.LFB47:
+ 117:../../../drivers/hal/bc62xx_timer.c **** 
+ 118:../../../drivers/hal/bc62xx_timer.c **** void SYS_timerPolling()
+ 119:../../../drivers/hal/bc62xx_timer.c **** {
+ 421              		.loc 1 119 0
+ 422              		.cfi_startproc
+ 423              		@ args = 0, pretend = 0, frame = 0
+ 424              		@ frame_needed = 0, uses_anonymous_args = 0
+ 425 00f6 10B5     		push	{r4, lr}
+ 426              	.LCFI2:
+ 427              		.cfi_def_cfa_offset 8
+ 428              		.cfi_offset 4, -8
+ 429              		.cfi_offset 14, -4
+ 120:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTimer;
+ 121:../../../drivers/hal/bc62xx_timer.c **** 	
+ 122:../../../drivers/hal/bc62xx_timer.c **** 	if (sys_Timer_Check_Flag)
+ 430              		.loc 1 122 0
+ 431 00f8 114B     		ldr	r3, .L40
+ 432 00fa 1A78     		ldrb	r2, [r3]
+ 433 00fc 002A     		cmp	r2, #0
+ 434 00fe 1DD0     		beq	.L32
+ 123:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 124:../../../drivers/hal/bc62xx_timer.c **** 		sys_Timer_Check_Flag = false;
+ 435              		.loc 1 124 0
+ 436 0100 0022     		movs	r2, #0
+ 437 0102 1A70     		strb	r2, [r3]
+ 125:../../../drivers/hal/bc62xx_timer.c **** 		//SYS_TimerTest();
+ 126:../../../drivers/hal/bc62xx_timer.c **** 	//	printf("2\n");
+ 127:../../../drivers/hal/bc62xx_timer.c **** 		for (pTimer = pheader; pTimer->pNextTimer != NULL; pTimer = pTimer->pNextTimer)
+ 438              		.loc 1 127 0
+ 439 0104 0F4B     		ldr	r3, .L40+4
+ 440 0106 1C68     		ldr	r4, [r3]
+ 441              	.LVL30:
+ 442              	.L34:
+ 443              		.loc 1 127 0 is_stmt 0 discriminator 1
+ 444 0108 2369     		ldr	r3, [r4, #16]
+ 445 010a 002B     		cmp	r3, #0
+ 446 010c 16D0     		beq	.L32
+ 128:../../../drivers/hal/bc62xx_timer.c **** 		{
+ 129:../../../drivers/hal/bc62xx_timer.c **** 	//		printf("3\n");
+ 130:../../../drivers/hal/bc62xx_timer.c **** 			if (pTimer->mTimerStatus == TIMER_START)
+ 447              		.loc 1 130 0 is_stmt 1
+ 448 010e 237A     		ldrb	r3, [r4, #8]
+ 449 0110 012B     		cmp	r3, #1
+ 450 0112 11D1     		bne	.L35
+ 131:../../../drivers/hal/bc62xx_timer.c **** 			{
+ 132:../../../drivers/hal/bc62xx_timer.c **** 		//		printf("sys_tick_count = %d\n",sys_tick_count);
+ 133:../../../drivers/hal/bc62xx_timer.c **** 		//		printf("pTimer->mTimerValue = %d\n",pTimer->mTimerValue);
+ 134:../../../drivers/hal/bc62xx_timer.c **** 		//		printf("timer %d in\r\n",pTimer->cbParams);
+ 135:../../../drivers/hal/bc62xx_timer.c **** 				if (pTimer->mTimerValue <= sys_tick_count)
+ 451              		.loc 1 135 0
+ 452 0114 0C4B     		ldr	r3, .L40+8
+ 453 0116 2268     		ldr	r2, [r4]
+ 454 0118 1B68     		ldr	r3, [r3]
+ 455 011a 9A42     		cmp	r2, r3
+ 456 011c 0CD8     		bhi	.L35
+ 136:../../../drivers/hal/bc62xx_timer.c **** 				{
+ 137:../../../drivers/hal/bc62xx_timer.c **** 		//			printf("5\n");
+ 138:../../../drivers/hal/bc62xx_timer.c **** 					if (pTimer->mIsCycle == TIMER_SINGLE)
+ 457              		.loc 1 138 0
+ 458 011e 627A     		ldrb	r2, [r4, #9]
+ 459 0120 002A     		cmp	r2, #0
+ 460 0122 03D1     		bne	.L36
+ 139:../../../drivers/hal/bc62xx_timer.c **** 					{
+ 140:../../../drivers/hal/bc62xx_timer.c **** 				//		printf("timer release %d in\r\n",pTimer->cbParams);
+ 141:../../../drivers/hal/bc62xx_timer.c **** 						SYS_ReleaseTimer(pTimer);
+ 461              		.loc 1 141 0
+ 462 0124 2000     		movs	r0, r4
+ 463 0126 FFF7FEFF 		bl	SYS_ReleaseTimer
+ 464              	.LVL31:
+ 465 012a 02E0     		b	.L37
+ 466              	.L36:
+ 142:../../../drivers/hal/bc62xx_timer.c **** 					}
+ 143:../../../drivers/hal/bc62xx_timer.c **** 					else
+ 144:../../../drivers/hal/bc62xx_timer.c **** 					{					
+ 145:../../../drivers/hal/bc62xx_timer.c **** 				//		printf("timer cycle in\r\n");
+ 146:../../../drivers/hal/bc62xx_timer.c **** 				//		printf("timer release %d in\r\n",pTimer->cbParams);
+ 147:../../../drivers/hal/bc62xx_timer.c **** 						pTimer->mTimerValue = sys_tick_count+(pTimer->mTick);
+ 467              		.loc 1 147 0
+ 468 012c 6268     		ldr	r2, [r4, #4]
+ 469 012e D318     		adds	r3, r2, r3
+ 470 0130 2360     		str	r3, [r4]
+ 471              	.L37:
+ 148:../../../drivers/hal/bc62xx_timer.c **** 					}
+ 149:../../../drivers/hal/bc62xx_timer.c **** 			//		printf("6\n");
+ 150:../../../drivers/hal/bc62xx_timer.c **** 					pTimer->pfExpireCb(pTimer->cbParams);
+ 472              		.loc 1 150 0
+ 473 0132 6069     		ldr	r0, [r4, #20]
+ 474 0134 E368     		ldr	r3, [r4, #12]
+ 475 0136 9847     		blx	r3
+ 476              	.LVL32:
+ 477              	.L35:
+ 127:../../../drivers/hal/bc62xx_timer.c **** 		{
+ 478              		.loc 1 127 0 discriminator 2
+ 479 0138 2469     		ldr	r4, [r4, #16]
+ 480              	.LVL33:
+ 481 013a E5E7     		b	.L34
+ 482              	.LVL34:
+ 483              	.L32:
+ 151:../../../drivers/hal/bc62xx_timer.c **** 				}
+ 152:../../../drivers/hal/bc62xx_timer.c **** 			}
+ 153:../../../drivers/hal/bc62xx_timer.c **** 		}
+ 154:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 155:../../../drivers/hal/bc62xx_timer.c **** }
+ 484              		.loc 1 155 0
+ 485              		@ sp needed
+ 486 013c 10BD     		pop	{r4, pc}
+ 487              	.L41:
+ 488 013e C046     		.align	2
+ 489              	.L40:
+ 490 0140 00000000 		.word	sys_Timer_Check_Flag
+ 491 0144 00000000 		.word	pheader
+ 492 0148 00000000 		.word	sys_tick_count
+ 493              		.cfi_endproc
+ 494              	.LFE47:
+ 496              		.align	1
+ 497              		.global	SYS_ReleaseTimer
+ 498              		.code	16
+ 499              		.thumb_func
+ 501              	SYS_ReleaseTimer:
+ 502              	.LFB48:
+ 156:../../../drivers/hal/bc62xx_timer.c **** 
+ 157:../../../drivers/hal/bc62xx_timer.c **** bool SYS_ReleaseTimer(SYS_TIMER_TYPE *pTimer)
+ 158:../../../drivers/hal/bc62xx_timer.c **** {
+ 503              		.loc 1 158 0
+ 504              		.cfi_startproc
+ 505              		@ args = 0, pretend = 0, frame = 0
+ 506              		@ frame_needed = 0, uses_anonymous_args = 0
+ 507              	.LVL35:
+ 508 014c 10B5     		push	{r4, lr}
+ 509              	.LCFI3:
+ 510              		.cfi_def_cfa_offset 8
+ 511              		.cfi_offset 4, -8
+ 512              		.cfi_offset 14, -4
+ 513              		.loc 1 158 0
+ 514 014e 011E     		subs	r1, r0, #0
+ 159:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp, *pPre;
+ 160:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == NULL)
+ 515              		.loc 1 160 0
+ 516 0150 1AD0     		beq	.L43
+ 161:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 162:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+ 163:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 164:../../../drivers/hal/bc62xx_timer.c **** 
+ 165:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == &header_Timer)
+ 517              		.loc 1 165 0
+ 518 0152 0E4B     		ldr	r3, .L51
+ 162:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 519              		.loc 1 162 0
+ 520 0154 0020     		movs	r0, #0
+ 521              	.LVL36:
+ 522              		.loc 1 165 0
+ 523 0156 9942     		cmp	r1, r3
+ 524 0158 16D0     		beq	.L43
+ 166:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 167:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+ 168:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 169:../../../drivers/hal/bc62xx_timer.c **** 
+ 170:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pPre = pheader; pTemp->pNextTimer != NULL; pPre = pTemp,pTemp = pTemp->pNextTimer)
+ 525              		.loc 1 170 0
+ 526 015a 0D4B     		ldr	r3, .L51+4
+ 527 015c 1A68     		ldr	r2, [r3]
+ 528              	.LVL37:
+ 529 015e 1800     		movs	r0, r3
+ 530 0160 1400     		movs	r4, r2
+ 531              	.LVL38:
+ 532              	.L44:
+ 533              		.loc 1 170 0 is_stmt 0 discriminator 1
+ 534 0162 1369     		ldr	r3, [r2, #16]
+ 535 0164 002B     		cmp	r3, #0
+ 536 0166 0ED0     		beq	.L50
+ 171:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 172:../../../drivers/hal/bc62xx_timer.c **** 		if (pTimer == pTemp)
+ 537              		.loc 1 172 0 is_stmt 1
+ 538 0168 8A42     		cmp	r2, r1
+ 539 016a 09D1     		bne	.L49
+ 173:../../../drivers/hal/bc62xx_timer.c **** 		{
+ 174:../../../drivers/hal/bc62xx_timer.c **** 			pTemp->mTimerStatus = TIMER_STOP;
+ 540              		.loc 1 174 0
+ 541 016c 0021     		movs	r1, #0
+ 542              	.LVL39:
+ 543 016e 1172     		strb	r1, [r2, #8]
+ 175:../../../drivers/hal/bc62xx_timer.c **** 			if (pPre == pTemp) //delete the first one element
+ 544              		.loc 1 175 0
+ 545 0170 9442     		cmp	r4, r2
+ 546 0172 02D1     		bne	.L45
+ 176:../../../drivers/hal/bc62xx_timer.c **** 			{
+ 177:../../../drivers/hal/bc62xx_timer.c **** 				pheader = pTemp->pNextTimer;
+ 547              		.loc 1 177 0
+ 548 0174 0360     		str	r3, [r0]
+ 178:../../../drivers/hal/bc62xx_timer.c **** 			}
+ 179:../../../drivers/hal/bc62xx_timer.c **** 			else
+ 180:../../../drivers/hal/bc62xx_timer.c **** 			{
+ 181:../../../drivers/hal/bc62xx_timer.c **** 				pPre->pNextTimer = pTemp->pNextTimer;
+ 182:../../../drivers/hal/bc62xx_timer.c **** 			}
+ 183:../../../drivers/hal/bc62xx_timer.c **** 
+ 184:../../../drivers/hal/bc62xx_timer.c **** 			//YC_LOG_INFO("release timer %d,%d \r\n",pPre->cbParams,pTimer->cbParams);
+ 185:../../../drivers/hal/bc62xx_timer.c **** 			return true;
+ 549              		.loc 1 185 0
+ 550 0176 0120     		movs	r0, #1
+ 551 0178 06E0     		b	.L43
+ 552              	.L45:
+ 181:../../../drivers/hal/bc62xx_timer.c **** 			}
+ 553              		.loc 1 181 0
+ 554 017a 2361     		str	r3, [r4, #16]
+ 555              		.loc 1 185 0
+ 556 017c 0120     		movs	r0, #1
+ 557 017e 03E0     		b	.L43
+ 558              	.LVL40:
+ 559              	.L49:
+ 560 0180 1400     		movs	r4, r2
+ 561              	.LVL41:
+ 562 0182 1A00     		movs	r2, r3
+ 563              	.LVL42:
+ 564 0184 EDE7     		b	.L44
+ 565              	.LVL43:
+ 566              	.L50:
+ 162:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 567              		.loc 1 162 0
+ 568 0186 1800     		movs	r0, r3
+ 569              	.LVL44:
+ 570              	.L43:
+ 186:../../../drivers/hal/bc62xx_timer.c **** 		}
+ 187:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 188:../../../drivers/hal/bc62xx_timer.c **** 	return false;
+ 189:../../../drivers/hal/bc62xx_timer.c **** }
+ 571              		.loc 1 189 0
+ 572              		@ sp needed
+ 573 0188 10BD     		pop	{r4, pc}
+ 574              	.L52:
+ 575 018a C046     		.align	2
+ 576              	.L51:
+ 577 018c 00000000 		.word	header_Timer
+ 578 0190 00000000 		.word	pheader
+ 579              		.cfi_endproc
+ 580              	.LFE48:
+ 582              		.align	1
+ 583              		.global	SYS_ReleaseAllTimer
+ 584              		.code	16
+ 585              		.thumb_func
+ 587              	SYS_ReleaseAllTimer:
+ 588              	.LFB49:
+ 190:../../../drivers/hal/bc62xx_timer.c **** 
+ 191:../../../drivers/hal/bc62xx_timer.c **** void SYS_ReleaseAllTimer()
+ 192:../../../drivers/hal/bc62xx_timer.c **** {
+ 589              		.loc 1 192 0
+ 590              		.cfi_startproc
+ 591              		@ args = 0, pretend = 0, frame = 0
+ 592              		@ frame_needed = 0, uses_anonymous_args = 0
+ 593              		@ link register save eliminated.
+ 193:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
+ 194:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pheader; pTemp->pNextTimer != NULL; pTemp = pTemp->pNextTimer)
+ 195:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 196:../../../drivers/hal/bc62xx_timer.c **** 		pTemp->mTimerStatus = TIMER_STOP;
+ 594              		.loc 1 196 0
+ 595 0194 0020     		movs	r0, #0
+ 194:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 596              		.loc 1 194 0
+ 597 0196 054B     		ldr	r3, .L57
+ 598 0198 1A68     		ldr	r2, [r3]
+ 599              	.LVL45:
+ 600              	.L54:
+ 194:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 601              		.loc 1 194 0 is_stmt 0 discriminator 1
+ 602 019a 1169     		ldr	r1, [r2, #16]
+ 603 019c 0029     		cmp	r1, #0
+ 604 019e 02D0     		beq	.L56
+ 605              		.loc 1 196 0 is_stmt 1 discriminator 3
+ 606 01a0 1072     		strb	r0, [r2, #8]
+ 607              	.LVL46:
+ 608 01a2 0A00     		movs	r2, r1
+ 609 01a4 F9E7     		b	.L54
+ 610              	.LVL47:
+ 611              	.L56:
+ 197:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 198:../../../drivers/hal/bc62xx_timer.c **** 	pheader = &header_Timer;
+ 612              		.loc 1 198 0
+ 613 01a6 024A     		ldr	r2, .L57+4
+ 614              	.LVL48:
+ 199:../../../drivers/hal/bc62xx_timer.c **** }
+ 615              		.loc 1 199 0
+ 616              		@ sp needed
+ 198:../../../drivers/hal/bc62xx_timer.c **** }
+ 617              		.loc 1 198 0
+ 618 01a8 1A60     		str	r2, [r3]
+ 619              		.loc 1 199 0
+ 620 01aa 7047     		bx	lr
+ 621              	.L58:
+ 622              		.align	2
+ 623              	.L57:
+ 624 01ac 00000000 		.word	pheader
+ 625 01b0 00000000 		.word	header_Timer
+ 626              		.cfi_endproc
+ 627              	.LFE49:
+ 629              		.global	__aeabi_uidivmod
+ 630              		.align	1
+ 631              		.global	SYStick_handle
+ 632              		.code	16
+ 633              		.thumb_func
+ 635              	SYStick_handle:
+ 636              	.LFB50:
+ 200:../../../drivers/hal/bc62xx_timer.c **** 
+ 201:../../../drivers/hal/bc62xx_timer.c **** void SYStick_handle()
+ 202:../../../drivers/hal/bc62xx_timer.c **** {
+ 637              		.loc 1 202 0
+ 638              		.cfi_startproc
+ 639              		@ args = 0, pretend = 0, frame = 0
+ 640              		@ frame_needed = 0, uses_anonymous_args = 0
+ 203:../../../drivers/hal/bc62xx_timer.c **** 	if(++tmpCnt%10 == 0){//each	systick interrupt is 10ms
+ 641              		.loc 1 203 0
+ 642 01b4 084B     		ldr	r3, .L61
+ 202:../../../drivers/hal/bc62xx_timer.c **** 	if(++tmpCnt%10 == 0){//each	systick interrupt is 10ms
+ 643              		.loc 1 202 0
+ 644 01b6 10B5     		push	{r4, lr}
+ 645              	.LCFI4:
+ 646              		.cfi_def_cfa_offset 8
+ 647              		.cfi_offset 4, -8
+ 648              		.cfi_offset 14, -4
+ 649              		.loc 1 203 0
+ 650 01b8 1A68     		ldr	r2, [r3]
+ 651 01ba 0A21     		movs	r1, #10
+ 652 01bc 501C     		adds	r0, r2, #1
+ 653 01be 1860     		str	r0, [r3]
+ 654 01c0 FFF7FEFF 		bl	__aeabi_uidivmod
+ 655              	.LVL49:
+ 656 01c4 0029     		cmp	r1, #0
+ 657 01c6 06D1     		bne	.L59
+ 204:../../../drivers/hal/bc62xx_timer.c **** 		sys_tick_count++; //10
+ 658              		.loc 1 204 0
+ 659 01c8 044A     		ldr	r2, .L61+4
+ 660 01ca 1368     		ldr	r3, [r2]
+ 661 01cc 0133     		adds	r3, r3, #1
+ 662 01ce 1360     		str	r3, [r2]
+ 205:../../../drivers/hal/bc62xx_timer.c **** 		sys_Timer_Check_Flag = true;
+ 663              		.loc 1 205 0
+ 664 01d0 0122     		movs	r2, #1
+ 665 01d2 034B     		ldr	r3, .L61+8
+ 666 01d4 1A70     		strb	r2, [r3]
+ 667              	.L59:
+ 206:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 207:../../../drivers/hal/bc62xx_timer.c **** }
+ 668              		.loc 1 207 0
+ 669              		@ sp needed
+ 670 01d6 10BD     		pop	{r4, pc}
+ 671              	.L62:
+ 672              		.align	2
+ 673              	.L61:
+ 674 01d8 00000000 		.word	.LANCHOR0
+ 675 01dc 00000000 		.word	sys_tick_count
+ 676 01e0 00000000 		.word	sys_Timer_Check_Flag
+ 677              		.cfi_endproc
+ 678              	.LFE50:
+ 680              		.bss
+ 681              		.align	2
+ 682              		.set	.LANCHOR0,. + 0
+ 685              	tmpCnt:
+ 686 0000 00000000 		.space	4
+ 687              		.text
+ 688              	.Letext0:
+ 689              		.file 4 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 690              		.file 5 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 691              		.file 6 "../../../device/inc/bc62xx.h"
+ 692              		.file 7 "../../../drivers/hal/inc/bc62xx_timer.h"

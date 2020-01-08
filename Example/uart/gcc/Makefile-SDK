@@ -1,0 +1,106 @@
+SDK_ROOT = ..\..
+PATCH_PATH = $(SDK_ROOT)\patch
+UTIL_PATH = $(SDK_ROOT)\tools\buildTool
+MESHPATH = $(SDK_ROOT)\mesh
+
+GCC_ARM_PATH :=  $(SDK_ROOT)\tools\gcc
+THUMB_PATH := $(GCC_ARM_PATH)\arm-none-eabi\lib\thumb
+CROSS_COMPILE := $(GCC_ARM_PATH)\bin\arm-none-eabi-
+INC = .\$(GCC_ARM_PATH)\arm-none-eabi\include
+
+SDK_PATH = $(SDK_ROOT)\SDK
+
+INCLUDES =	-I./inc \
+			-I$(SDK_ROOT)/Example/sigMesh/ \
+			-I$(SDK_ROOT) -I$(SDK_ROOT)/cmsis/ \
+			-I$(SDK_ROOT)/device/ -I$(SDK_ROOT)/drivers/hal/ \
+			-I$(SDK_ROOT)/drivers/uart/ -I$(SDK_ROOT)/libcore/uart/ \
+			-I$(SDK_ROOT)/libcore/util/ -I$(SDK_ROOT)/drivers/log/ \
+			-I$(SDK_ROOT)/libcore/bt/ -I$(SDK_ROOT)/drivers/ring/ \
+			-I$(SDK_ROOT)/drivers/pwm/ -I$(SDK_ROOT)/libcore/pwm/ \
+			-I$(SDK_ROOT)/drivers/pwm/ -I$(SDK_ROOT)/drivers/iic/ \
+			-I$(SDK_ROOT)/patch/ -I$(SDK_ROOT)/drivers/bt/ \
+			-I$(SDK_ROOT)/drivers/gpio/ -I$(SDK_ROOT)/drivers/timer/ \
+			-I$(SDK_ROOT)/drivers/qspi/ -I$(SDK_ROOT)/drivers/NoiseSuppresion_x/ \
+			-I$(GCC_ARM_PATH)/arm-none-eabi/include \
+			-I$(SDK_ROOT)/drivers/dbg/ 
+			
+INCLUDES += -I$(MESHPATH)/api \
+			-I$(MESHPATH)/app \
+			-I$(MESHPATH)/app/ali_light \
+			-I$(MESHPATH)/app/ali_socket \
+			-I$(MESHPATH)/common/api \
+			-I$(MESHPATH)/config \
+			-I$(MESHPATH)/drivers \
+			-I$(MESHPATH)/include \
+			-I$(MESHPATH)/m_al \
+			-I$(MESHPATH)/models/inc \
+			-I$(MESHPATH)/port \
+			-I$(MESHPATH)/src \
+			-I$(MESHPATH)/src/m_bearer \
+			-I$(MESHPATH)/src/m_fnd \
+			-I$(MESHPATH)/src/m_lay \
+			-I$(MESHPATH)/src/m_prov \
+			-I$(MESHPATH)/src/m_tb \
+
+SRC_FILES = ./src/main.c \
+			./src/gatt_ota.c\
+            $(SDK_ROOT)/drivers/dbg/Drv_debug.c \
+            $(SDK_ROOT)/libcore/uart/app_uart.c \
+            $(SDK_ROOT)/libcore/sys/system.c \
+            $(SDK_ROOT)/libcore/sys/kdevice.c \
+            $(SDK_ROOT)/libcore/sys/kservice.c \
+            $(SDK_ROOT)/libcore/sys/mempool.c \
+			$(SDK_ROOT)/drivers/bt/yc11xx_bt.c \
+			$(SDK_ROOT)/drivers/qspi/yc11xx_qspi.c \
+			$(SDK_ROOT)/drivers/bt/mesh.c \
+			$(SDK_ROOT)/libcore/sys/systick.c \
+            $(SDK_ROOT)/libcore/pwm/app_pwm.c	\
+            $(SDK_ROOT)/drivers/timer/yc_timer.c \
+			$(MESHPATH)/app/app_mesh.c \
+			$(MESHPATH)/app/ali_light/ali_light.c \
+			$(MESHPATH)/app/ali_socket/ali_socket.c 
+           
+OBJ = ${patsubst %.c, %.o, ${SRC_FILES}} 
+
+# Debug build flags
+ifeq ($(release),1)
+	  MACRO = -DMESH_RELEASE
+else
+      MACRO := 
+endif
+
+LDSCRIPTS := -T $(SDK_ROOT)/gcc.ld -lgcc
+
+LIBFILES := -lm -I${INC} -lyc11xx -lmesh -lc
+LIBDIR   := -L.
+LIBDIR   += -L "$(GCC_ARM_PATH)\lib\gcc\arm-none-eabi\5.4.1\armv6-m"
+LIBDIR   += -L "$(GCC_ARM_PATH)\arm-none-eabi\lib\armv6-m"
+LIBDIR   += -L "$(SDK_ROOT)\libcore"
+
+#$(warning   OBJIEAT is $(OBJ)) 
+
+all : output\a.out
+	$(CROSS_COMPILE)objdump -S $^ > output\disasm
+	$(CROSS_COMPILE)objcopy $^ -O ihex output\out.hex
+	perl $(UTIL_PATH)\hex2rom.pl 0 40000 < output\out.hex > output\out.rom
+	copy $(PATCH_PATH)\ramcode.rom .\output\ramcode.rom
+	copy $(PATCH_PATH)\patch.dat + $(PATCH_PATH)\user.dat + $(PATCH_PATH)\rf.dat .\output\sched.rom
+	copy $(PATCH_PATH)\memmap.format .\output\memmap.format
+	
+OBJS = $(SDK_ROOT)/startup_m0.o
+
+output\a.out : $(OBJ) $(OBJS)
+	$(CROSS_COMPILE)ld $^ -o $@ $(LIBDIR) $(LIBFILES) $(LDSCRIPTS) -Map=output\memmap
+
+$(OBJS) : $(SDK_ROOT)/startup_m0.s
+	$(CROSS_COMPILE)as $^ -o $@ -mthumb -mcpu=cortex-m0 
+
+$(OBJ) : %.o : %.c
+	$(CROSS_COMPILE)gcc $^ -c $(INCLUDES) -g $(MACRO) -Os -o $@ -mthumb -mcpu=cortex-m0 -msoft-float
+
+clean :
+	@del /Q output\*.*
+	@del /Q /S $(SDK_ROOT)\*.o
+	@del /Q /S $(SDK_ROOT)\*.d.*
+	

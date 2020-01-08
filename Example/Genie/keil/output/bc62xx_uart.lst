@@ -1,0 +1,2052 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"bc62xx_uart.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.align	1
+  20              		.code	16
+  21              		.thumb_func
+  23              	hw_delay:
+  24              	.LFB37:
+  25              		.file 1 "../../../device/inc/bc62xx.h"
+   1:../../../device/inc/bc62xx.h **** #ifndef _BC62XX_H_
+   2:../../../device/inc/bc62xx.h **** #define _BC62XX_H_
+   3:../../../device/inc/bc62xx.h **** #include <stdio.h>
+   4:../../../device/inc/bc62xx.h **** #include "bc62xx_def.h"
+   5:../../../device/inc/bc62xx.h **** #include "btreg.h" 
+   6:../../../device/inc/bc62xx.h **** 
+   7:../../../device/inc/bc62xx.h **** #ifdef __cplusplus
+   8:../../../device/inc/bc62xx.h **** extern "C" {
+   9:../../../device/inc/bc62xx.h **** #endif
+  10:../../../device/inc/bc62xx.h **** 
+  11:../../../device/inc/bc62xx.h **** /* -------------------------  Interrupt Number Definition  ------------------------ */
+  12:../../../device/inc/bc62xx.h **** typedef enum 
+  13:../../../device/inc/bc62xx.h **** {
+  14:../../../device/inc/bc62xx.h **** /* -------------------  Cortex-M0 Processor Exceptions Numbers  -------------------                
+  15:../../../device/inc/bc62xx.h **** 	Reset_IRQn                    = -15,              /*!<   1  Reset Vector, invoked on Power up and 
+  16:../../../device/inc/bc62xx.h **** 	NonMaskableInt_IRQn           = -14,              /*!<   2  Non maskable Interrupt, cannot be stop
+  17:../../../device/inc/bc62xx.h ****     	HardFault_IRQn                = -13,              /*!<   3  Hard Fault, all classes of Fault  
+  18:../../../device/inc/bc62xx.h ****     	SVCall_IRQn                   =  -5,              /*!<  11  System Service Call via SVC instru
+  19:../../../device/inc/bc62xx.h ****     	DebugMonitor_IRQn             =  -4,              /*!<  12  Debug Monitor                     
+  20:../../../device/inc/bc62xx.h ****     	PendSV_IRQn                   =  -2,              /*!<  14  Pendable request for system servic
+  21:../../../device/inc/bc62xx.h ****     	SysTick_IRQn                  =  -1,              /*!<  15  System Tick Timer                 
+  22:../../../device/inc/bc62xx.h **** /* ---------------------  C32F0xx Specific Interrupt Numbers  --------------------                 
+  23:../../../device/inc/bc62xx.h **** 	usb_handler_IRQn              =   0,
+  24:../../../device/inc/bc62xx.h ****   	iicd_handler_IRQn             =   1,
+  25:../../../device/inc/bc62xx.h ****   	qspi_handler_IRQn             =   2,
+  26:../../../device/inc/bc62xx.h ****   	spid_handler_IRQn             =   3,
+  27:../../../device/inc/bc62xx.h ****   	uart_handler_IRQn             =   4,
+  28:../../../device/inc/bc62xx.h ****   	uartb_handler_IRQn            =   5,
+  29:../../../device/inc/bc62xx.h ****   	adcd_handler_IRQn             =   6,
+  30:../../../device/inc/bc62xx.h ****   	i2s_handler_IRQn              =   7,
+  31:../../../device/inc/bc62xx.h ****   	bt_handler_IRQn               =   8,
+  32:../../../device/inc/bc62xx.h **** 	GPIO0_intr						=  9,
+  33:../../../device/inc/bc62xx.h **** 	GPIO1_intr						=  10,
+  34:../../../device/inc/bc62xx.h **** 	GPIO2_intr						=  11,
+  35:../../../device/inc/bc62xx.h **** 	GPIO3_intr						=  12,
+  36:../../../device/inc/bc62xx.h **** 	GPIO4_intr						=  13,
+  37:../../../device/inc/bc62xx.h **** 	GPIO5_intr						=  14,
+  38:../../../device/inc/bc62xx.h **** 	GPIO6_intr						=  15,
+  39:../../../device/inc/bc62xx.h **** 	GPIO7_intr						=  16,
+  40:../../../device/inc/bc62xx.h **** 	GPIO8_intr						=  17,
+  41:../../../device/inc/bc62xx.h **** 	GPIO9_intr						=  18,
+  42:../../../device/inc/bc62xx.h **** 	GPIO10_intr						=  19,
+  43:../../../device/inc/bc62xx.h **** 	GPIO11_intr						=  20,
+  44:../../../device/inc/bc62xx.h **** 	GPIO12_intr						=  21,
+  45:../../../device/inc/bc62xx.h **** } IRQn_Type;
+  46:../../../device/inc/bc62xx.h **** 
+  47:../../../device/inc/bc62xx.h **** /** @addtogroup Configuration_of_CMSIS
+  48:../../../device/inc/bc62xx.h ****   * @{
+  49:../../../device/inc/bc62xx.h ****   */
+  50:../../../device/inc/bc62xx.h **** 
+  51:../../../device/inc/bc62xx.h **** 
+  52:../../../device/inc/bc62xx.h **** /* ================================================================================ */
+  53:../../../device/inc/bc62xx.h **** /* ================      Processor and Core Peripheral Section     ================ */
+  54:../../../device/inc/bc62xx.h **** /* ================================================================================ */
+  55:../../../device/inc/bc62xx.h **** 
+  56:../../../device/inc/bc62xx.h **** /* ----------------Configuration of the Cortex-M0 Processor and Core Peripherals---------------- */
+  57:../../../device/inc/bc62xx.h **** #define __CM0_REV                 0x0000            /*!< Cortex-M0 Core Revision                   
+  58:../../../device/inc/bc62xx.h **** #define __MPU_PRESENT                  0            /*!< MPU present or not                        
+  59:../../../device/inc/bc62xx.h **** #define __NVIC_PRIO_BITS               2            /*!< Number of Bits used for Priority Levels   
+  60:../../../device/inc/bc62xx.h **** #define __Vendor_SysTickConfig         0            /*!< Set to 1 if different SysTick Config is us
+  61:../../../device/inc/bc62xx.h **** /** @} */ /* End of group Configuration_of_CMSIS */
+  62:../../../device/inc/bc62xx.h **** 
+  63:../../../device/inc/bc62xx.h **** #include <core_cm0.h>                               /*!< Cortex-M0 processor and core peripherals 
+  64:../../../device/inc/bc62xx.h **** */
+  65:../../../device/inc/bc62xx.h **** 
+  66:../../../device/inc/bc62xx.h **** //******************************************************************************************
+  67:../../../device/inc/bc62xx.h **** //start define reg address
+  68:../../../device/inc/bc62xx.h **** //******************************************************************************************
+  69:../../../device/inc/bc62xx.h **** #define CORE_CHIPID							  0x8000
+  70:../../../device/inc/bc62xx.h **** #define CORE_KICK                  0x8003
+  71:../../../device/inc/bc62xx.h **** #define CORE_LPM_WR                0x8005
+  72:../../../device/inc/bc62xx.h **** #define CORE_MISC_CTRL             0x8006
+  73:../../../device/inc/bc62xx.h **** #define CORE_OTP_RDATA             0x8007
+  74:../../../device/inc/bc62xx.h **** #define CORE_DMA_START             0x800a
+  75:../../../device/inc/bc62xx.h **** #define CORE_RESET                 0x8010
+  76:../../../device/inc/bc62xx.h **** #define CORE_ENCRYPT               0x8011
+  77:../../../device/inc/bc62xx.h **** #define CORE_UART_TXD              0x8015
+  78:../../../device/inc/bc62xx.h **** #define CORE_UCODE_HI              0x8022
+  79:../../../device/inc/bc62xx.h **** #define CORE_UCODE_CTRL            0x8023
+  80:../../../device/inc/bc62xx.h **** #define CORE_UCODE_LOW             0x8024
+  81:../../../device/inc/bc62xx.h **** #define CORE_UCODE_DATA            0x8025
+  82:../../../device/inc/bc62xx.h **** #define	CORE_SCS_WDATA						0x8026
+  83:../../../device/inc/bc62xx.h **** #define	CORE_SCS_ADDR							0x802a
+  84:../../../device/inc/bc62xx.h **** #define	CORE_FLASH_OFFSET					0x802c
+  85:../../../device/inc/bc62xx.h **** #define	CORE_FLASH_READ_CMD				0x802f
+  86:../../../device/inc/bc62xx.h **** #define	CORE_I2S_CTRL							0x8030
+  87:../../../device/inc/bc62xx.h **** #define  CORE_I2S_CLKDIV        	0x8031
+  88:../../../device/inc/bc62xx.h **** #define	CORE_I2S_RX_SADDR					0x8032
+  89:../../../device/inc/bc62xx.h **** #define	CORE_I2S_TX_SADDR					0x8034
+  90:../../../device/inc/bc62xx.h **** #define	CORE_I2S_LEN							0x8036
+  91:../../../device/inc/bc62xx.h **** #define	CORE_ADCD_MAP						0x8038
+  92:../../../device/inc/bc62xx.h **** #define CORE_ADCD_DELAY						0x8039
+  93:../../../device/inc/bc62xx.h **** #define CORE_ADCD_CTRL                 	    0x803B
+  94:../../../device/inc/bc62xx.h **** #define	CORE_ADCD_SADDR						0x803c
+  95:../../../device/inc/bc62xx.h **** #define	CORE_ADCD_EADDR						0x803e
+  96:../../../device/inc/bc62xx.h **** #define	CORE_RTHALFSLOT						0x8040
+  97:../../../device/inc/bc62xx.h **** #define	CORE_CLKSEL								0x8042
+  98:../../../device/inc/bc62xx.h **** #define	CORE_CONFIG								0x8043
+  99:../../../device/inc/bc62xx.h **** #define CORE_UART_CLKSEL               		0X8043
+ 100:../../../device/inc/bc62xx.h **** #define	CORE_OTP_ADDR_SET					0x8044
+ 101:../../../device/inc/bc62xx.h **** #define	CORE_OTPD_CTRL						0x8046
+ 102:../../../device/inc/bc62xx.h **** #define	CORE_OTP_CTRL							0x8046
+ 103:../../../device/inc/bc62xx.h **** #define	CORE_OTPD_RXADDR					0x8048
+ 104:../../../device/inc/bc62xx.h **** #define	CORE_OTPD_RXLEN						0x804a
+ 105:../../../device/inc/bc62xx.h **** #define	CORE_LPM_REG							0x804c
+ 106:../../../device/inc/bc62xx.h **** #define	CORE_CLKOFF								0x8050
+ 107:../../../device/inc/bc62xx.h **** #define	CORE_UART_BAUD						0x8052
+ 108:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_SADDR				0x8054
+ 109:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_EADDR				0x8056
+ 110:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_RPTR					0x8058
+ 111:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_SADDR				0x805a
+ 112:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_EADDR				0x805c
+ 113:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_WPTR					0x805e
+ 114:../../../device/inc/bc62xx.h **** #define	CORE_UART_CTRL						0x8060
+ 115:../../../device/inc/bc62xx.h **** #define	CORE_GPIO_KEY							0x8061
+ 116:../../../device/inc/bc62xx.h **** #define	CORE_CORDIC_MODE					0x8063
+ 117:../../../device/inc/bc62xx.h **** #define	CORE_SUM_EN								0x8063
+ 118:../../../device/inc/bc62xx.h **** #define	CORE_ROWCOLUMN_NUM				0x8064
+ 119:../../../device/inc/bc62xx.h **** #define	CORE_SCANCYCLE_TIMER			0x8065
+ 120:../../../device/inc/bc62xx.h **** #define	CORE_U_DEBOUNCE						0x8066
+ 121:../../../device/inc/bc62xx.h **** #define	CORE_M_DEBOUNCE						0x8067
+ 122:../../../device/inc/bc62xx.h **** #define	CORE_MODKEY								0x8068
+ 123:../../../device/inc/bc62xx.h **** #define	CORE_KSCTRL								0x8070
+ 124:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_CTRL						0x8071
+ 125:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_BAUD						0x8072
+ 126:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_SADDR				0x8074
+ 127:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_EADDR				0x8076
+ 128:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_RPTR				0x8078
+ 129:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_SADDR				0x807a
+ 130:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_EADDR				0x807c
+ 131:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_WPTR				0x807e
+ 132:../../../device/inc/bc62xx.h **** #define	CORE_GPIO_CONF						0x8080
+ 133:../../../device/inc/bc62xx.h **** #define CORE_GPIO0_CONF                 				0X8080
+ 134:../../../device/inc/bc62xx.h **** #define CORE_GPIO1_CONF                 				0X8081
+ 135:../../../device/inc/bc62xx.h **** #define CORE_GPIO2_CONF                 				0X8082
+ 136:../../../device/inc/bc62xx.h **** #define CORE_GPIO3_CONF                 				0X8083
+ 137:../../../device/inc/bc62xx.h **** #define CORE_GPIO4_CONF                 				0X8084
+ 138:../../../device/inc/bc62xx.h **** #define CORE_GPIO5_CONF                 				0X8085
+ 139:../../../device/inc/bc62xx.h **** #define CORE_GPIO6_CONF                 				0X8086
+ 140:../../../device/inc/bc62xx.h **** #define CORE_GPIO7_CONF                 				0X8087
+ 141:../../../device/inc/bc62xx.h **** #define CORE_GPIO8_CONF                 				0X8088
+ 142:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_CTRL						0x80a0
+ 143:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_DELAY						0x80a1
+ 144:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_TXLEN						0x80a2
+ 145:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_TXADDR					0x80a4
+ 146:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_RXADDR					0x80a6
+ 147:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_RXLEN						0x80a8
+ 148:../../../device/inc/bc62xx.h **** #define	CORE_IICD_CTRL						0x80aa
+ 149:../../../device/inc/bc62xx.h **** #define  CORE_IICD_SCL_LOW              0x80ab
+ 150:../../../device/inc/bc62xx.h **** #define  CORE_IICD_SCL_HIGH             0x80ac
+ 151:../../../device/inc/bc62xx.h **** #define  CORE_IICD_START_SETUP          0x80ad
+ 152:../../../device/inc/bc62xx.h **** #define  CORE_IICD_START_HOLD           0x80ae
+ 153:../../../device/inc/bc62xx.h **** #define  CORE_IICD_STOP_SETUP           0x80af
+ 154:../../../device/inc/bc62xx.h **** #define  CORE_IICD_DATA_SETUP           0x80b0
+ 155:../../../device/inc/bc62xx.h **** #define  CORE_IICD_DATA_HOLD            0x80b1
+ 156:../../../device/inc/bc62xx.h **** #define	CORE_IICD_TXLEN								0x80b2
+ 157:../../../device/inc/bc62xx.h **** #define	CORE_IICD_TXADDR							0x80b4
+ 158:../../../device/inc/bc62xx.h **** #define	CORE_IICD_RXADDR							0x80b6
+ 159:../../../device/inc/bc62xx.h **** #define	CORE_IICD_RXLEN							0x80b8
+ 160:../../../device/inc/bc62xx.h **** #define	CORE_SPID_CTRL							0x80ba
+ 161:../../../device/inc/bc62xx.h **** #define	CORE_SPID_DELAY							0x80bb
+ 162:../../../device/inc/bc62xx.h **** #define	CORE_SPID_TXLEN						0x80bc
+ 163:../../../device/inc/bc62xx.h **** #define	CORE_SPID_TXADDR					0x80be
+ 164:../../../device/inc/bc62xx.h **** #define	CORE_SPID_RXADDR					0x80c0
+ 165:../../../device/inc/bc62xx.h **** #define	CORE_SPID_RXLEN						0x80c2
+ 166:../../../device/inc/bc62xx.h **** #define	CORE_CORDIC_A							0x80c4
+ 167:../../../device/inc/bc62xx.h **** #define	CORE_CORDIC_B							0x80c8
+ 168:../../../device/inc/bc62xx.h **** #define	CORE_BIST_CTRL_REG				0x80cc
+ 169:../../../device/inc/bc62xx.h **** #define	CORE_CCNT_BIT							0x80cc
+ 170:../../../device/inc/bc62xx.h **** #define  CORE_PWM0_PCNT                 0x80cd
+ 171:../../../device/inc/bc62xx.h **** #define  CORE_PWM0_NCNT                 0x80cf
+ 172:../../../device/inc/bc62xx.h **** #define	CORE_PWM0_CTRL						0x80d1
+ 173:../../../device/inc/bc62xx.h **** #define  CORE_PWM1_PCNT                 0x80d2
+ 174:../../../device/inc/bc62xx.h **** #define  CORE_PWM1_NCNT                 0x80d4
+ 175:../../../device/inc/bc62xx.h **** #define	CORE_PWM1_CTRL						0x80d6
+ 176:../../../device/inc/bc62xx.h **** #define  CORE_PWM2_PCNT                 0x80d7
+ 177:../../../device/inc/bc62xx.h **** #define  CORE_PWM2_NCNT                 0x80d9
+ 178:../../../device/inc/bc62xx.h **** #define	CORE_PWM2_CTRL						0x80db
+ 179:../../../device/inc/bc62xx.h **** #define  CORE_PWM3_PCNT                 0x80dc
+ 180:../../../device/inc/bc62xx.h **** #define  CORE_PWM3_NCNT                 0x80de
+ 181:../../../device/inc/bc62xx.h **** #define	CORE_PWM3_CTRL						0x80e0
+ 182:../../../device/inc/bc62xx.h **** #define  CORE_PWM4_PCNT                 0x80e1
+ 183:../../../device/inc/bc62xx.h **** #define  CORE_PWM4_NCNT                 0x80e3
+ 184:../../../device/inc/bc62xx.h **** #define	CORE_PWM4_CTRL						0x80e5
+ 185:../../../device/inc/bc62xx.h **** #define  CORE_PWM5_PCNT                 0x80e6
+ 186:../../../device/inc/bc62xx.h **** #define  CORE_PWM5_NCNT                 0x80e8
+ 187:../../../device/inc/bc62xx.h **** #define	CORE_PWM5_CTRL						0x80ea
+ 188:../../../device/inc/bc62xx.h **** #define  CORE_PWM6_PCNT                 0x80eb
+ 189:../../../device/inc/bc62xx.h **** #define  CORE_PWM6_NCNT                 0x80ed
+ 190:../../../device/inc/bc62xx.h **** #define	CORE_PWM6_CTRL						0x80ef
+ 191:../../../device/inc/bc62xx.h **** #define  CORE_PWM7_PCNT                 0x80f0
+ 192:../../../device/inc/bc62xx.h **** #define  CORE_PWM7_NCNT                 0x80f2
+ 193:../../../device/inc/bc62xx.h **** #define	CORE_PWM7_CTRL						0x80f4
+ 194:../../../device/inc/bc62xx.h **** #define	CORE_CVSD_CTRL						0x80f5
+ 195:../../../device/inc/bc62xx.h **** #define	CORE_CVSDIN_SADDR					0x80f6
+ 196:../../../device/inc/bc62xx.h **** #define	CORE_CVSDOUT_SADDR				0x80f8
+ 197:../../../device/inc/bc62xx.h **** #define	CORE_CVSD_LEN							0x80fa
+ 198:../../../device/inc/bc62xx.h **** #define	CORE_PCMIN_SADDR					0x80fc
+ 199:../../../device/inc/bc62xx.h **** #define	CORE_PCMOUT_SADDR					0x80fe
+ 200:../../../device/inc/bc62xx.h **** #define	CORE_DAC_SADDR						0x8100
+ 201:../../../device/inc/bc62xx.h **** #define	CORE_DAC_LEN							0x8102
+ 202:../../../device/inc/bc62xx.h **** #define	CORE_DAC_CTRL							0x8104
+ 203:../../../device/inc/bc62xx.h **** #define	CORE_VOL_TEST							0x8105
+ 204:../../../device/inc/bc62xx.h **** #define	CORE_THRESHOLD_GAIN				0x8106
+ 205:../../../device/inc/bc62xx.h **** #define	CORE_THRESHOLD_MAX				0x8108
+ 206:../../../device/inc/bc62xx.h **** #define	CORE_VOX_TIMER_WINDOW			0x810a
+ 207:../../../device/inc/bc62xx.h **** #define	CORE_VOX_CTRL							0x810b
+ 208:../../../device/inc/bc62xx.h **** #define	CORE_DS_COEF_A						0x810c
+ 209:../../../device/inc/bc62xx.h **** #define	CORE_CALIBRATION_WINDOW		0x810f
+ 210:../../../device/inc/bc62xx.h **** #define	CORE_CLKN									0x8300
+ 211:../../../device/inc/bc62xx.h **** #define	CORE_EXTMCLK							0x8304
+ 212:../../../device/inc/bc62xx.h **** #define	CORE_MISC_STATUS					0x8308
+ 213:../../../device/inc/bc62xx.h **** #define	CORE_REG_ZW_COUNTER				0x8309
+ 214:../../../device/inc/bc62xx.h **** #define	CORE_UART_STATUS					0x830c
+ 215:../../../device/inc/bc62xx.h **** #define	CORE_UART_RBAUD						0x830c
+ 216:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_ITEMS				0x830e
+ 217:../../../device/inc/bc62xx.h **** #define	CORE_UART_TX_RPTR					0x8310
+ 218:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_ITEMS				0x8312
+ 219:../../../device/inc/bc62xx.h **** #define	CORE_UART_RX_WPTR					0x8314
+ 220:../../../device/inc/bc62xx.h **** #define	CORE_ADCD_ADDR						0x8316
+ 221:../../../device/inc/bc62xx.h **** #define	CORE_KEY_STAT							0x8318
+ 222:../../../device/inc/bc62xx.h **** #define	CORE_KEY_EVENT						0x8319
+ 223:../../../device/inc/bc62xx.h **** #define	CORE_KEY_EVENT_NUM				0x831a
+ 224:../../../device/inc/bc62xx.h **** #define	CORE_DEBUG_BAUD						0x831b
+ 225:../../../device/inc/bc62xx.h **** #define	CORE_GPIO_IN							0x831c
+ 226:../../../device/inc/bc62xx.h **** #define	CORE_I2S_WRPTR						0x8320
+ 227:../../../device/inc/bc62xx.h **** #define	CORE_I2S_RDPTR						0x8322
+ 228:../../../device/inc/bc62xx.h **** #define	CORE_SPID_REMAIN					0x8324
+ 229:../../../device/inc/bc62xx.h **** #define	CORE_OTPD_REMAIN					0x8326
+ 230:../../../device/inc/bc62xx.h **** #define	CORE_QSPI_REMAIN					0x8328
+ 231:../../../device/inc/bc62xx.h **** #define	CORE_IICD_REMAIN					0x832a
+ 232:../../../device/inc/bc62xx.h **** #define	CORE_SARDATA							0x832c
+ 233:../../../device/inc/bc62xx.h **** #define	CORE_OTP_ADDR							0x832e
+ 234:../../../device/inc/bc62xx.h **** #define	CORE_DMA_STATUS						0x8330
+ 235:../../../device/inc/bc62xx.h **** #define	CORE_PERF_STATUS					0x8331
+ 236:../../../device/inc/bc62xx.h **** #define	CORE_CORDIC_OUT						0x8332
+ 237:../../../device/inc/bc62xx.h **** #define	CORE_LPM_CTRL							0x8336
+ 238:../../../device/inc/bc62xx.h **** #define	CORE_LPM_STATUS						0x8342
+ 239:../../../device/inc/bc62xx.h **** #define	CORE_CCNT_COUNTER					0x834b
+ 240:../../../device/inc/bc62xx.h **** #define	CORE_BIST_DONE						0x834e
+ 241:../../../device/inc/bc62xx.h **** #define	CORE_BIST_FAIL						0x8350
+ 242:../../../device/inc/bc62xx.h **** #define	CORE_SUMDATA							0x8352
+ 243:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_STATUS					0x8354
+ 244:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RBAUD					0x8354
+ 245:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_ITEMS				0x8356
+ 246:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_TX_RPTR				0x8358
+ 247:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_ITEMS				0x835a
+ 248:../../../device/inc/bc62xx.h **** #define	CORE_UARTB_RX_WPTR				0x835c
+ 249:../../../device/inc/bc62xx.h **** #define	CORE_SCS_RDATA						0x835e
+ 250:../../../device/inc/bc62xx.h **** #define	CORE_PCMIN_PTR						0x8362
+ 251:../../../device/inc/bc62xx.h **** #define	CORE_PCMOUT_PTR						0x8364
+ 252:../../../device/inc/bc62xx.h **** #define	CORE_CVSDIN_PTR						0x8366
+ 253:../../../device/inc/bc62xx.h **** #define	CORE_CVSDOUT_PTR					0x8368
+ 254:../../../device/inc/bc62xx.h **** #define CORE_DAC_OUTPUT_PTR					0x836a
+ 255:../../../device/inc/bc62xx.h **** 
+ 256:../../../device/inc/bc62xx.h **** #define CORE_SARADC_CONFIG1				0x8971
+ 257:../../../device/inc/bc62xx.h **** #define CORE_SARADC_CONFIG2				0x8972
+ 258:../../../device/inc/bc62xx.h **** #define CORE_SARADC_CONFIG3				0x8973
+ 259:../../../device/inc/bc62xx.h **** #define CORE_SARADC_CONFIG4				0x8974
+ 260:../../../device/inc/bc62xx.h **** #define CORE_RF_ADC_CONFIG				0x8906
+ 261:../../../device/inc/bc62xx.h **** //high pass filter
+ 262:../../../device/inc/bc62xx.h **** #define CORE_MIC_HPF   						0x8114
+ 263:../../../device/inc/bc62xx.h **** #define CORE_MIC_HPF_CTR					0x8115
+ 264:../../../device/inc/bc62xx.h **** 
+ 265:../../../device/inc/bc62xx.h **** 
+ 266:../../../device/inc/bc62xx.h **** #define CORE_SBC_SADDR 0x810a 
+ 267:../../../device/inc/bc62xx.h **** #define CORE_SBC_DADDR 0x810c 
+ 268:../../../device/inc/bc62xx.h **** #define CORE_SBC_SLEN  0x810e 
+ 269:../../../device/inc/bc62xx.h **** #define CORE_SBC_DLEN  0x8110 
+ 270:../../../device/inc/bc62xx.h **** #define CORE_SBC_SWP   0x8112 
+ 271:../../../device/inc/bc62xx.h **** #define CORE_SBC_SRP   0x836c 
+ 272:../../../device/inc/bc62xx.h **** #define CORE_SBC_DWP   0x836e 
+ 273:../../../device/inc/bc62xx.h **** #define CORE_EXE_ADDR  0x8370 
+ 274:../../../device/inc/bc62xx.h **** #define CORE_SBC_CTRL    0x8064
+ 275:../../../device/inc/bc62xx.h **** #define CORE_SBC_CRL    0x800b
+ 276:../../../device/inc/bc62xx.h **** 
+ 277:../../../device/inc/bc62xx.h **** 
+ 278:../../../device/inc/bc62xx.h **** #define CORE_USB_CONFIG 		 0x8c00
+ 279:../../../device/inc/bc62xx.h **** #define CORE_USB_INT_MASK  		 0x8c01
+ 280:../../../device/inc/bc62xx.h **** #define CORE_USB_ADDR  			 0x8c04
+ 281:../../../device/inc/bc62xx.h **** #define CORE_USB_TRIG  			 0x8c10
+ 282:../../../device/inc/bc62xx.h **** #define CORE_USB_STALL			 0x8c11
+ 283:../../../device/inc/bc62xx.h **** #define CORE_USB_CLEAR  		 0x8c12
+ 284:../../../device/inc/bc62xx.h **** #define CORE_USB_EP				 0X8C18
+ 285:../../../device/inc/bc62xx.h **** #define CORE_USB_DFIFO(x)   			 (0x8c18+x)
+ 286:../../../device/inc/bc62xx.h **** #define CORE_USB_EP_LEN  		 0x8c20
+ 287:../../../device/inc/bc62xx.h **** 
+ 288:../../../device/inc/bc62xx.h **** #define CORE_USB_STATUS 		 0x8c26
+ 289:../../../device/inc/bc62xx.h **** #define CORE_USB_FIFO_EMPTY 	 0x8c27
+ 290:../../../device/inc/bc62xx.h **** 
+ 291:../../../device/inc/bc62xx.h **** 
+ 292:../../../device/inc/bc62xx.h **** //************************************************************************************************
+ 293:../../../device/inc/bc62xx.h **** //end define reg address
+ 294:../../../device/inc/bc62xx.h **** //************************************************************************************************
+ 295:../../../device/inc/bc62xx.h **** 
+ 296:../../../device/inc/bc62xx.h **** //*****************************************************************************
+ 297:../../../device/inc/bc62xx.h **** //config gpio selected function
+ 298:../../../device/inc/bc62xx.h **** //*****************************************************************************
+ 299:../../../device/inc/bc62xx.h **** #define  GPCFG_INPUT			0  
+ 300:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_NCS        	2  
+ 301:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_SCK        	3  
+ 302:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_IO0        		4  
+ 303:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_IO1        		5  
+ 304:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_IO2        		6  
+ 305:../../../device/inc/bc62xx.h **** #define  GPCFG_QSPI_IO3        		7  
+ 306:../../../device/inc/bc62xx.h **** #define  GPCFG_UART_TXD        	8  
+ 307:../../../device/inc/bc62xx.h **** #define  GPCFG_UART_RXD        	9  
+ 308:../../../device/inc/bc62xx.h **** #define  GPCFG_UART_RTS        	10 
+ 309:../../../device/inc/bc62xx.h **** #define  GPCFG_UART_CTS        	11 
+ 310:../../../device/inc/bc62xx.h **** #define  GPCFG_UARTB_TXD       	12 
+ 311:../../../device/inc/bc62xx.h **** #define  GPCFG_UARTB_RXD       	13 
+ 312:../../../device/inc/bc62xx.h **** #define  GPCFG_UARTB_RTS       	14 
+ 313:../../../device/inc/bc62xx.h **** #define  GPCFG_UARTB_CTS       	15 
+ 314:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT0        	16 
+ 315:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT1        	17 
+ 316:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT2        	18 
+ 317:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT3        	19 
+ 318:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT4        	20 
+ 319:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT5        	21 
+ 320:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT6        	22 
+ 321:../../../device/inc/bc62xx.h **** #define  GPCFG_PWM_OUT7        	23 
+ 322:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_DOUT        	24 
+ 323:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_LRCKOUT     	25 
+ 324:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_CLKOUT      	26 
+ 325:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_DIN         		28 
+ 326:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_LRCKIN      	29 
+ 327:../../../device/inc/bc62xx.h **** #define  GPCFG_I2S_CLKIN       		30 
+ 328:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_MISO       	31 
+ 329:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_NCS        	32 
+ 330:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_SCK        	33 
+ 331:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_MOSI       	34 
+ 332:../../../device/inc/bc62xx.h **** #define  GPCFG_SPID_SDIO       	35 
+ 333:../../../device/inc/bc62xx.h **** #define  GPCFG_JTAG_SWCLK      	36 
+ 334:../../../device/inc/bc62xx.h **** #define  GPCFG_JTAG_SWDAT      	37 
+ 335:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_X0         	38 
+ 336:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_X1         	39 
+ 337:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_Y0         	40 
+ 338:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_Y1         	41 
+ 339:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_Z0         		42 
+ 340:../../../device/inc/bc62xx.h **** #define  GPCFG_QDEC_Z1         		43 
+ 341:../../../device/inc/bc62xx.h **** #define  GPCFG_IIC_SCL         		44 
+ 342:../../../device/inc/bc62xx.h **** #define  GPCFG_IIC_SDA        		45 
+ 343:../../../device/inc/bc62xx.h **** #define  GPCFG_OUTPUT_LOW      	62 
+ 344:../../../device/inc/bc62xx.h **** #define  GPCFG_OUTPUT_HIGH     	63
+ 345:../../../device/inc/bc62xx.h **** #define  GPCFG_PULLUP			0x40 
+ 346:../../../device/inc/bc62xx.h **** #define  GPCFG_PULLDOWN        	0x80 
+ 347:../../../device/inc/bc62xx.h **** #define  GPCFG_NO_IE           		0xc0
+ 348:../../../device/inc/bc62xx.h **** //*****************************************************************************
+ 349:../../../device/inc/bc62xx.h **** //end config gpio selected function
+ 350:../../../device/inc/bc62xx.h **** //*****************************************************************************
+ 351:../../../device/inc/bc62xx.h **** 
+ 352:../../../device/inc/bc62xx.h **** 
+ 353:../../../device/inc/bc62xx.h **** //*************************************************************************************
+ 354:../../../device/inc/bc62xx.h **** //interrupt id
+ 355:../../../device/inc/bc62xx.h **** //*************************************************************************************
+ 356:../../../device/inc/bc62xx.h **** #define	USB_INTID		0
+ 357:../../../device/inc/bc62xx.h **** #define	IICD_INTID		1
+ 358:../../../device/inc/bc62xx.h **** #define	QSPI_INTID		2
+ 359:../../../device/inc/bc62xx.h **** #define	SPID_INTID		3
+ 360:../../../device/inc/bc62xx.h **** #define	KEY_INTID		4
+ 361:../../../device/inc/bc62xx.h **** #define	UART_INTID		5
+ 362:../../../device/inc/bc62xx.h **** #define	UARTB_INTID	6
+ 363:../../../device/inc/bc62xx.h **** #define	ADCD_INTID		7
+ 364:../../../device/inc/bc62xx.h **** #define	I2S_INTID		8
+ 365:../../../device/inc/bc62xx.h **** #define	BT_INTID		9
+ 366:../../../device/inc/bc62xx.h **** #define	RSA_INTID		10
+ 367:../../../device/inc/bc62xx.h **** //*************************************************************************************
+ 368:../../../device/inc/bc62xx.h **** //end interrupt id
+ 369:../../../device/inc/bc62xx.h **** //*************************************************************************************
+ 370:../../../device/inc/bc62xx.h **** 
+ 371:../../../device/inc/bc62xx.h **** 
+ 372:../../../device/inc/bc62xx.h **** #define reg_map(reg)		((int)(reg) | 0x10000000)
+ 373:../../../device/inc/bc62xx.h **** #define reg_map_m0(reg)	((int)(reg) | 0x10010000)
+ 374:../../../device/inc/bc62xx.h **** #define PREFETCH_LINE(addr)	*(volatile int*)0x20000000 = addr
+ 375:../../../device/inc/bc62xx.h **** #define des_ctrl			*(volatile uint8_t*)0x30000002
+ 376:../../../device/inc/bc62xx.h **** #define des_key(x)		*(volatile uint8_t*)(0x30000003 + x)
+ 377:../../../device/inc/bc62xx.h **** #define des_in(x)			*(volatile uint8_t*)(0x30000018 + x)
+ 378:../../../device/inc/bc62xx.h **** #define crypt_status		*(volatile uint8_t*)0x30010000
+ 379:../../../device/inc/bc62xx.h **** #define des_out(x)			*(volatile uint8_t*)(0x30010004 + x)
+ 380:../../../device/inc/bc62xx.h **** #define des_start			*(volatile uint8_t*)0x30008000
+ 381:../../../device/inc/bc62xx.h **** #define rsa_exp(x)			*(volatile int32_t*)(0x30020000 + x*4)
+ 382:../../../device/inc/bc62xx.h **** #define rsa_out(x)			*(volatile int32_t*)(0x30020000 + x*4)
+ 383:../../../device/inc/bc62xx.h **** #define rsa_in(x)			*(volatile int32_t*)(0x30020080 + x*4)
+ 384:../../../device/inc/bc62xx.h **** #define rsa_mod(x)		*(volatile int32_t*)(0x30020100 + x*4)
+ 385:../../../device/inc/bc62xx.h **** #define rsa_ctrl			*(volatile int32_t*)0x30020180
+ 386:../../../device/inc/bc62xx.h **** 
+ 387:../../../device/inc/bc62xx.h **** #define NVIC_SETENA		*(volatile int32_t*)0xe000e100
+ 388:../../../device/inc/bc62xx.h **** #define NVIC_CLRENA		*(volatile int32_t*)0xe000e180
+ 389:../../../device/inc/bc62xx.h **** #define NVIC_ISPR		*(volatile int32_t*)0xe000e200
+ 390:../../../device/inc/bc62xx.h **** #define NVIC_ICPR		*(volatile int32_t*)0xe000e280
+ 391:../../../device/inc/bc62xx.h **** #define NVIC_SETPEND      *(volatile int32_t*)0xe000e200
+ 392:../../../device/inc/bc62xx.h **** #define NVIC_CLRPEND      *(volatile int32_t*)0xe000e280
+ 393:../../../device/inc/bc62xx.h **** #define NVIC_00_03_IPR		*(volatile int32_t*)0xe000e400
+ 394:../../../device/inc/bc62xx.h **** #define NVIC_04_07_IPR		*(volatile int32_t*)0xe000e404
+ 395:../../../device/inc/bc62xx.h **** #define NVIC_08_11_IPR		*(volatile int32_t*)0xe000e408
+ 396:../../../device/inc/bc62xx.h **** #define NVIC_12_15_IPR		*(volatile int32_t*)0xe000e40C
+ 397:../../../device/inc/bc62xx.h **** #define NVIC_16_19_IPR		*(volatile int32_t*)0xe000e410
+ 398:../../../device/inc/bc62xx.h **** #define NVIC_20_23_IPR		*(volatile int32_t*)0xe000e414
+ 399:../../../device/inc/bc62xx.h **** #define NVIC_24_27_IPR		*(volatile int32_t*)0xe000e418
+ 400:../../../device/inc/bc62xx.h **** #define NVIC_28_31_IPR		*(volatile int32_t*)0xe000e40C
+ 401:../../../device/inc/bc62xx.h **** 
+ 402:../../../device/inc/bc62xx.h **** #define CPU_MHZ        (48*1000000)
+ 403:../../../device/inc/bc62xx.h **** /* SysTick registers */  
+ 404:../../../device/inc/bc62xx.h **** /* SysTick control & status */ 
+ 405:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR     ((volatile unsigned int *)0xE000E010)
+ 406:../../../device/inc/bc62xx.h **** /* SysTick Reload value */ 
+ 407:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_RVR     ((volatile unsigned int *)0xE000E014)
+ 408:../../../device/inc/bc62xx.h **** /* SysTick Current value */ 
+ 409:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CVR     ((volatile unsigned int *)0xE000E018)
+ 410:../../../device/inc/bc62xx.h **** /* SysTick CSR register bits */ 
+ 411:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR_COUNTFLAG (1 << 16)
+ 412:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR_CLKSOURCE (1 << 2)
+ 413:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR_TICKINT   (1 << 1)
+ 414:../../../device/inc/bc62xx.h **** #define INITCPU_SYST_CSR_ENABLE    (1 << 0)
+ 415:../../../device/inc/bc62xx.h **** 
+ 416:../../../device/inc/bc62xx.h **** static inline void enable_intr(int intid)   { NVIC_SETENA |= 1 << intid;}
+ 417:../../../device/inc/bc62xx.h **** static inline void disable_intr(int intid)  { NVIC_CLRENA |= 1 << intid;}
+ 418:../../../device/inc/bc62xx.h **** 
+ 419:../../../device/inc/bc62xx.h **** typedef unsigned char byte;
+ 420:../../../device/inc/bc62xx.h **** typedef unsigned short word;
+ 421:../../../device/inc/bc62xx.h **** 
+ 422:../../../device/inc/bc62xx.h **** void _nop() __attribute__((optimize("O0")));
+ 423:../../../device/inc/bc62xx.h **** 
+ 424:../../../device/inc/bc62xx.h **** #define TO_16BIT_ADDR(A) (((int)A)&0xFFFF)
+ 425:../../../device/inc/bc62xx.h **** 
+ 426:../../../device/inc/bc62xx.h **** #define HREAD(reg)		*(volatile byte*)(reg_map(reg))
+ 427:../../../device/inc/bc62xx.h **** #define HREADW(reg)		(int)HREAD(reg) | HREAD(reg + 1) << 8
+ 428:../../../device/inc/bc62xx.h **** #define HWRITE(reg, val)	HREAD(reg) = (byte)(val)
+ 429:../../../device/inc/bc62xx.h **** #define HWRITEW(reg, val)	do { HWRITE(reg, (int)(val));HWRITE(reg + 1, (int)(val) >> 8); }while(0)
+ 430:../../../device/inc/bc62xx.h **** 
+ 431:../../../device/inc/bc62xx.h **** #define HWRITE24BIT(reg,val) do { HWRITE(reg, (int)(val));HWRITE(reg + 1, (int)(val) >> 8); HWRITE(
+ 432:../../../device/inc/bc62xx.h **** //#define HWOR(reg, val)	HWRITE(reg, HREAD(reg) | (val))
+ 433:../../../device/inc/bc62xx.h **** 
+ 434:../../../device/inc/bc62xx.h **** #define HWOR(reg, val)	HWRITE(reg, ((HREAD(reg) )| (val)))
+ 435:../../../device/inc/bc62xx.h **** #define HWCOR(reg, val)	HWRITE(reg, HREAD(reg) & ~(val))
+ 436:../../../device/inc/bc62xx.h **** 
+ 437:../../../device/inc/bc62xx.h **** //#define SETBIT(reg, val)	HWRITE(reg, HREAD(reg) | (val))
+ 438:../../../device/inc/bc62xx.h **** //#define CLRBIT(reg, val)	HWRITE(reg, HREAD(reg) & ~(val))
+ 439:../../../device/inc/bc62xx.h **** 
+ 440:../../../device/inc/bc62xx.h **** #define BW(addr)			(int)*(addr) << 24 | (int)*(addr + 1) << 16 | (int)*(addr + 2) << 8 | *(addr + 3
+ 441:../../../device/inc/bc62xx.h **** 
+ 442:../../../device/inc/bc62xx.h **** static inline void hw_delay() 
+ 443:../../../device/inc/bc62xx.h **** {
+  26              		.loc 1 443 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 0
+  29              		@ frame_needed = 0, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+ 444:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  31              		.loc 1 444 0
+  32              		.syntax divided
+  33              	@ 444 "../../../device/inc/bc62xx.h" 1
+  34 0000 C046     		nop
+  35              	@ 0 "" 2
+ 445:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  36              		.loc 1 445 0
+  37              	@ 445 "../../../device/inc/bc62xx.h" 1
+  38 0002 C046     		nop
+  39              	@ 0 "" 2
+ 446:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  40              		.loc 1 446 0
+  41              	@ 446 "../../../device/inc/bc62xx.h" 1
+  42 0004 C046     		nop
+  43              	@ 0 "" 2
+ 447:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  44              		.loc 1 447 0
+  45              	@ 447 "../../../device/inc/bc62xx.h" 1
+  46 0006 C046     		nop
+  47              	@ 0 "" 2
+ 448:../../../device/inc/bc62xx.h **** 	__asm__ __volatile__("nop");
+  48              		.loc 1 448 0
+  49              	@ 448 "../../../device/inc/bc62xx.h" 1
+  50 0008 C046     		nop
+  51              	@ 0 "" 2
+ 449:../../../device/inc/bc62xx.h **** }
+  52              		.loc 1 449 0
+  53              		.thumb
+  54              		.syntax unified
+  55              		@ sp needed
+  56 000a 7047     		bx	lr
+  57              		.cfi_endproc
+  58              	.LFE37:
+  60              		.align	1
+  61              		.code	16
+  62              		.thumb_func
+  64              	HW_REG_16BIT:
+  65              	.LFB38:
+  66              		.file 2 "../../../device/inc/common.h"
+   1:../../../device/inc/common.h **** #ifndef __COMMON_H__
+   2:../../../device/inc/common.h **** #define __COMMON_H__
+   3:../../../device/inc/common.h **** 
+   4:../../../device/inc/common.h **** #include <stdio.h>
+   5:../../../device/inc/common.h **** #include <string.h>
+   6:../../../device/inc/common.h **** #include <stdint.h>
+   7:../../../device/inc/common.h **** #include <stdbool.h>
+   8:../../../device/inc/common.h **** #include <stdlib.h>
+   9:../../../device/inc/common.h **** 
+  10:../../../device/inc/common.h **** #include "bc62xx.h"
+  11:../../../device/inc/common.h **** 
+  12:../../../device/inc/common.h **** #ifdef RELEASE
+  13:../../../device/inc/common.h **** #define ASSERT(x) 
+  14:../../../device/inc/common.h **** #else
+  15:../../../device/inc/common.h **** #define ASSERT(x) while(!(x))
+  16:../../../device/inc/common.h **** #endif
+  17:../../../device/inc/common.h **** 
+  18:../../../device/inc/common.h **** #define OS_ENTER_CRITICAL() __disable_irq() 
+  19:../../../device/inc/common.h **** #define OS_EXIT_CRITICAL() __enable_irq() 
+  20:../../../device/inc/common.h **** 
+  21:../../../device/inc/common.h **** 
+  22:../../../device/inc/common.h **** static inline void HW_REG_16BIT(uint32_t reg, uint16_t word)
+  23:../../../device/inc/common.h **** {
+  67              		.loc 2 23 0
+  68              		.cfi_startproc
+  69              		@ args = 0, pretend = 0, frame = 0
+  70              		@ frame_needed = 0, uses_anonymous_args = 0
+  71              	.LVL0:
+  72 000c 70B5     		push	{r4, r5, r6, lr}
+  73              	.LCFI0:
+  74              		.cfi_def_cfa_offset 16
+  75              		.cfi_offset 4, -16
+  76              		.cfi_offset 5, -12
+  77              		.cfi_offset 6, -8
+  78              		.cfi_offset 14, -4
+  79              		.loc 2 23 0
+  80 000e 0C00     		movs	r4, r1
+  81 0010 0500     		movs	r5, r0
+  24:../../../device/inc/common.h ****     HW_REG_8BIT(reg, word & 0x00FF);
+  82              		.loc 2 24 0
+  83 0012 CBB2     		uxtb	r3, r1
+  84 0014 0370     		strb	r3, [r0]
+  25:../../../device/inc/common.h ****     hw_delay();
+  26:../../../device/inc/common.h ****     HW_REG_8BIT(reg + 1,(word >> 8));
+  85              		.loc 2 26 0
+  86 0016 240A     		lsrs	r4, r4, #8
+  25:../../../device/inc/common.h ****     hw_delay();
+  87              		.loc 2 25 0
+  88 0018 FFF7F2FF 		bl	hw_delay
+  89              	.LVL1:
+  27:../../../device/inc/common.h **** }
+  90              		.loc 2 27 0
+  91              		@ sp needed
+  26:../../../device/inc/common.h **** }
+  92              		.loc 2 26 0
+  93 001c 6C70     		strb	r4, [r5, #1]
+  94              	.LVL2:
+  95              		.loc 2 27 0
+  96 001e 70BD     		pop	{r4, r5, r6, pc}
+  97              		.cfi_endproc
+  98              	.LFE38:
+ 100              		.align	1
+ 101              		.code	16
+ 102              		.thumb_func
+ 104              	HR_REG_16BIT:
+ 105              	.LFB39:
+  28:../../../device/inc/common.h **** static inline uint16_t HR_REG_16BIT(uint32_t reg)
+  29:../../../device/inc/common.h **** {
+ 106              		.loc 2 29 0
+ 107              		.cfi_startproc
+ 108              		@ args = 0, pretend = 0, frame = 0
+ 109              		@ frame_needed = 0, uses_anonymous_args = 0
+ 110              	.LVL3:
+ 111 0020 70B5     		push	{r4, r5, r6, lr}
+ 112              	.LCFI1:
+ 113              		.cfi_def_cfa_offset 16
+ 114              		.cfi_offset 4, -16
+ 115              		.cfi_offset 5, -12
+ 116              		.cfi_offset 6, -8
+ 117              		.cfi_offset 14, -4
+ 118              		.loc 2 29 0
+ 119 0022 0500     		movs	r5, r0
+  30:../../../device/inc/common.h **** 	uint16_t return_data = 0;
+  31:../../../device/inc/common.h **** 	uint16_t H_data = 0;
+  32:../../../device/inc/common.h **** 	hw_delay();
+ 120              		.loc 2 32 0
+ 121 0024 FFF7ECFF 		bl	hw_delay
+ 122              	.LVL4:
+  33:../../../device/inc/common.h **** 	return_data = HR_REG_8BIT(reg);
+ 123              		.loc 2 33 0
+ 124 0028 2C78     		ldrb	r4, [r5]
+  34:../../../device/inc/common.h **** 	hw_delay();
+ 125              		.loc 2 34 0
+ 126 002a FFF7E9FF 		bl	hw_delay
+ 127              	.LVL5:
+  35:../../../device/inc/common.h **** 	H_data = HR_REG_8BIT(reg + 1);
+ 128              		.loc 2 35 0
+ 129 002e 6878     		ldrb	r0, [r5, #1]
+  33:../../../device/inc/common.h **** 	return_data = HR_REG_8BIT(reg);
+ 130              		.loc 2 33 0
+ 131 0030 E4B2     		uxtb	r4, r4
+ 132              	.LVL6:
+  36:../../../device/inc/common.h **** 	return_data = (return_data | ((H_data << 8) & 0xFF00));
+  37:../../../device/inc/common.h **** 	return return_data;
+ 133              		.loc 2 37 0
+ 134 0032 0002     		lsls	r0, r0, #8
+ 135              	.LVL7:
+ 136 0034 2043     		orrs	r0, r4
+  38:../../../device/inc/common.h **** }
+ 137              		.loc 2 38 0
+ 138              		@ sp needed
+ 139              	.LVL8:
+ 140 0036 70BD     		pop	{r4, r5, r6, pc}
+ 141              		.cfi_endproc
+ 142              	.LFE39:
+ 144              		.comm	GPIO_FUNC,1,1
+ 145              		.comm	regBeck,32,2
+ 146              		.align	1
+ 147              		.code	16
+ 148              		.thumb_func
+ 150              	usartInitByBackup:
+ 151              	.LFB41:
+ 152              		.file 3 "../../../drivers/hal/bc62xx_uart.c"
+   1:../../../drivers/hal/bc62xx_uart.c **** #include "bc62xx_uart.h"
+   2:../../../drivers/hal/bc62xx_uart.c **** 
+   3:../../../drivers/hal/bc62xx_uart.c **** 
+   4:../../../drivers/hal/bc62xx_uart.c **** #define IS_USART_TXLen(TxLen)			(TxLen != 0) 
+   5:../../../drivers/hal/bc62xx_uart.c ****   
+   6:../../../drivers/hal/bc62xx_uart.c **** #define IS_USART_RXLen(RxLen)			(RxLen != 0)
+   7:../../../drivers/hal/bc62xx_uart.c **** 
+   8:../../../drivers/hal/bc62xx_uart.c **** #define IS_UARTE_BAUDRATE(BAUDRATE)		((BAUDRATE > 0) && (BAUDRATE< BAUD1M))
+   9:../../../drivers/hal/bc62xx_uart.c **** 
+  10:../../../drivers/hal/bc62xx_uart.c **** #define IS_USART_WORD_LENGTH(LENGTH)	(((LENGTH) == DATA_BITS_8b) || \
+  11:../../../drivers/hal/bc62xx_uart.c ****                                     	((LENGTH) == DATA_BITS_9b))
+  12:../../../drivers/hal/bc62xx_uart.c **** 
+  13:../../../drivers/hal/bc62xx_uart.c **** #define IS_USART_HARDWARE_FLOW_CONTROL(CONTROL)\
+  14:../../../drivers/hal/bc62xx_uart.c ****                               (((CONTROL) == FLOW_CTRL_NONE) || \
+  15:../../../drivers/hal/bc62xx_uart.c ****                                ((CONTROL) == FLOW_CTRL_ENABLE))
+  16:../../../drivers/hal/bc62xx_uart.c **** typedef struct 
+  17:../../../drivers/hal/bc62xx_uart.c **** {
+  18:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t Baudrate;
+  19:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t RxSadr;
+  20:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t RxEadr;
+  21:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t RxRptr;
+  22:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t TxSadr;
+  23:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t TxEadr;
+  24:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t TxWptr;
+  25:../../../drivers/hal/bc62xx_uart.c **** }UartxRegDef;
+  26:../../../drivers/hal/bc62xx_uart.c **** 
+  27:../../../drivers/hal/bc62xx_uart.c **** typedef struct
+  28:../../../drivers/hal/bc62xx_uart.c **** {
+  29:../../../drivers/hal/bc62xx_uart.c **** 	UartxRegDef rbu;
+  30:../../../drivers/hal/bc62xx_uart.c **** 	uint8_t cbu;
+  31:../../../drivers/hal/bc62xx_uart.c **** }UartxRegControlBackup;
+  32:../../../drivers/hal/bc62xx_uart.c **** 
+  33:../../../drivers/hal/bc62xx_uart.c **** #define UART_PER_NUM 2
+  34:../../../drivers/hal/bc62xx_uart.c **** 
+  35:../../../drivers/hal/bc62xx_uart.c **** UartxRegControlBackup regBeck[UART_PER_NUM];
+  36:../../../drivers/hal/bc62xx_uart.c **** 
+  37:../../../drivers/hal/bc62xx_uart.c **** 
+  38:../../../drivers/hal/bc62xx_uart.c **** static void usartInitByBackup(USART_TypeDef USARTx)
+  39:../../../drivers/hal/bc62xx_uart.c **** {
+ 153              		.loc 3 39 0
+ 154              		.cfi_startproc
+ 155              		@ args = 0, pretend = 0, frame = 0
+ 156              		@ frame_needed = 0, uses_anonymous_args = 0
+ 157              	.LVL9:
+ 158 0038 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 159              	.LCFI2:
+ 160              		.cfi_def_cfa_offset 24
+ 161              		.cfi_offset 3, -24
+ 162              		.cfi_offset 4, -20
+ 163              		.cfi_offset 5, -16
+ 164              		.cfi_offset 6, -12
+ 165              		.cfi_offset 7, -8
+ 166              		.cfi_offset 14, -4
+  40:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t UartxCtrlAdr = 0;
+  41:../../../drivers/hal/bc62xx_uart.c **** 	UartxRegDef *UartAdr = NULL;
+  42:../../../drivers/hal/bc62xx_uart.c **** 	/*set uart control*/
+  43:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA) {
+ 167              		.loc 3 43 0
+ 168 003a 0028     		cmp	r0, #0
+ 169 003c 04D0     		beq	.L6
+  44:../../../drivers/hal/bc62xx_uart.c **** 		UartxCtrlAdr = CORE_UART_CTRL;
+  45:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));
+  46:../../../drivers/hal/bc62xx_uart.c **** 	}else if(USARTx == UARTB) {
+ 170              		.loc 3 46 0
+ 171 003e 0128     		cmp	r0, #1
+ 172 0040 05D1     		bne	.L7
+  47:../../../drivers/hal/bc62xx_uart.c **** 		UartxCtrlAdr = CORE_UARTB_CTRL;
+  48:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UARTB_BAUD));
+ 173              		.loc 3 48 0
+ 174 0042 1B4E     		ldr	r6, .L9
+  47:../../../drivers/hal/bc62xx_uart.c **** 		UartxCtrlAdr = CORE_UARTB_CTRL;
+ 175              		.loc 3 47 0
+ 176 0044 1B4B     		ldr	r3, .L9+4
+ 177 0046 04E0     		b	.L5
+ 178              	.L6:
+  45:../../../drivers/hal/bc62xx_uart.c **** 	}else if(USARTx == UARTB) {
+ 179              		.loc 3 45 0
+ 180 0048 1B4E     		ldr	r6, .L9+8
+  44:../../../drivers/hal/bc62xx_uart.c **** 		UartxCtrlAdr = CORE_UART_CTRL;
+ 181              		.loc 3 44 0
+ 182 004a 1C4B     		ldr	r3, .L9+12
+ 183 004c 01E0     		b	.L5
+ 184              	.L7:
+  41:../../../drivers/hal/bc62xx_uart.c **** 	/*set uart control*/
+ 185              		.loc 3 41 0
+ 186 004e 0026     		movs	r6, #0
+  40:../../../drivers/hal/bc62xx_uart.c **** 	UartxRegDef *UartAdr = NULL;
+ 187              		.loc 3 40 0
+ 188 0050 3300     		movs	r3, r6
+ 189              	.L5:
+ 190              	.LVL10:
+  49:../../../drivers/hal/bc62xx_uart.c **** 	}
+  50:../../../drivers/hal/bc62xx_uart.c **** 
+  51:../../../drivers/hal/bc62xx_uart.c **** 	HWCOR(UartxCtrlAdr, 1);
+ 191              		.loc 3 51 0
+ 192 0052 8025     		movs	r5, #128
+ 193 0054 0122     		movs	r2, #1
+ 194 0056 6D05     		lsls	r5, r5, #21
+ 195 0058 1D43     		orrs	r5, r3
+ 196 005a 2B78     		ldrb	r3, [r5]
+ 197              	.LVL11:
+  52:../../../drivers/hal/bc62xx_uart.c **** 
+  53:../../../drivers/hal/bc62xx_uart.c **** 	/*init all reg by backup*/
+  54:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT(((uint32_t)(&UartAdr->Baudrate)), regBeck[USARTx].rbu.Baudrate);
+ 198              		.loc 3 54 0
+ 199 005c 184F     		ldr	r7, .L9+16
+  51:../../../drivers/hal/bc62xx_uart.c **** 
+ 200              		.loc 3 51 0
+ 201 005e 9343     		bics	r3, r2
+ 202 0060 2B70     		strb	r3, [r5]
+ 203              		.loc 3 54 0
+ 204 0062 0401     		lsls	r4, r0, #4
+ 205 0064 E15B     		ldrh	r1, [r4, r7]
+ 206 0066 3000     		movs	r0, r6
+ 207              	.LVL12:
+ 208 0068 FFF7D0FF 		bl	HW_REG_16BIT
+ 209              	.LVL13:
+  55:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT(((uint32_t)(&UartAdr->TxSadr)), (uint32_t)regBeck[USARTx].rbu.TxSadr);
+ 210              		.loc 3 55 0
+ 211 006c 3000     		movs	r0, r6
+ 212 006e 3C19     		adds	r4, r7, r4
+ 213 0070 2189     		ldrh	r1, [r4, #8]
+ 214 0072 0830     		adds	r0, r0, #8
+ 215 0074 FFF7CAFF 		bl	HW_REG_16BIT
+ 216              	.LVL14:
+  56:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT(((uint32_t)(&UartAdr->TxEadr)), (uint32_t)regBeck[USARTx].rbu.TxEadr);
+ 217              		.loc 3 56 0
+ 218 0078 3000     		movs	r0, r6
+ 219 007a 6189     		ldrh	r1, [r4, #10]
+ 220 007c 0A30     		adds	r0, r0, #10
+ 221 007e FFF7C5FF 		bl	HW_REG_16BIT
+ 222              	.LVL15:
+  57:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT(((uint32_t)(&UartAdr->TxWptr)), (uint32_t)regBeck[USARTx].rbu.TxSadr);
+ 223              		.loc 3 57 0
+ 224 0082 3000     		movs	r0, r6
+ 225 0084 2189     		ldrh	r1, [r4, #8]
+ 226 0086 0C30     		adds	r0, r0, #12
+ 227 0088 FFF7C0FF 		bl	HW_REG_16BIT
+ 228              	.LVL16:
+  58:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT(((uint32_t)(&UartAdr->RxSadr)), (uint32_t)regBeck[USARTx].rbu.RxSadr);
+ 229              		.loc 3 58 0
+ 230 008c B01C     		adds	r0, r6, #2
+ 231 008e 6188     		ldrh	r1, [r4, #2]
+ 232 0090 FFF7BCFF 		bl	HW_REG_16BIT
+ 233              	.LVL17:
+  59:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT(((uint32_t)(&UartAdr->RxEadr)), (uint32_t)regBeck[USARTx].rbu.RxEadr);
+ 234              		.loc 3 59 0
+ 235 0094 301D     		adds	r0, r6, #4
+ 236 0096 A188     		ldrh	r1, [r4, #4]
+ 237 0098 FFF7B8FF 		bl	HW_REG_16BIT
+ 238              	.LVL18:
+  60:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT(((uint32_t)(&UartAdr->RxRptr)), (uint32_t)regBeck[USARTx].rbu.RxSadr);
+ 239              		.loc 3 60 0
+ 240 009c B01D     		adds	r0, r6, #6
+ 241 009e 6188     		ldrh	r1, [r4, #2]
+ 242 00a0 FFF7B4FF 		bl	HW_REG_16BIT
+ 243              	.LVL19:
+  61:../../../drivers/hal/bc62xx_uart.c **** 	HWOR(UartxCtrlAdr, regBeck[USARTx].cbu);
+ 244              		.loc 3 61 0
+ 245 00a4 2A78     		ldrb	r2, [r5]
+ 246 00a6 A37B     		ldrb	r3, [r4, #14]
+  62:../../../drivers/hal/bc62xx_uart.c **** }
+ 247              		.loc 3 62 0
+ 248              		@ sp needed
+  61:../../../drivers/hal/bc62xx_uart.c **** 	HWOR(UartxCtrlAdr, regBeck[USARTx].cbu);
+ 249              		.loc 3 61 0
+ 250 00a8 1343     		orrs	r3, r2
+ 251 00aa 2B70     		strb	r3, [r5]
+ 252              	.LVL20:
+ 253              		.loc 3 62 0
+ 254 00ac F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 255              	.L10:
+ 256 00ae C046     		.align	2
+ 257              	.L9:
+ 258 00b0 72800010 		.word	268468338
+ 259 00b4 71800000 		.word	32881
+ 260 00b8 52800010 		.word	268468306
+ 261 00bc 60800000 		.word	32864
+ 262 00c0 00000000 		.word	regBeck
+ 263              		.cfi_endproc
+ 264              	.LFE41:
+ 266              		.align	1
+ 267              		.global	USART_Init
+ 268              		.code	16
+ 269              		.thumb_func
+ 271              	USART_Init:
+ 272              	.LFB42:
+  63:../../../drivers/hal/bc62xx_uart.c **** #if 0
+  64:../../../drivers/hal/bc62xx_uart.c **** static error_t usartAReinit()
+  65:../../../drivers/hal/bc62xx_uart.c **** {
+  66:../../../drivers/hal/bc62xx_uart.c **** 	usartInitByBackup(UARTA);
+  67:../../../drivers/hal/bc62xx_uart.c **** 	return SUCCESS;
+  68:../../../drivers/hal/bc62xx_uart.c **** }
+  69:../../../drivers/hal/bc62xx_uart.c **** 
+  70:../../../drivers/hal/bc62xx_uart.c **** static error_t usartBReinit()
+  71:../../../drivers/hal/bc62xx_uart.c **** {
+  72:../../../drivers/hal/bc62xx_uart.c **** 	usartInitByBackup(UARTB);
+  73:../../../drivers/hal/bc62xx_uart.c **** 	return SUCCESS;
+  74:../../../drivers/hal/bc62xx_uart.c **** }
+  75:../../../drivers/hal/bc62xx_uart.c **** #endif
+  76:../../../drivers/hal/bc62xx_uart.c **** 
+  77:../../../drivers/hal/bc62xx_uart.c **** void USART_Init(USART_TypeDef USARTx, USART_InitTypeDef* USART_InitStruct)
+  78:../../../drivers/hal/bc62xx_uart.c **** {	
+ 273              		.loc 3 78 0
+ 274              		.cfi_startproc
+ 275              		@ args = 0, pretend = 0, frame = 8
+ 276              		@ frame_needed = 0, uses_anonymous_args = 0
+ 277              	.LVL21:
+ 278 00c4 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 279              	.LCFI3:
+ 280              		.cfi_def_cfa_offset 32
+ 281              		.cfi_offset 0, -32
+ 282              		.cfi_offset 1, -28
+ 283              		.cfi_offset 2, -24
+ 284              		.cfi_offset 4, -20
+ 285              		.cfi_offset 5, -16
+ 286              		.cfi_offset 6, -12
+ 287              		.cfi_offset 7, -8
+ 288              		.cfi_offset 14, -4
+ 289              		.loc 3 78 0
+ 290 00c6 0600     		movs	r6, r0
+ 291 00c8 0C1E     		subs	r4, r1, #0
+  79:../../../drivers/hal/bc62xx_uart.c **** #define UARTC_BIT_ENABLE (1<<0)
+  80:../../../drivers/hal/bc62xx_uart.c **** #define BAUD_USE_SETTING (1<<7)
+  81:../../../drivers/hal/bc62xx_uart.c **** 	void *Ptr = NULL;
+  82:../../../drivers/hal/bc62xx_uart.c **** 	uint8_t CtrValue = 0;
+  83:../../../drivers/hal/bc62xx_uart.c **** 
+  84:../../../drivers/hal/bc62xx_uart.c **** 	/*check parameter*/
+  85:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(USART_InitStruct != NULL);
+ 292              		.loc 3 85 0
+ 293 00ca 00D1     		bne	.L32
+ 294              	.L40:
+ 295 00cc FEE7     		b	.L40
+ 296              	.L32:
+  86:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USARTAB(USARTx));
+ 297              		.loc 3 86 0 discriminator 1
+ 298 00ce 012E     		cmp	r6, #1
+ 299 00d0 FDD8     		bhi	.L32
+  87:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_UARTE_BAUDRATE(USART_InitStruct->USART_BaudRate));
+ 300              		.loc 3 87 0
+ 301 00d2 2368     		ldr	r3, [r4]
+ 302 00d4 334A     		ldr	r2, .L49
+ 303 00d6 013B     		subs	r3, r3, #1
+ 304              	.L14:
+ 305              		.loc 3 87 0 is_stmt 0 discriminator 1
+ 306 00d8 9342     		cmp	r3, r2
+ 307 00da FDD8     		bhi	.L14
+  88:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USART_WORD_LENGTH(USART_InitStruct->USART_WordLength));
+ 308              		.loc 3 88 0 is_stmt 1
+ 309 00dc 0422     		movs	r2, #4
+ 310 00de A388     		ldrh	r3, [r4, #4]
+ 311 00e0 9343     		bics	r3, r2
+ 312              	.L15:
+ 313              		.loc 3 88 0 is_stmt 0 discriminator 2
+ 314 00e2 002B     		cmp	r3, #0
+ 315 00e4 FDD1     		bne	.L15
+  89:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USART_STOPBITS(USART_InitStruct->USART_StopBits));
+ 316              		.loc 3 89 0 is_stmt 1
+ 317 00e6 0822     		movs	r2, #8
+ 318 00e8 E388     		ldrh	r3, [r4, #6]
+ 319 00ea 9343     		bics	r3, r2
+ 320              	.L16:
+ 321              		.loc 3 89 0 is_stmt 0 discriminator 2
+ 322 00ec 002B     		cmp	r3, #0
+ 323 00ee FDD1     		bne	.L16
+  90:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USART_PARITY(USART_InitStruct->USART_Parity));
+ 324              		.loc 3 90 0 is_stmt 1
+ 325 00f0 0222     		movs	r2, #2
+ 326 00f2 2389     		ldrh	r3, [r4, #8]
+ 327 00f4 9343     		bics	r3, r2
+ 328              	.L17:
+ 329              		.loc 3 90 0 is_stmt 0 discriminator 2
+ 330 00f6 002B     		cmp	r3, #0
+ 331 00f8 FDD1     		bne	.L17
+  91:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USART_MODE(USART_InitStruct->USART_Mode));
+ 332              		.loc 3 91 0 is_stmt 1
+ 333 00fa 4022     		movs	r2, #64
+ 334 00fc 6389     		ldrh	r3, [r4, #10]
+ 335 00fe 9343     		bics	r3, r2
+ 336              	.L18:
+ 337              		.loc 3 91 0 is_stmt 0 discriminator 2
+ 338 0100 002B     		cmp	r3, #0
+ 339 0102 FDD1     		bne	.L18
+  92:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USART_HARDWARE_FLOW_CONTROL(USART_InitStruct->USART_HardwareFlowControl));
+ 340              		.loc 3 92 0 is_stmt 1
+ 341 0104 1022     		movs	r2, #16
+ 342 0106 A389     		ldrh	r3, [r4, #12]
+ 343 0108 9343     		bics	r3, r2
+ 344              	.L19:
+ 345              		.loc 3 92 0 is_stmt 0 discriminator 2
+ 346 010a 002B     		cmp	r3, #0
+ 347 010c FDD1     		bne	.L19
+  93:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USART_TXLen(USART_InitStruct->USART_TXLen));
+ 348              		.loc 3 93 0 is_stmt 1
+ 349 010e E389     		ldrh	r3, [r4, #14]
+ 350 0110 002B     		cmp	r3, #0
+ 351 0112 00D1     		bne	.L45
+ 352              	.L41:
+ 353 0114 FEE7     		b	.L41
+ 354              	.L45:
+  94:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USART_RXLen(USART_InitStruct->USART_RXLen));
+ 355              		.loc 3 94 0
+ 356 0116 238A     		ldrh	r3, [r4, #16]
+ 357 0118 002B     		cmp	r3, #0
+ 358 011a 00D1     		bne	.L46
+ 359              	.L42:
+ 360 011c FEE7     		b	.L42
+ 361              	.L46:
+  95:../../../drivers/hal/bc62xx_uart.c **** 
+  96:../../../drivers/hal/bc62xx_uart.c **** 	HWRITE(CORE_UART_CLKSEL, 1);
+ 362              		.loc 3 96 0
+ 363 011e 0121     		movs	r1, #1
+ 364              	.LVL22:
+  97:../../../drivers/hal/bc62xx_uart.c **** 	HWCOR(CORE_CLKOFF + 1, 0x80);
+ 365              		.loc 3 97 0
+ 366 0120 7F22     		movs	r2, #127
+  96:../../../drivers/hal/bc62xx_uart.c **** 	HWCOR(CORE_CLKOFF + 1, 0x80);
+ 367              		.loc 3 96 0
+ 368 0122 214B     		ldr	r3, .L49+4
+ 369              		.loc 3 97 0
+ 370 0124 2148     		ldr	r0, .L49+8
+ 371              	.LVL23:
+  96:../../../drivers/hal/bc62xx_uart.c **** 	HWCOR(CORE_CLKOFF + 1, 0x80);
+ 372              		.loc 3 96 0
+ 373 0126 1970     		strb	r1, [r3]
+ 374              		.loc 3 97 0
+ 375 0128 0578     		ldrb	r5, [r0]
+ 376 012a 2A40     		ands	r2, r5
+ 377 012c 0270     		strb	r2, [r0]
+  98:../../../drivers/hal/bc62xx_uart.c **** 	if(USART_InitStruct->USART_BaudRate == BAUD9600){
+ 378              		.loc 3 98 0
+ 379 012e 2068     		ldr	r0, [r4]
+ 380 0130 1F4A     		ldr	r2, .L49+12
+ 381 0132 9042     		cmp	r0, r2
+ 382 0134 02D1     		bne	.L22
+  99:../../../drivers/hal/bc62xx_uart.c **** 		HWCOR(CORE_UART_CLKSEL, 0x01);
+ 383              		.loc 3 99 0
+ 384 0136 1A78     		ldrb	r2, [r3]
+ 385 0138 8A43     		bics	r2, r1
+ 386 013a 1A70     		strb	r2, [r3]
+ 387              	.L22:
+ 100:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 101:../../../drivers/hal/bc62xx_uart.c **** 
+ 102:../../../drivers/hal/bc62xx_uart.c **** 	/*init baud backup*/
+ 103:../../../drivers/hal/bc62xx_uart.c **** 	regBeck[USARTx].rbu.Baudrate = USART_InitStruct->USART_BaudRate;
+ 388              		.loc 3 103 0
+ 389 013c 1D4F     		ldr	r7, .L49+16
+ 390 013e 2388     		ldrh	r3, [r4]
+ 391 0140 3501     		lsls	r5, r6, #4
+ 392 0142 EB53     		strh	r3, [r5, r7]
+ 104:../../../drivers/hal/bc62xx_uart.c **** 	
+ 105:../../../drivers/hal/bc62xx_uart.c **** 	/*init tx ring buffer backup*/
+ 106:../../../drivers/hal/bc62xx_uart.c **** 	Ptr = malloc(USART_InitStruct->USART_TXLen);
+ 393              		.loc 3 106 0
+ 394 0144 E389     		ldrh	r3, [r4, #14]
+ 107:../../../drivers/hal/bc62xx_uart.c **** 	regBeck[USARTx].rbu.TxSadr = (uint32_t)Ptr;
+ 395              		.loc 3 107 0
+ 396 0146 7D19     		adds	r5, r7, r5
+ 106:../../../drivers/hal/bc62xx_uart.c **** 	regBeck[USARTx].rbu.TxSadr = (uint32_t)Ptr;
+ 397              		.loc 3 106 0
+ 398 0148 1800     		movs	r0, r3
+ 399 014a 0193     		str	r3, [sp, #4]
+ 400 014c FFF7FEFF 		bl	malloc
+ 401              	.LVL24:
+ 402              		.loc 3 107 0
+ 403 0150 83B2     		uxth	r3, r0
+ 404 0152 2B81     		strh	r3, [r5, #8]
+ 108:../../../drivers/hal/bc62xx_uart.c **** 
+ 109:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(Ptr != NULL);	
+ 405              		.loc 3 109 0
+ 406 0154 0028     		cmp	r0, #0
+ 407 0156 00D1     		bne	.L47
+ 408              	.L43:
+ 409 0158 FEE7     		b	.L43
+ 410              	.L47:
+ 110:../../../drivers/hal/bc62xx_uart.c **** 	regBeck[USARTx].rbu.TxEadr = ((uint32_t)Ptr) + USART_InitStruct->USART_TXLen;
+ 411              		.loc 3 110 0
+ 412 015a 019A     		ldr	r2, [sp, #4]
+ 413 015c D318     		adds	r3, r2, r3
+ 414 015e 6B81     		strh	r3, [r5, #10]
+ 415              	.LVL25:
+ 111:../../../drivers/hal/bc62xx_uart.c **** 	Ptr = NULL;
+ 112:../../../drivers/hal/bc62xx_uart.c **** 	
+ 113:../../../drivers/hal/bc62xx_uart.c **** 	/*init rx ring buffer backup*/
+ 114:../../../drivers/hal/bc62xx_uart.c **** 	Ptr = malloc(USART_InitStruct->USART_RXLen);
+ 416              		.loc 3 114 0
+ 417 0160 278A     		ldrh	r7, [r4, #16]
+ 418 0162 3800     		movs	r0, r7
+ 419 0164 FFF7FEFF 		bl	malloc
+ 420              	.LVL26:
+ 115:../../../drivers/hal/bc62xx_uart.c **** 	regBeck[USARTx].rbu.RxSadr = (uint32_t)Ptr;
+ 421              		.loc 3 115 0
+ 422 0168 83B2     		uxth	r3, r0
+ 423 016a 6B80     		strh	r3, [r5, #2]
+ 116:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(Ptr != NULL);	
+ 424              		.loc 3 116 0
+ 425 016c 0028     		cmp	r0, #0
+ 426 016e 00D1     		bne	.L48
+ 427              	.L44:
+ 428 0170 FEE7     		b	.L44
+ 429              	.L48:
+ 117:../../../drivers/hal/bc62xx_uart.c **** 	regBeck[USARTx].rbu.RxEadr = ((uint32_t)Ptr) + USART_InitStruct->USART_RXLen;
+ 430              		.loc 3 117 0
+ 431 0172 FF18     		adds	r7, r7, r3
+ 432 0174 AF80     		strh	r7, [r5, #4]
+ 433              	.LVL27:
+ 118:../../../drivers/hal/bc62xx_uart.c **** 
+ 119:../../../drivers/hal/bc62xx_uart.c **** 	CtrValue =  USART_InitStruct->USART_Mode | USART_InitStruct->USART_HardwareFlowControl |\
+ 120:../../../drivers/hal/bc62xx_uart.c **** 			  USART_InitStruct->USART_Parity |USART_InitStruct->USART_StopBits| \
+ 121:../../../drivers/hal/bc62xx_uart.c **** 			  USART_InitStruct->USART_WordLength|BAUD_USE_SETTING|UARTC_BIT_ENABLE;
+ 122:../../../drivers/hal/bc62xx_uart.c **** 	
+ 123:../../../drivers/hal/bc62xx_uart.c **** 	regBeck[USARTx].cbu = CtrValue;
+ 434              		.loc 3 123 0
+ 435 0176 6289     		ldrh	r2, [r4, #10]
+ 436 0178 A389     		ldrh	r3, [r4, #12]
+ 437 017a 1343     		orrs	r3, r2
+ 438 017c 7F22     		movs	r2, #127
+ 439 017e 5242     		rsbs	r2, r2, #0
+ 440 0180 1343     		orrs	r3, r2
+ 441 0182 2289     		ldrh	r2, [r4, #8]
+ 442 0184 1343     		orrs	r3, r2
+ 443 0186 E288     		ldrh	r2, [r4, #6]
+ 444 0188 1343     		orrs	r3, r2
+ 445 018a A288     		ldrh	r2, [r4, #4]
+ 446 018c 1343     		orrs	r3, r2
+ 447 018e AB73     		strb	r3, [r5, #14]
+ 448              	.LVL28:
+ 124:../../../drivers/hal/bc62xx_uart.c **** 
+ 125:../../../drivers/hal/bc62xx_uart.c **** 	/*init rx ring buffer regs*/
+ 126:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA) {
+ 449              		.loc 3 126 0
+ 450 0190 002E     		cmp	r6, #0
+ 451 0192 03D1     		bne	.L25
+ 127:../../../drivers/hal/bc62xx_uart.c **** 		usartInitByBackup(UARTA);
+ 452              		.loc 3 127 0
+ 453 0194 3000     		movs	r0, r6
+ 454              	.LVL29:
+ 455 0196 FFF74FFF 		bl	usartInitByBackup
+ 456              	.LVL30:
+ 457 019a 02E0     		b	.L11
+ 458              	.LVL31:
+ 459              	.L25:
+ 128:../../../drivers/hal/bc62xx_uart.c **** 		//DEV_Register(Device_Id_UartA, usartAReinit, NULL);
+ 129:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 130:../../../drivers/hal/bc62xx_uart.c **** 	else {
+ 131:../../../drivers/hal/bc62xx_uart.c **** 		usartInitByBackup(UARTB);
+ 460              		.loc 3 131 0
+ 461 019c 0120     		movs	r0, #1
+ 462              	.LVL32:
+ 463 019e FFF74BFF 		bl	usartInitByBackup
+ 464              	.LVL33:
+ 465              	.L11:
+ 132:../../../drivers/hal/bc62xx_uart.c **** 		//DEV_Register(Device_Id_UartB, usartBReinit, NULL);
+ 133:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 134:../../../drivers/hal/bc62xx_uart.c **** 
+ 135:../../../drivers/hal/bc62xx_uart.c **** }
+ 466              		.loc 3 135 0
+ 467              		@ sp needed
+ 468              	.LVL34:
+ 469 01a2 F7BD     		pop	{r0, r1, r2, r4, r5, r6, r7, pc}
+ 470              	.L50:
+ 471              		.align	2
+ 472              	.L49:
+ 473 01a4 FE8F0000 		.word	36862
+ 474 01a8 43800010 		.word	268468291
+ 475 01ac 51800010 		.word	268468305
+ 476 01b0 C4890000 		.word	35268
+ 477 01b4 00000000 		.word	regBeck
+ 478              		.cfi_endproc
+ 479              	.LFE42:
+ 481              		.align	1
+ 482              		.global	USART_DeInit
+ 483              		.code	16
+ 484              		.thumb_func
+ 486              	USART_DeInit:
+ 487              	.LFB43:
+ 136:../../../drivers/hal/bc62xx_uart.c **** 
+ 137:../../../drivers/hal/bc62xx_uart.c **** 
+ 138:../../../drivers/hal/bc62xx_uart.c **** void USART_DeInit(USART_TypeDef USARTx)
+ 139:../../../drivers/hal/bc62xx_uart.c **** {
+ 488              		.loc 3 139 0
+ 489              		.cfi_startproc
+ 490              		@ args = 0, pretend = 0, frame = 0
+ 491              		@ frame_needed = 0, uses_anonymous_args = 0
+ 492              	.LVL35:
+ 493 01b8 10B5     		push	{r4, lr}
+ 494              	.LCFI4:
+ 495              		.cfi_def_cfa_offset 8
+ 496              		.cfi_offset 4, -8
+ 497              		.cfi_offset 14, -4
+ 498              	.L52:
+ 140:../../../drivers/hal/bc62xx_uart.c **** 	UartxRegDef *UartAdr = NULL;
+ 141:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USARTAB(USARTx));
+ 499              		.loc 3 141 0 discriminator 1
+ 500 01ba 0128     		cmp	r0, #1
+ 501 01bc FDD8     		bhi	.L52
+ 502 01be 0122     		movs	r2, #1
+ 142:../../../drivers/hal/bc62xx_uart.c **** 	
+ 143:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA) {
+ 503              		.loc 3 143 0
+ 504 01c0 0028     		cmp	r0, #0
+ 505 01c2 08D1     		bne	.L53
+ 144:../../../drivers/hal/bc62xx_uart.c **** 		HWOR(reg_map(CORE_UART_CTRL), (1<<0));
+ 506              		.loc 3 144 0
+ 507 01c4 0B4B     		ldr	r3, .L56
+ 145:../../../drivers/hal/bc62xx_uart.c **** 		HWOR(reg_map(CORE_UART_CTRL), (0<<0));
+ 146:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));
+ 508              		.loc 3 146 0
+ 509 01c6 0C4C     		ldr	r4, .L56+4
+ 144:../../../drivers/hal/bc62xx_uart.c **** 		HWOR(reg_map(CORE_UART_CTRL), (1<<0));
+ 510              		.loc 3 144 0
+ 511 01c8 1978     		ldrb	r1, [r3]
+ 512 01ca 0A43     		orrs	r2, r1
+ 513 01cc 1A70     		strb	r2, [r3]
+ 145:../../../drivers/hal/bc62xx_uart.c **** 		HWOR(reg_map(CORE_UART_CTRL), (0<<0));
+ 514              		.loc 3 145 0
+ 515 01ce 1A78     		ldrb	r2, [r3]
+ 516 01d0 D2B2     		uxtb	r2, r2
+ 517 01d2 1A70     		strb	r2, [r3]
+ 518              	.LVL36:
+ 519 01d4 07E0     		b	.L54
+ 520              	.LVL37:
+ 521              	.L53:
+ 147:../../../drivers/hal/bc62xx_uart.c **** 	}else {
+ 148:../../../drivers/hal/bc62xx_uart.c **** 
+ 149:../../../drivers/hal/bc62xx_uart.c **** 		HWOR(reg_map(CORE_UARTB_CTRL), (1<<0));
+ 522              		.loc 3 149 0
+ 523 01d6 094B     		ldr	r3, .L56+8
+ 150:../../../drivers/hal/bc62xx_uart.c **** 		HWOR(reg_map(CORE_UARTB_CTRL), (0<<0));
+ 151:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UARTB_BAUD));
+ 524              		.loc 3 151 0
+ 525 01d8 094C     		ldr	r4, .L56+12
+ 149:../../../drivers/hal/bc62xx_uart.c **** 		HWOR(reg_map(CORE_UARTB_CTRL), (0<<0));
+ 526              		.loc 3 149 0
+ 527 01da 1978     		ldrb	r1, [r3]
+ 528 01dc 0A43     		orrs	r2, r1
+ 529 01de 1A70     		strb	r2, [r3]
+ 150:../../../drivers/hal/bc62xx_uart.c **** 		HWOR(reg_map(CORE_UARTB_CTRL), (0<<0));
+ 530              		.loc 3 150 0
+ 531 01e0 1A78     		ldrb	r2, [r3]
+ 532 01e2 D2B2     		uxtb	r2, r2
+ 533 01e4 1A70     		strb	r2, [r3]
+ 534              	.LVL38:
+ 535              	.L54:
+ 152:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 153:../../../drivers/hal/bc62xx_uart.c **** 	free((void *)((uint32_t)(UartAdr->TxSadr)));
+ 536              		.loc 3 153 0
+ 537 01e6 2089     		ldrh	r0, [r4, #8]
+ 538              	.LVL39:
+ 539 01e8 FFF7FEFF 		bl	free
+ 540              	.LVL40:
+ 154:../../../drivers/hal/bc62xx_uart.c **** 	free((void *)((uint32_t)(UartAdr->RxSadr)));
+ 541              		.loc 3 154 0
+ 542 01ec 6088     		ldrh	r0, [r4, #2]
+ 543 01ee FFF7FEFF 		bl	free
+ 544              	.LVL41:
+ 155:../../../drivers/hal/bc62xx_uart.c **** }
+ 545              		.loc 3 155 0
+ 546              		@ sp needed
+ 547              	.LVL42:
+ 548 01f2 10BD     		pop	{r4, pc}
+ 549              	.L57:
+ 550              		.align	2
+ 551              	.L56:
+ 552 01f4 60800010 		.word	268468320
+ 553 01f8 52800010 		.word	268468306
+ 554 01fc 71800010 		.word	268468337
+ 555 0200 72800010 		.word	268468338
+ 556              		.cfi_endproc
+ 557              	.LFE43:
+ 559              		.align	1
+ 560              		.global	USART_SendData
+ 561              		.code	16
+ 562              		.thumb_func
+ 564              	USART_SendData:
+ 565              	.LFB44:
+ 156:../../../drivers/hal/bc62xx_uart.c **** 
+ 157:../../../drivers/hal/bc62xx_uart.c **** 
+ 158:../../../drivers/hal/bc62xx_uart.c **** 
+ 159:../../../drivers/hal/bc62xx_uart.c **** void USART_SendData(USART_TypeDef USARTx, uint16_t Data)
+ 160:../../../drivers/hal/bc62xx_uart.c **** {
+ 566              		.loc 3 160 0
+ 567              		.cfi_startproc
+ 568              		@ args = 0, pretend = 0, frame = 8
+ 569              		@ frame_needed = 0, uses_anonymous_args = 0
+ 570              	.LVL43:
+ 571 0204 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 572              	.LCFI5:
+ 573              		.cfi_def_cfa_offset 32
+ 574              		.cfi_offset 0, -32
+ 575              		.cfi_offset 1, -28
+ 576              		.cfi_offset 2, -24
+ 577              		.cfi_offset 4, -20
+ 578              		.cfi_offset 5, -16
+ 579              		.cfi_offset 6, -12
+ 580              		.cfi_offset 7, -8
+ 581              		.cfi_offset 14, -4
+ 582 0206 0600     		movs	r6, r0
+ 583 0208 0191     		str	r1, [sp, #4]
+ 584              	.LVL44:
+ 585              	.L59:
+ 161:../../../drivers/hal/bc62xx_uart.c **** 	UartxRegDef * UartAdr = NULL;
+ 162:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t  WPtr = 0; 
+ 163:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USARTAB(USARTx));
+ 586              		.loc 3 163 0 discriminator 1
+ 587 020a 012E     		cmp	r6, #1
+ 588 020c FDD8     		bhi	.L59
+ 164:../../../drivers/hal/bc62xx_uart.c **** 	
+ 165:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA) {
+ 589              		.loc 3 165 0
+ 590 020e 002E     		cmp	r6, #0
+ 591 0210 01D0     		beq	.L66
+ 166:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));	
+ 167:../../../drivers/hal/bc62xx_uart.c **** 	}else {
+ 168:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UARTB_BAUD));
+ 592              		.loc 3 168 0
+ 593 0212 154C     		ldr	r4, .L71
+ 594 0214 00E0     		b	.L60
+ 595              	.L66:
+ 166:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));	
+ 596              		.loc 3 166 0
+ 597 0216 154C     		ldr	r4, .L71+4
+ 598              	.L60:
+ 599              	.LVL45:
+ 169:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 170:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT((&UartAdr->TxSadr  != NULL));
+ 171:../../../drivers/hal/bc62xx_uart.c **** 	
+ 172:../../../drivers/hal/bc62xx_uart.c **** 	WPtr = HR_REG_16BIT((uint32_t)(&UartAdr->TxWptr));
+ 600              		.loc 3 172 0 discriminator 1
+ 601 0218 2700     		movs	r7, r4
+ 602 021a 0C37     		adds	r7, r7, #12
+ 603 021c 3800     		movs	r0, r7
+ 604              	.LVL46:
+ 605 021e FFF7FFFE 		bl	HR_REG_16BIT
+ 606              	.LVL47:
+ 607 0222 0500     		movs	r5, r0
+ 608              	.LVL48:
+ 173:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA) {
+ 609              		.loc 3 173 0 discriminator 1
+ 610 0224 002E     		cmp	r6, #0
+ 611 0226 04D1     		bne	.L61
+ 174:../../../drivers/hal/bc62xx_uart.c **** 		while(HREAD(CORE_UART_TX_ITEMS) > 0);
+ 612              		.loc 3 174 0
+ 613 0228 114A     		ldr	r2, .L71+8
+ 614              	.L62:
+ 615              		.loc 3 174 0 is_stmt 0 discriminator 1
+ 616 022a 1378     		ldrb	r3, [r2]
+ 617 022c 002B     		cmp	r3, #0
+ 618 022e FCD1     		bne	.L62
+ 619 0230 03E0     		b	.L63
+ 620              	.L61:
+ 175:../../../drivers/hal/bc62xx_uart.c **** 	}else {
+ 176:../../../drivers/hal/bc62xx_uart.c **** 		while(HREAD(CORE_UARTB_TX_ITEMS) > 0);
+ 621              		.loc 3 176 0 is_stmt 1 discriminator 1
+ 622 0232 104A     		ldr	r2, .L71+12
+ 623              	.L67:
+ 624 0234 1378     		ldrb	r3, [r2]
+ 625 0236 002B     		cmp	r3, #0
+ 626 0238 FCD1     		bne	.L67
+ 627              	.L63:
+ 177:../../../drivers/hal/bc62xx_uart.c **** 	}	
+ 178:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_8BIT(WPtr|M0_MEMORY_BASE,Data);	
+ 628              		.loc 3 178 0
+ 629 023a 6A46     		mov	r2, sp
+ 179:../../../drivers/hal/bc62xx_uart.c **** 	RB_UPDATE_PTR(WPtr, HR_REG_16BIT((uint32_t)(&UartAdr->TxSadr)),  HR_REG_16BIT((uint32_t)(&UartAdr-
+ 630              		.loc 3 179 0
+ 631 023c 2000     		movs	r0, r4
+ 178:../../../drivers/hal/bc62xx_uart.c **** 	RB_UPDATE_PTR(WPtr, HR_REG_16BIT((uint32_t)(&UartAdr->TxSadr)),  HR_REG_16BIT((uint32_t)(&UartAdr-
+ 632              		.loc 3 178 0
+ 633 023e 0E4B     		ldr	r3, .L71+16
+ 634 0240 1279     		ldrb	r2, [r2, #4]
+ 635 0242 2B43     		orrs	r3, r5
+ 636 0244 1A70     		strb	r2, [r3]
+ 637              		.loc 3 179 0
+ 638 0246 0A30     		adds	r0, r0, #10
+ 639 0248 FFF7EAFE 		bl	HR_REG_16BIT
+ 640              	.LVL49:
+ 641 024c 691C     		adds	r1, r5, #1
+ 642 024e 89B2     		uxth	r1, r1
+ 643 0250 8542     		cmp	r5, r0
+ 644 0252 04D1     		bne	.L65
+ 170:../../../drivers/hal/bc62xx_uart.c **** 	
+ 645              		.loc 3 170 0 discriminator 1
+ 646 0254 2000     		movs	r0, r4
+ 647 0256 0830     		adds	r0, r0, #8
+ 648              		.loc 3 179 0 discriminator 1
+ 649 0258 FFF7E2FE 		bl	HR_REG_16BIT
+ 650              	.LVL50:
+ 651 025c 0100     		movs	r1, r0
+ 652              	.LVL51:
+ 653              	.L65:
+ 180:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT((uint32_t)(&UartAdr->TxWptr),  WPtr);                                                
+ 654              		.loc 3 180 0
+ 655 025e 3800     		movs	r0, r7
+ 656 0260 FFF7D4FE 		bl	HW_REG_16BIT
+ 657              	.LVL52:
+ 181:../../../drivers/hal/bc62xx_uart.c **** }
+ 658              		.loc 3 181 0
+ 659              		@ sp needed
+ 660              	.LVL53:
+ 661              	.LVL54:
+ 662 0264 F7BD     		pop	{r0, r1, r2, r4, r5, r6, r7, pc}
+ 663              	.L72:
+ 664 0266 C046     		.align	2
+ 665              	.L71:
+ 666 0268 72800010 		.word	268468338
+ 667 026c 52800010 		.word	268468306
+ 668 0270 0E830010 		.word	268469006
+ 669 0274 56830010 		.word	268469078
+ 670 0278 00000110 		.word	268500992
+ 671              		.cfi_endproc
+ 672              	.LFE44:
+ 674              		.align	1
+ 675              		.global	USART_ReceiveData
+ 676              		.code	16
+ 677              		.thumb_func
+ 679              	USART_ReceiveData:
+ 680              	.LFB45:
+ 182:../../../drivers/hal/bc62xx_uart.c **** 
+ 183:../../../drivers/hal/bc62xx_uart.c **** 
+ 184:../../../drivers/hal/bc62xx_uart.c **** 
+ 185:../../../drivers/hal/bc62xx_uart.c **** uint16_t USART_ReceiveData(USART_TypeDef USARTx)
+ 186:../../../drivers/hal/bc62xx_uart.c **** {	
+ 681              		.loc 3 186 0
+ 682              		.cfi_startproc
+ 683              		@ args = 0, pretend = 0, frame = 0
+ 684              		@ frame_needed = 0, uses_anonymous_args = 0
+ 685              	.LVL55:
+ 686 027c F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 687              	.LCFI6:
+ 688              		.cfi_def_cfa_offset 24
+ 689              		.cfi_offset 3, -24
+ 690              		.cfi_offset 4, -20
+ 691              		.cfi_offset 5, -16
+ 692              		.cfi_offset 6, -12
+ 693              		.cfi_offset 7, -8
+ 694              		.cfi_offset 14, -4
+ 695              	.L74:
+ 187:../../../drivers/hal/bc62xx_uart.c **** 	UartxRegDef *UartAdr = NULL;
+ 188:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t  RPtr = 0;
+ 189:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t  RdData = 0;
+ 190:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USARTAB(USARTx)); 
+ 696              		.loc 3 190 0 discriminator 1
+ 697 027e 0128     		cmp	r0, #1
+ 698 0280 FDD8     		bhi	.L74
+ 191:../../../drivers/hal/bc62xx_uart.c **** 
+ 192:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA) {
+ 699              		.loc 3 192 0
+ 700 0282 0028     		cmp	r0, #0
+ 701 0284 01D0     		beq	.L78
+ 193:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));	
+ 194:../../../drivers/hal/bc62xx_uart.c **** 	}else {
+ 195:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UARTB_BAUD));
+ 702              		.loc 3 195 0
+ 703 0286 0E4C     		ldr	r4, .L80
+ 704 0288 00E0     		b	.L75
+ 705              	.L78:
+ 193:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));	
+ 706              		.loc 3 193 0
+ 707 028a 0E4C     		ldr	r4, .L80+4
+ 708              	.L75:
+ 709              	.LVL56:
+ 196:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 197:../../../drivers/hal/bc62xx_uart.c **** 	RPtr = HR_REG_16BIT((uint32_t)(&UartAdr->RxRptr));
+ 710              		.loc 3 197 0
+ 711 028c A51D     		adds	r5, r4, #6
+ 712 028e 2800     		movs	r0, r5
+ 713              	.LVL57:
+ 714 0290 FFF7C6FE 		bl	HR_REG_16BIT
+ 715              	.LVL58:
+ 716 0294 0700     		movs	r7, r0
+ 717              	.LVL59:
+ 198:../../../drivers/hal/bc62xx_uart.c **** 	RdData = HR_REG_16BIT(RPtr|M0_MEMORY_BASE);
+ 718              		.loc 3 198 0
+ 719 0296 0C48     		ldr	r0, .L80+8
+ 720 0298 3843     		orrs	r0, r7
+ 721 029a FFF7C1FE 		bl	HR_REG_16BIT
+ 722              	.LVL60:
+ 723 029e 0600     		movs	r6, r0
+ 724              	.LVL61:
+ 199:../../../drivers/hal/bc62xx_uart.c **** 	RB_UPDATE_PTR(RPtr, HR_REG_16BIT((uint32_t)(&UartAdr->RxSadr)), HR_REG_16BIT((uint32_t)(&UartAdr->
+ 725              		.loc 3 199 0
+ 726 02a0 201D     		adds	r0, r4, #4
+ 727 02a2 FFF7BDFE 		bl	HR_REG_16BIT
+ 728              	.LVL62:
+ 729 02a6 791C     		adds	r1, r7, #1
+ 730 02a8 89B2     		uxth	r1, r1
+ 731 02aa 8742     		cmp	r7, r0
+ 732 02ac 03D1     		bne	.L77
+ 733              		.loc 3 199 0 is_stmt 0 discriminator 1
+ 734 02ae A01C     		adds	r0, r4, #2
+ 735 02b0 FFF7B6FE 		bl	HR_REG_16BIT
+ 736              	.LVL63:
+ 737 02b4 0100     		movs	r1, r0
+ 738              	.LVL64:
+ 739              	.L77:
+ 200:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT((uint32_t)(&UartAdr->RxRptr), RPtr);	
+ 740              		.loc 3 200 0 is_stmt 1
+ 741 02b6 2800     		movs	r0, r5
+ 742 02b8 FFF7A8FE 		bl	HW_REG_16BIT
+ 743              	.LVL65:
+ 201:../../../drivers/hal/bc62xx_uart.c **** 	return RdData;
+ 202:../../../drivers/hal/bc62xx_uart.c **** }
+ 744              		.loc 3 202 0
+ 745              		@ sp needed
+ 746 02bc 3000     		movs	r0, r6
+ 747              	.LVL66:
+ 748              	.LVL67:
+ 749              	.LVL68:
+ 750 02be F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 751              	.L81:
+ 752              		.align	2
+ 753              	.L80:
+ 754 02c0 72800010 		.word	268468338
+ 755 02c4 52800010 		.word	268468306
+ 756 02c8 00000110 		.word	268500992
+ 757              		.cfi_endproc
+ 758              	.LFE45:
+ 760              		.align	1
+ 761              		.global	USART_GetRxCount
+ 762              		.code	16
+ 763              		.thumb_func
+ 765              	USART_GetRxCount:
+ 766              	.LFB46:
+ 203:../../../drivers/hal/bc62xx_uart.c **** 
+ 204:../../../drivers/hal/bc62xx_uart.c **** 
+ 205:../../../drivers/hal/bc62xx_uart.c **** uint16_t USART_GetRxCount(USART_TypeDef USARTx)
+ 206:../../../drivers/hal/bc62xx_uart.c **** {
+ 767              		.loc 3 206 0
+ 768              		.cfi_startproc
+ 769              		@ args = 0, pretend = 0, frame = 0
+ 770              		@ frame_needed = 0, uses_anonymous_args = 0
+ 771              	.LVL69:
+ 772 02cc 10B5     		push	{r4, lr}
+ 773              	.LCFI7:
+ 774              		.cfi_def_cfa_offset 8
+ 775              		.cfi_offset 4, -8
+ 776              		.cfi_offset 14, -4
+ 777              	.L83:
+ 207:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USARTAB(USARTx));
+ 778              		.loc 3 207 0 discriminator 1
+ 779 02ce 0128     		cmp	r0, #1
+ 780 02d0 FDD8     		bhi	.L83
+ 208:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA) {
+ 781              		.loc 3 208 0
+ 782 02d2 0028     		cmp	r0, #0
+ 783 02d4 03D1     		bne	.L84
+ 209:../../../drivers/hal/bc62xx_uart.c **** 		return HR_REG_16BIT(reg_map(CORE_UART_RX_ITEMS));
+ 784              		.loc 3 209 0
+ 785 02d6 0448     		ldr	r0, .L87
+ 786              	.LVL70:
+ 787 02d8 FFF7A2FE 		bl	HR_REG_16BIT
+ 788              	.LVL71:
+ 789 02dc 02E0     		b	.L85
+ 790              	.LVL72:
+ 791              	.L84:
+ 210:../../../drivers/hal/bc62xx_uart.c **** 	}else {
+ 211:../../../drivers/hal/bc62xx_uart.c **** 		return HR_REG_16BIT(reg_map(CORE_UARTB_RX_ITEMS));
+ 792              		.loc 3 211 0
+ 793 02de 0348     		ldr	r0, .L87+4
+ 794              	.LVL73:
+ 795 02e0 FFF79EFE 		bl	HR_REG_16BIT
+ 796              	.LVL74:
+ 797              	.L85:
+ 212:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 213:../../../drivers/hal/bc62xx_uart.c **** }
+ 798              		.loc 3 213 0
+ 799              		@ sp needed
+ 800 02e4 10BD     		pop	{r4, pc}
+ 801              	.L88:
+ 802 02e6 C046     		.align	2
+ 803              	.L87:
+ 804 02e8 12830010 		.word	268469010
+ 805 02ec 5A830010 		.word	268469082
+ 806              		.cfi_endproc
+ 807              	.LFE46:
+ 809              		.align	1
+ 810              		.global	USART_ReadDatatoBuff
+ 811              		.code	16
+ 812              		.thumb_func
+ 814              	USART_ReadDatatoBuff:
+ 815              	.LFB47:
+ 214:../../../drivers/hal/bc62xx_uart.c **** 
+ 215:../../../drivers/hal/bc62xx_uart.c **** 
+ 216:../../../drivers/hal/bc62xx_uart.c **** uint16_t USART_ReadDatatoBuff(USART_TypeDef USARTx, uint8_t* RxBuff, uint16_t RxSize)
+ 217:../../../drivers/hal/bc62xx_uart.c **** {
+ 816              		.loc 3 217 0
+ 817              		.cfi_startproc
+ 818              		@ args = 0, pretend = 0, frame = 8
+ 819              		@ frame_needed = 0, uses_anonymous_args = 0
+ 820              	.LVL75:
+ 821 02f0 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 822              	.LCFI8:
+ 823              		.cfi_def_cfa_offset 32
+ 824              		.cfi_offset 0, -32
+ 825              		.cfi_offset 1, -28
+ 826              		.cfi_offset 2, -24
+ 827              		.cfi_offset 4, -20
+ 828              		.cfi_offset 5, -16
+ 829              		.cfi_offset 6, -12
+ 830              		.cfi_offset 7, -8
+ 831              		.cfi_offset 14, -4
+ 832 02f2 0D00     		movs	r5, r1
+ 833 02f4 1600     		movs	r6, r2
+ 834              	.LVL76:
+ 835              	.L90:
+ 218:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t RxLen = 0;	
+ 219:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t RPtr = 0;
+ 220:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t RdataLen = 0;
+ 221:../../../drivers/hal/bc62xx_uart.c **** 	uint32_t RxITEMS = 0;
+ 222:../../../drivers/hal/bc62xx_uart.c **** 	UartxRegDef *UartAdr = NULL;
+ 223:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USARTAB(USARTx));
+ 836              		.loc 3 223 0 discriminator 1
+ 837 02f6 0128     		cmp	r0, #1
+ 838 02f8 FDD8     		bhi	.L90
+ 224:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(RxBuff != NULL);
+ 839              		.loc 3 224 0 discriminator 1
+ 840 02fa 002D     		cmp	r5, #0
+ 841 02fc 00D1     		bne	.L108
+ 842              	.L106:
+ 843 02fe FEE7     		b	.L106
+ 844              	.L108:
+ 225:../../../drivers/hal/bc62xx_uart.c **** 	
+ 226:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA) {
+ 845              		.loc 3 226 0
+ 846 0300 0028     		cmp	r0, #0
+ 847 0302 02D0     		beq	.L100
+ 227:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));
+ 228:../../../drivers/hal/bc62xx_uart.c **** 		RxITEMS = reg_map(CORE_UART_RX_ITEMS);
+ 229:../../../drivers/hal/bc62xx_uart.c **** 	}else {
+ 230:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UARTB_BAUD));
+ 848              		.loc 3 230 0
+ 849 0304 1A4F     		ldr	r7, .L110
+ 231:../../../drivers/hal/bc62xx_uart.c **** 		RxITEMS = reg_map(CORE_UARTB_RX_ITEMS);
+ 850              		.loc 3 231 0
+ 851 0306 1B48     		ldr	r0, .L110+4
+ 852              	.LVL77:
+ 853 0308 01E0     		b	.L92
+ 854              	.LVL78:
+ 855              	.L100:
+ 227:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));
+ 856              		.loc 3 227 0
+ 857 030a 1B4F     		ldr	r7, .L110+8
+ 228:../../../drivers/hal/bc62xx_uart.c **** 	}else {
+ 858              		.loc 3 228 0
+ 859 030c 1B48     		ldr	r0, .L110+12
+ 860              	.LVL79:
+ 861              	.L92:
+ 232:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 233:../../../drivers/hal/bc62xx_uart.c **** 	RxLen = HR_REG_16BIT(reg_map(RxITEMS)); 
+ 862              		.loc 3 233 0
+ 863 030e FFF787FE 		bl	HR_REG_16BIT
+ 864              	.LVL80:
+ 234:../../../drivers/hal/bc62xx_uart.c **** 	if (RxSize!=0) {
+ 865              		.loc 3 234 0
+ 866 0312 002E     		cmp	r6, #0
+ 867 0314 03D0     		beq	.L93
+ 235:../../../drivers/hal/bc62xx_uart.c **** 		if (RxLen < RxSize) return 0; else RxLen = RxSize;
+ 868              		.loc 3 235 0
+ 869 0316 0023     		movs	r3, #0
+ 870 0318 B042     		cmp	r0, r6
+ 871 031a 04D2     		bcs	.L95
+ 872 031c 25E0     		b	.L94
+ 873              	.L93:
+ 874 031e 3300     		movs	r3, r6
+ 236:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 237:../../../drivers/hal/bc62xx_uart.c **** 	if (0 == RxLen) {
+ 875              		.loc 3 237 0
+ 876 0320 0028     		cmp	r0, #0
+ 877 0322 22D0     		beq	.L94
+ 878 0324 0600     		movs	r6, r0
+ 879              	.L95:
+ 880              	.LVL81:
+ 238:../../../drivers/hal/bc62xx_uart.c ****         return 0;
+ 239:../../../drivers/hal/bc62xx_uart.c **** 	} else {
+ 240:../../../drivers/hal/bc62xx_uart.c **** 		RPtr = HR_REG_16BIT((uint32_t)(&UartAdr->RxRptr));
+ 881              		.loc 3 240 0
+ 882 0326 BB1D     		adds	r3, r7, #6
+ 883 0328 1800     		movs	r0, r3
+ 884 032a 0093     		str	r3, [sp]
+ 885 032c FFF778FE 		bl	HR_REG_16BIT
+ 886              	.LVL82:
+ 887 0330 0400     		movs	r4, r0
+ 888              	.LVL83:
+ 889 0332 AB19     		adds	r3, r5, r6
+ 890 0334 0193     		str	r3, [sp, #4]
+ 891              	.LVL84:
+ 892              	.L96:
+ 241:../../../drivers/hal/bc62xx_uart.c **** 		for(RdataLen = 0; RdataLen<RxLen; RdataLen++ ){
+ 893              		.loc 3 241 0 discriminator 1
+ 894 0336 019B     		ldr	r3, [sp, #4]
+ 895 0338 9D42     		cmp	r5, r3
+ 896 033a 11D0     		beq	.L109
+ 242:../../../drivers/hal/bc62xx_uart.c **** 			RxBuff[RdataLen] = HR_REG_8BIT(RPtr|M0_MEMORY_BASE);   
+ 897              		.loc 3 242 0
+ 898 033c 104B     		ldr	r3, .L110+16
+ 243:../../../drivers/hal/bc62xx_uart.c **** 			RB_UPDATE_PTR(RPtr, HR_REG_16BIT((uint32_t)(&UartAdr->RxSadr)), HR_REG_16BIT((uint32_t)(&UartAdr
+ 899              		.loc 3 243 0
+ 900 033e 381D     		adds	r0, r7, #4
+ 242:../../../drivers/hal/bc62xx_uart.c **** 			RxBuff[RdataLen] = HR_REG_8BIT(RPtr|M0_MEMORY_BASE);   
+ 901              		.loc 3 242 0
+ 902 0340 2343     		orrs	r3, r4
+ 903 0342 1B78     		ldrb	r3, [r3]
+ 904 0344 2B70     		strb	r3, [r5]
+ 905              		.loc 3 243 0
+ 906 0346 FFF76BFE 		bl	HR_REG_16BIT
+ 907              	.LVL85:
+ 908 034a 8442     		cmp	r4, r0
+ 909 034c 04D1     		bne	.L97
+ 910              		.loc 3 243 0 is_stmt 0 discriminator 1
+ 911 034e B81C     		adds	r0, r7, #2
+ 912 0350 FFF766FE 		bl	HR_REG_16BIT
+ 913              	.LVL86:
+ 914 0354 0400     		movs	r4, r0
+ 915              	.LVL87:
+ 916 0356 01E0     		b	.L98
+ 917              	.LVL88:
+ 918              	.L97:
+ 919              		.loc 3 243 0 discriminator 2
+ 920 0358 0134     		adds	r4, r4, #1
+ 921              	.LVL89:
+ 922 035a A4B2     		uxth	r4, r4
+ 923              	.LVL90:
+ 924              	.L98:
+ 925 035c 0135     		adds	r5, r5, #1
+ 926              	.LVL91:
+ 927 035e EAE7     		b	.L96
+ 928              	.LVL92:
+ 929              	.L109:
+ 244:../../../drivers/hal/bc62xx_uart.c **** 		}
+ 245:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 246:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT((uint32_t)(&UartAdr->RxRptr), (RPtr));
+ 930              		.loc 3 246 0 is_stmt 1
+ 931 0360 2100     		movs	r1, r4
+ 932 0362 0098     		ldr	r0, [sp]
+ 933 0364 FFF752FE 		bl	HW_REG_16BIT
+ 934              	.LVL93:
+ 247:../../../drivers/hal/bc62xx_uart.c **** 	return RdataLen;
+ 935              		.loc 3 247 0
+ 936 0368 3300     		movs	r3, r6
+ 937              	.LVL94:
+ 938              	.L94:
+ 248:../../../drivers/hal/bc62xx_uart.c **** }
+ 939              		.loc 3 248 0
+ 940 036a 1800     		movs	r0, r3
+ 941              		@ sp needed
+ 942              	.LVL95:
+ 943 036c FEBD     		pop	{r1, r2, r3, r4, r5, r6, r7, pc}
+ 944              	.L111:
+ 945 036e C046     		.align	2
+ 946              	.L110:
+ 947 0370 72800010 		.word	268468338
+ 948 0374 5A830010 		.word	268469082
+ 949 0378 52800010 		.word	268468306
+ 950 037c 12830010 		.word	268469010
+ 951 0380 00000110 		.word	268500992
+ 952              		.cfi_endproc
+ 953              	.LFE47:
+ 955              		.align	1
+ 956              		.global	USART_SendDataFromBuff
+ 957              		.code	16
+ 958              		.thumb_func
+ 960              	USART_SendDataFromBuff:
+ 961              	.LFB48:
+ 249:../../../drivers/hal/bc62xx_uart.c **** 
+ 250:../../../drivers/hal/bc62xx_uart.c **** uint16_t USART_SendDataFromBuff(USART_TypeDef USARTx, uint8_t* TxBuff, uint16_t TxLen)
+ 251:../../../drivers/hal/bc62xx_uart.c **** {
+ 962              		.loc 3 251 0
+ 963              		.cfi_startproc
+ 964              		@ args = 0, pretend = 0, frame = 8
+ 965              		@ frame_needed = 0, uses_anonymous_args = 0
+ 966              	.LVL96:
+ 967 0384 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 968              	.LCFI9:
+ 969              		.cfi_def_cfa_offset 32
+ 970              		.cfi_offset 0, -32
+ 971              		.cfi_offset 1, -28
+ 972              		.cfi_offset 2, -24
+ 973              		.cfi_offset 4, -20
+ 974              		.cfi_offset 5, -16
+ 975              		.cfi_offset 6, -12
+ 976              		.cfi_offset 7, -8
+ 977              		.cfi_offset 14, -4
+ 978 0386 0D00     		movs	r5, r1
+ 979 0388 1700     		movs	r7, r2
+ 980              	.LVL97:
+ 981              	.L113:
+ 252:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t  WPtr = 0;
+ 253:../../../drivers/hal/bc62xx_uart.c **** 	uint16_t  SDataLen = 0;	
+ 254:../../../drivers/hal/bc62xx_uart.c **** 	UartxRegDef *UartAdr = NULL;
+ 255:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(IS_USARTAB(USARTx));
+ 982              		.loc 3 255 0 discriminator 1
+ 983 038a 0128     		cmp	r0, #1
+ 984 038c FDD8     		bhi	.L113
+ 256:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(TxBuff != 0);
+ 985              		.loc 3 256 0 discriminator 1
+ 986 038e 002D     		cmp	r5, #0
+ 987 0390 00D1     		bne	.L129
+ 988              	.L127:
+ 989 0392 FEE7     		b	.L127
+ 990              	.L129:
+ 257:../../../drivers/hal/bc62xx_uart.c **** 	ASSERT(TxLen > 0);
+ 991              		.loc 3 257 0 discriminator 1
+ 992 0394 002F     		cmp	r7, #0
+ 993 0396 00D1     		bne	.L130
+ 994              	.L128:
+ 995 0398 FEE7     		b	.L128
+ 996              	.L130:
+ 258:../../../drivers/hal/bc62xx_uart.c **** 	
+ 259:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA) {
+ 997              		.loc 3 259 0
+ 998 039a 0028     		cmp	r0, #0
+ 999 039c 01D0     		beq	.L121
+ 260:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));	
+ 261:../../../drivers/hal/bc62xx_uart.c **** 	}else {
+ 262:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UARTB_BAUD));
+ 1000              		.loc 3 262 0
+ 1001 039e 144E     		ldr	r6, .L132
+ 1002 03a0 00E0     		b	.L116
+ 1003              	.L121:
+ 260:../../../drivers/hal/bc62xx_uart.c **** 		UartAdr = (UartxRegDef *)(reg_map(CORE_UART_BAUD));	
+ 1004              		.loc 3 260 0
+ 1005 03a2 144E     		ldr	r6, .L132+4
+ 1006              	.L116:
+ 1007              	.LVL98:
+ 263:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 264:../../../drivers/hal/bc62xx_uart.c ****    	WPtr = HR_REG_16BIT((uint32_t)(&UartAdr->TxWptr));
+ 1008              		.loc 3 264 0
+ 1009 03a4 3300     		movs	r3, r6
+ 1010 03a6 0C33     		adds	r3, r3, #12
+ 1011 03a8 1800     		movs	r0, r3
+ 1012              	.LVL99:
+ 1013 03aa 0093     		str	r3, [sp]
+ 1014 03ac FFF738FE 		bl	HR_REG_16BIT
+ 1015              	.LVL100:
+ 1016 03b0 0400     		movs	r4, r0
+ 1017              	.LVL101:
+ 1018 03b2 EB19     		adds	r3, r5, r7
+ 1019 03b4 0193     		str	r3, [sp, #4]
+ 1020              	.LVL102:
+ 1021              	.L117:
+ 1022              	.LBB2:
+ 265:../../../drivers/hal/bc62xx_uart.c ****    	for (uint16_t i=0; i<TxLen; i++)  {	
+ 1023              		.loc 3 265 0 discriminator 1
+ 1024 03b6 019B     		ldr	r3, [sp, #4]
+ 1025 03b8 9D42     		cmp	r5, r3
+ 1026 03ba 13D0     		beq	.L131
+ 266:../../../drivers/hal/bc62xx_uart.c **** 		HW_REG_8BIT(WPtr|M0_MEMORY_BASE,TxBuff[i]);	
+ 267:../../../drivers/hal/bc62xx_uart.c **** 		RB_UPDATE_PTR(WPtr, HR_REG_16BIT((uint32_t)(&UartAdr->TxSadr)),  HR_REG_16BIT((uint32_t)(&UartAdr
+ 1027              		.loc 3 267 0
+ 1028 03bc 3000     		movs	r0, r6
+ 266:../../../drivers/hal/bc62xx_uart.c **** 		HW_REG_8BIT(WPtr|M0_MEMORY_BASE,TxBuff[i]);	
+ 1029              		.loc 3 266 0
+ 1030 03be 0E4B     		ldr	r3, .L132+8
+ 1031 03c0 2A78     		ldrb	r2, [r5]
+ 1032 03c2 2343     		orrs	r3, r4
+ 1033 03c4 1A70     		strb	r2, [r3]
+ 1034              		.loc 3 267 0
+ 1035 03c6 0A30     		adds	r0, r0, #10
+ 1036 03c8 FFF72AFE 		bl	HR_REG_16BIT
+ 1037              	.LVL103:
+ 1038 03cc 8442     		cmp	r4, r0
+ 1039 03ce 05D1     		bne	.L118
+ 1040              		.loc 3 267 0 is_stmt 0 discriminator 1
+ 1041 03d0 3000     		movs	r0, r6
+ 1042 03d2 0830     		adds	r0, r0, #8
+ 1043 03d4 FFF724FE 		bl	HR_REG_16BIT
+ 1044              	.LVL104:
+ 1045 03d8 0400     		movs	r4, r0
+ 1046              	.LVL105:
+ 1047 03da 01E0     		b	.L119
+ 1048              	.LVL106:
+ 1049              	.L118:
+ 1050              		.loc 3 267 0 discriminator 2
+ 1051 03dc 0134     		adds	r4, r4, #1
+ 1052              	.LVL107:
+ 1053 03de A4B2     		uxth	r4, r4
+ 1054              	.LVL108:
+ 1055              	.L119:
+ 1056 03e0 0135     		adds	r5, r5, #1
+ 1057              	.LVL109:
+ 1058 03e2 E8E7     		b	.L117
+ 1059              	.LVL110:
+ 1060              	.L131:
+ 1061              	.LBE2:
+ 268:../../../drivers/hal/bc62xx_uart.c **** 		SDataLen++;	
+ 269:../../../drivers/hal/bc62xx_uart.c **** 	}
+ 270:../../../drivers/hal/bc62xx_uart.c **** 	HW_REG_16BIT((uint32_t)(&UartAdr->TxWptr),  WPtr);  
+ 1062              		.loc 3 270 0 is_stmt 1
+ 1063 03e4 0098     		ldr	r0, [sp]
+ 1064 03e6 2100     		movs	r1, r4
+ 1065 03e8 FFF710FE 		bl	HW_REG_16BIT
+ 1066              	.LVL111:
+ 271:../../../drivers/hal/bc62xx_uart.c **** 	return SDataLen;
+ 272:../../../drivers/hal/bc62xx_uart.c **** }
+ 1067              		.loc 3 272 0
+ 1068              		@ sp needed
+ 1069 03ec 3800     		movs	r0, r7
+ 1070              	.LVL112:
+ 1071              	.LVL113:
+ 1072              	.LVL114:
+ 1073 03ee FEBD     		pop	{r1, r2, r3, r4, r5, r6, r7, pc}
+ 1074              	.L133:
+ 1075              		.align	2
+ 1076              	.L132:
+ 1077 03f0 72800010 		.word	268468338
+ 1078 03f4 52800010 		.word	268468306
+ 1079 03f8 00000110 		.word	268500992
+ 1080              		.cfi_endproc
+ 1081              	.LFE48:
+ 1083              		.align	1
+ 1084              		.global	UART_RemapToPrintf
+ 1085              		.code	16
+ 1086              		.thumb_func
+ 1088              	UART_RemapToPrintf:
+ 1089              	.LFB49:
+ 273:../../../drivers/hal/bc62xx_uart.c **** 
+ 274:../../../drivers/hal/bc62xx_uart.c **** static USART_TypeDef _printf_uart = UARTN;
+ 275:../../../drivers/hal/bc62xx_uart.c **** 
+ 276:../../../drivers/hal/bc62xx_uart.c **** int UART_RemapToPrintf(USART_TypeDef USARTx, uint8_t txPin, uint8_t rxPin)
+ 277:../../../drivers/hal/bc62xx_uart.c **** {
+ 1090              		.loc 3 277 0
+ 1091              		.cfi_startproc
+ 1092              		@ args = 0, pretend = 0, frame = 32
+ 1093              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1094              	.LVL115:
+ 1095 03fc F0B5     		push	{r4, r5, r6, r7, lr}
+ 1096              	.LCFI10:
+ 1097              		.cfi_def_cfa_offset 20
+ 1098              		.cfi_offset 4, -20
+ 1099              		.cfi_offset 5, -16
+ 1100              		.cfi_offset 6, -12
+ 1101              		.cfi_offset 7, -8
+ 1102              		.cfi_offset 14, -4
+ 1103 03fe 0700     		movs	r7, r0
+ 278:../../../drivers/hal/bc62xx_uart.c **** 	_printf_uart = USARTx;
+ 279:../../../drivers/hal/bc62xx_uart.c **** 	/*init gpio*/	
+ 280:../../../drivers/hal/bc62xx_uart.c **** 	GPIO_CFG cfgTx ={FUNC_UARTB_TXD, GFG_PULLUP};
+ 1104              		.loc 3 280 0
+ 1105 0400 174B     		ldr	r3, .L137
+ 277:../../../drivers/hal/bc62xx_uart.c **** 	_printf_uart = USARTx;
+ 1106              		.loc 3 277 0
+ 1107 0402 89B0     		sub	sp, sp, #36
+ 1108              	.LCFI11:
+ 1109              		.cfi_def_cfa_offset 56
+ 277:../../../drivers/hal/bc62xx_uart.c **** 	_printf_uart = USARTx;
+ 1110              		.loc 3 277 0
+ 1111 0404 1600     		movs	r6, r2
+ 278:../../../drivers/hal/bc62xx_uart.c **** 	_printf_uart = USARTx;
+ 1112              		.loc 3 278 0
+ 1113 0406 174D     		ldr	r5, .L137+4
+ 1114              		.loc 3 280 0
+ 1115 0408 1A78     		ldrb	r2, [r3]
+ 1116              	.LVL116:
+ 277:../../../drivers/hal/bc62xx_uart.c **** 	_printf_uart = USARTx;
+ 1117              		.loc 3 277 0
+ 1118 040a 0800     		movs	r0, r1
+ 1119              	.LVL117:
+ 1120              		.loc 3 280 0
+ 1121 040c 01A9     		add	r1, sp, #4
+ 1122              	.LVL118:
+ 278:../../../drivers/hal/bc62xx_uart.c **** 	_printf_uart = USARTx;
+ 1123              		.loc 3 278 0
+ 1124 040e 2F70     		strb	r7, [r5]
+ 1125              		.loc 3 280 0
+ 1126 0410 0A70     		strb	r2, [r1]
+ 1127 0412 1C00     		movs	r4, r3
+ 281:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA)
+ 1128              		.loc 3 281 0
+ 1129 0414 002F     		cmp	r7, #0
+ 1130 0416 05D1     		bne	.L135
+ 282:../../../drivers/hal/bc62xx_uart.c **** 		cfgTx.pin_func = FUNC_UART_TXD;
+ 1131              		.loc 3 282 0
+ 1132 0418 D3B2     		uxtb	r3, r2
+ 1133 041a 3F22     		movs	r2, #63
+ 1134 041c 9343     		bics	r3, r2
+ 1135 041e 373A     		subs	r2, r2, #55
+ 1136 0420 1343     		orrs	r3, r2
+ 1137 0422 0B70     		strb	r3, [r1]
+ 1138              	.L135:
+ 283:../../../drivers/hal/bc62xx_uart.c **** 	bc_gpio_init(txPin, &cfgTx);
+ 1139              		.loc 3 283 0
+ 1140 0424 FFF7FEFF 		bl	bc_gpio_init
+ 1141              	.LVL119:
+ 284:../../../drivers/hal/bc62xx_uart.c **** 	
+ 285:../../../drivers/hal/bc62xx_uart.c **** 	GPIO_CFG cfgRx ={FUNC_UARTB_RXD, GFG_PULLUP};
+ 1142              		.loc 3 285 0
+ 1143 0428 6378     		ldrb	r3, [r4, #1]
+ 1144 042a 02A9     		add	r1, sp, #8
+ 1145 042c 0B70     		strb	r3, [r1]
+ 286:../../../drivers/hal/bc62xx_uart.c **** 	if(USARTx == UARTA)
+ 1146              		.loc 3 286 0
+ 1147 042e 002F     		cmp	r7, #0
+ 1148 0430 05D1     		bne	.L136
+ 287:../../../drivers/hal/bc62xx_uart.c **** 		cfgRx.pin_func = FUNC_UART_RXD;
+ 1149              		.loc 3 287 0
+ 1150 0432 3F22     		movs	r2, #63
+ 1151 0434 DBB2     		uxtb	r3, r3
+ 1152 0436 9343     		bics	r3, r2
+ 1153 0438 363A     		subs	r2, r2, #54
+ 1154 043a 1343     		orrs	r3, r2
+ 1155 043c 0B70     		strb	r3, [r1]
+ 1156              	.L136:
+ 288:../../../drivers/hal/bc62xx_uart.c **** 	bc_gpio_init(rxPin, &cfgRx);
+ 1157              		.loc 3 288 0
+ 1158 043e 3000     		movs	r0, r6
+ 1159 0440 FFF7FEFF 		bl	bc_gpio_init
+ 1160              	.LVL120:
+ 289:../../../drivers/hal/bc62xx_uart.c **** 
+ 290:../../../drivers/hal/bc62xx_uart.c **** 	/*cofig uart parameter*/	
+ 291:../../../drivers/hal/bc62xx_uart.c **** 	USART_InitTypeDef Uart = {BAUD921600, DATA_BITS_8b, STOP_BITS_1, PARITY_EVEN,
+ 1161              		.loc 3 291 0
+ 1162 0444 03A9     		add	r1, sp, #12
+ 1163 0446 0A00     		movs	r2, r1
+ 1164 0448 231D     		adds	r3, r4, #4
+ 1165 044a 51CB     		ldmia	r3!, {r0, r4, r6}
+ 1166 044c 51C2     		stmia	r2!, {r0, r4, r6}
+ 1167 044e 11CB     		ldmia	r3!, {r0, r4}
+ 1168 0450 11C2     		stmia	r2!, {r0, r4}
+ 292:../../../drivers/hal/bc62xx_uart.c **** 								MODE_DUPLEX, FLOW_CTRL_NONE, 128, 128};
+ 293:../../../drivers/hal/bc62xx_uart.c **** 	USART_Init(_printf_uart, &Uart);
+ 1169              		.loc 3 293 0
+ 1170 0452 2878     		ldrb	r0, [r5]
+ 1171 0454 FFF7FEFF 		bl	USART_Init
+ 1172              	.LVL121:
+ 294:../../../drivers/hal/bc62xx_uart.c **** 	return 0;
+ 295:../../../drivers/hal/bc62xx_uart.c **** }
+ 1173              		.loc 3 295 0
+ 1174 0458 0020     		movs	r0, #0
+ 1175 045a 09B0     		add	sp, sp, #36
+ 1176              		@ sp needed
+ 1177 045c F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1178              	.L138:
+ 1179 045e C046     		.align	2
+ 1180              	.L137:
+ 1181 0460 00000000 		.word	.LANCHOR1
+ 1182 0464 00000000 		.word	.LANCHOR0
+ 1183              		.cfi_endproc
+ 1184              	.LFE49:
+ 1186              		.align	1
+ 1187              		.global	UART_PutChar
+ 1188              		.code	16
+ 1189              		.thumb_func
+ 1191              	UART_PutChar:
+ 1192              	.LFB50:
+ 296:../../../drivers/hal/bc62xx_uart.c **** 
+ 297:../../../drivers/hal/bc62xx_uart.c **** void UART_PutChar(char c)
+ 298:../../../drivers/hal/bc62xx_uart.c **** {
+ 1193              		.loc 3 298 0
+ 1194              		.cfi_startproc
+ 1195              		@ args = 0, pretend = 0, frame = 0
+ 1196              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1197              	.LVL122:
+ 299:../../../drivers/hal/bc62xx_uart.c **** 	if(_printf_uart != UARTN)
+ 1198              		.loc 3 299 0
+ 1199 0468 044B     		ldr	r3, .L144
+ 298:../../../drivers/hal/bc62xx_uart.c **** 	if(_printf_uart != UARTN)
+ 1200              		.loc 3 298 0
+ 1201 046a 0100     		movs	r1, r0
+ 1202              		.loc 3 299 0
+ 1203 046c 1878     		ldrb	r0, [r3]
+ 1204              	.LVL123:
+ 298:../../../drivers/hal/bc62xx_uart.c **** 	if(_printf_uart != UARTN)
+ 1205              		.loc 3 298 0
+ 1206 046e 10B5     		push	{r4, lr}
+ 1207              	.LCFI12:
+ 1208              		.cfi_def_cfa_offset 8
+ 1209              		.cfi_offset 4, -8
+ 1210              		.cfi_offset 14, -4
+ 1211              		.loc 3 299 0
+ 1212 0470 0228     		cmp	r0, #2
+ 1213 0472 02D0     		beq	.L139
+ 300:../../../drivers/hal/bc62xx_uart.c **** 		USART_SendData(_printf_uart, (uint16_t)c);
+ 1214              		.loc 3 300 0
+ 1215 0474 89B2     		uxth	r1, r1
+ 1216 0476 FFF7FEFF 		bl	USART_SendData
+ 1217              	.LVL124:
+ 1218              	.L139:
+ 301:../../../drivers/hal/bc62xx_uart.c **** }
+ 1219              		.loc 3 301 0
+ 1220              		@ sp needed
+ 1221 047a 10BD     		pop	{r4, pc}
+ 1222              	.L145:
+ 1223              		.align	2
+ 1224              	.L144:
+ 1225 047c 00000000 		.word	.LANCHOR0
+ 1226              		.cfi_endproc
+ 1227              	.LFE50:
+ 1229              		.section	.rodata
+ 1230              		.align	2
+ 1231              		.set	.LANCHOR1,. + 0
+ 1232              	.LC0:
+ 1233 0000 4C       		.byte	76
+ 1234              	.LC1:
+ 1235 0001 4D       		.byte	77
+ 1236 0002 0000     		.space	2
+ 1237              	.LC2:
+ 1238 0004 34800000 		.word	32820
+ 1239 0008 0000     		.short	0
+ 1240 000a 0000     		.short	0
+ 1241 000c 0000     		.short	0
+ 1242 000e 0000     		.short	0
+ 1243 0010 0000     		.short	0
+ 1244 0012 8000     		.short	128
+ 1245 0014 8000     		.short	128
+ 1246 0016 0000     		.space	2
+ 1247              		.data
+ 1248              		.set	.LANCHOR0,. + 0
+ 1251              	_printf_uart:
+ 1252 0000 02       		.byte	2
+ 1253              		.text
+ 1254              	.Letext0:
+ 1255              		.file 4 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1256              		.file 5 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1257              		.file 6 "../../../drivers/hal/inc/bc62xx_gpio.h"
+ 1258              		.file 7 "../../../drivers/hal/inc/bc62xx_uart.h"
+ 1259              		.file 8 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none

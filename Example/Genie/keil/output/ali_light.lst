@@ -1,0 +1,2856 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"ali_light.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.comm	L_LEV,4,4
+  20              		.comm	GPIO_FUNC,1,1
+  21              		.global	__aeabi_idiv
+  22              		.align	1
+  23              		.code	16
+  24              		.thumb_func
+  26              	_ready_to_indicate:
+  27              	.LFB85:
+  28              		.file 1 "../../../mesh/app/ali_light/ali_light.c"
+   1:../../../mesh/app/ali_light/ali_light.c **** #include "ali_light.h"
+   2:../../../mesh/app/ali_light/ali_light.c **** #include "mm_defines.h"
+   3:../../../mesh/app/ali_light/ali_light.c **** #include "meshTimer.h"
+   4:../../../mesh/app/ali_light/ali_light.c **** 
+   5:../../../mesh/app/ali_light/ali_light.c **** #include "mm_ali.h"
+   6:../../../mesh/app/ali_light/ali_light.c **** #include "bc_flash.h"
+   7:../../../mesh/app/ali_light/ali_light.c **** #include "bc_sys.h"
+   8:../../../mesh/app/ali_light/ali_light.c **** 
+   9:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+  10:../../../mesh/app/ali_light/ali_light.c **** #define REPEAT_COUNTER	(100)
+  11:../../../mesh/app/ali_light/ali_light.c **** #endif
+  12:../../../mesh/app/ali_light/ali_light.c **** 
+  13:../../../mesh/app/ali_light/ali_light.c **** static ali_light_t* p_ali_light = NULL;
+  14:../../../mesh/app/ali_light/ali_light.c **** 
+  15:../../../mesh/app/ali_light/ali_light.c **** static void ali_light_period_ind_timer_cb(void* param);
+  16:../../../mesh/app/ali_light/ali_light.c **** 
+  17:../../../mesh/app/ali_light/ali_light.c **** static void _ready_to_indicate(bool random)
+  18:../../../mesh/app/ali_light/ali_light.c **** {
+  29              		.loc 1 18 0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              	.LVL0:
+  19:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light == NULL)
+  34              		.loc 1 19 0
+  35 0000 0D4B     		ldr	r3, .L11
+  18:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light == NULL)
+  36              		.loc 1 18 0
+  37 0002 10B5     		push	{r4, lr}
+  38              	.LCFI0:
+  39              		.cfi_def_cfa_offset 8
+  40              		.cfi_offset 4, -8
+  41              		.cfi_offset 14, -4
+  42              		.loc 1 19 0
+  43 0004 1A68     		ldr	r2, [r3]
+  44 0006 1C00     		movs	r4, r3
+  45 0008 002A     		cmp	r2, #0
+  46 000a 13D0     		beq	.L1
+  47              	.LVL1:
+  20:../../../mesh/app/ali_light/ali_light.c **** 		return;
+  21:../../../mesh/app/ali_light/ali_light.c **** 	uint32_t delay_time = M_ALIS_INDICATION_PERIOD;
+  22:../../../mesh/app/ali_light/ali_light.c **** 	if(random){
+  48              		.loc 1 22 0
+  49 000c 0028     		cmp	r0, #0
+  50 000e 02D0     		beq	.L6
+  23:../../../mesh/app/ali_light/ali_light.c **** 		delay_time = bc_mm_alis_get_random_time();
+  51              		.loc 1 23 0
+  52 0010 FFF7FEFF 		bl	bc_mm_alis_get_random_time
+  53              	.LVL2:
+  54 0014 00E0     		b	.L4
+  55              	.LVL3:
+  56              	.L6:
+  21:../../../mesh/app/ali_light/ali_light.c **** 	if(random){
+  57              		.loc 1 21 0
+  58 0016 0948     		ldr	r0, .L11+4
+  59              	.LVL4:
+  60              	.L4:
+  24:../../../mesh/app/ali_light/ali_light.c **** 	}
+  25:../../../mesh/app/ali_light/ali_light.c **** 	
+  26:../../../mesh/app/ali_light/ali_light.c **** 	//if bound
+  27:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light->provState){
+  61              		.loc 1 27 0
+  62 0018 2468     		ldr	r4, [r4]
+  63 001a 6378     		ldrb	r3, [r4, #1]
+  64 001c 002B     		cmp	r3, #0
+  65 001e 09D0     		beq	.L1
+  28:../../../mesh/app/ali_light/ali_light.c **** 		SYS_SetTimer(&p_ali_light->periodIndTimer, (int)delay_time/10, 
+  66              		.loc 1 28 0
+  67 0020 0A21     		movs	r1, #10
+  68 0022 FFF7FEFF 		bl	__aeabi_idiv
+  69              	.LVL5:
+  70 0026 0100     		movs	r1, r0
+  71 0028 2000     		movs	r0, r4
+  72 002a 054B     		ldr	r3, .L11+8
+  73 002c 3C30     		adds	r0, r0, #60
+  74 002e 0022     		movs	r2, #0
+  75 0030 FFF7FEFF 		bl	SYS_SetTimer
+  76              	.LVL6:
+  77              	.L1:
+  29:../../../mesh/app/ali_light/ali_light.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_light_period_ind_timer_cb);
+  30:../../../mesh/app/ali_light/ali_light.c **** 	}
+  31:../../../mesh/app/ali_light/ali_light.c **** }
+  78              		.loc 1 31 0
+  79              		@ sp needed
+  80 0034 10BD     		pop	{r4, pc}
+  81              	.L12:
+  82 0036 C046     		.align	2
+  83              	.L11:
+  84 0038 00000000 		.word	.LANCHOR0
+  85 003c 20BF0200 		.word	180000
+  86 0040 00000000 		.word	ali_light_period_ind_timer_cb
+  87              		.cfi_endproc
+  88              	.LFE85:
+  90              		.align	1
+  91              		.global	ali_light_cw_set_on_off
+  92              		.code	16
+  93              		.thumb_func
+  95              	ali_light_cw_set_on_off:
+  96              	.LFB87:
+  32:../../../mesh/app/ali_light/ali_light.c **** 
+  33:../../../mesh/app/ali_light/ali_light.c **** 
+  34:../../../mesh/app/ali_light/ali_light.c **** //light ctrl
+  35:../../../mesh/app/ali_light/ali_light.c **** static void _light_cw_init(void)
+  36:../../../mesh/app/ali_light/ali_light.c **** {
+  37:../../../mesh/app/ali_light/ali_light.c **** 	static uint8_t _init = 0;
+  38:../../../mesh/app/ali_light/ali_light.c **** 	if(_init == 1)
+  39:../../../mesh/app/ali_light/ali_light.c **** 		return;
+  40:../../../mesh/app/ali_light/ali_light.c **** 	_init = 1;
+  41:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+  42:../../../mesh/app/ali_light/ali_light.c **** 	light_cw_t t = {.freq = ALI_CURRENT_FREQ,
+  43:../../../mesh/app/ali_light/ali_light.c **** 					.ln = ALI_MIN_LN_VAL,
+  44:../../../mesh/app/ali_light/ali_light.c **** 					.on = ALI_CW_OFF,
+  45:../../../mesh/app/ali_light/ali_light.c **** 					.tp = ALI_DEFAULT_TP_VAL};
+  46:../../../mesh/app/ali_light/ali_light.c **** #else
+  47:../../../mesh/app/ali_light/ali_light.c **** 	light_cw_t t = {.freq = ALI_CURRENT_FREQ,
+  48:../../../mesh/app/ali_light/ali_light.c **** 					.ln = ALI_DEFAULT_LN_VAL,
+  49:../../../mesh/app/ali_light/ali_light.c **** 					.on = ALI_DEFAULT_ON_VAL,
+  50:../../../mesh/app/ali_light/ali_light.c **** 					.tp = ALI_DEFAULT_TP_VAL};
+  51:../../../mesh/app/ali_light/ali_light.c **** #endif
+  52:../../../mesh/app/ali_light/ali_light.c **** 	t.tp = p_ali_light->tp;
+  53:../../../mesh/app/ali_light/ali_light.c **** 	t.ln = p_ali_light->ln;
+  54:../../../mesh/app/ali_light/ali_light.c **** #if (LIGHT_CW_WITH_RGB)
+  55:../../../mesh/app/ali_light/ali_light.c **** 	t.rVal = p_ali_light->r;
+  56:../../../mesh/app/ali_light/ali_light.c **** 	t.gVal = p_ali_light->g;
+  57:../../../mesh/app/ali_light/ali_light.c **** 	t.bVal = p_ali_light->b;
+  58:../../../mesh/app/ali_light/ali_light.c **** #endif
+  59:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_init(&t);
+  60:../../../mesh/app/ali_light/ali_light.c **** }
+  61:../../../mesh/app/ali_light/ali_light.c **** void ali_light_cw_set_on_off(uint8_t on)
+  62:../../../mesh/app/ali_light/ali_light.c **** {
+  97              		.loc 1 62 0
+  98              		.cfi_startproc
+  99              		@ args = 0, pretend = 0, frame = 0
+ 100              		@ frame_needed = 0, uses_anonymous_args = 0
+ 101              	.LVL7:
+ 102 0044 10B5     		push	{r4, lr}
+ 103              	.LCFI1:
+ 104              		.cfi_def_cfa_offset 8
+ 105              		.cfi_offset 4, -8
+ 106              		.cfi_offset 14, -4
+  63:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+  64:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.mode = BREATH_MODE_FLOW;
+  65:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.rCnt = 1;
+  66:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
+  67:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_on_off(on, &p_ali_light->breath);
+  68:../../../mesh/app/ali_light/ali_light.c **** #else
+  69:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_on_off(on, NULL);
+ 107              		.loc 1 69 0
+ 108 0046 0021     		movs	r1, #0
+ 109 0048 FFF7FEFF 		bl	led_cw_set_on_off
+ 110              	.LVL8:
+  70:../../../mesh/app/ali_light/ali_light.c **** #endif
+  71:../../../mesh/app/ali_light/ali_light.c **** }
+ 111              		.loc 1 71 0
+ 112              		@ sp needed
+ 113 004c 10BD     		pop	{r4, pc}
+ 114              		.cfi_endproc
+ 115              	.LFE87:
+ 117              		.align	1
+ 118              		.global	ali_light_cw_get_on_off
+ 119              		.code	16
+ 120              		.thumb_func
+ 122              	ali_light_cw_get_on_off:
+ 123              	.LFB88:
+  72:../../../mesh/app/ali_light/ali_light.c **** uint8_t ali_light_cw_get_on_off(void)
+  73:../../../mesh/app/ali_light/ali_light.c **** {
+ 124              		.loc 1 73 0
+ 125              		.cfi_startproc
+ 126              		@ args = 0, pretend = 0, frame = 0
+ 127              		@ frame_needed = 0, uses_anonymous_args = 0
+ 128 004e 10B5     		push	{r4, lr}
+ 129              	.LCFI2:
+ 130              		.cfi_def_cfa_offset 8
+ 131              		.cfi_offset 4, -8
+ 132              		.cfi_offset 14, -4
+  74:../../../mesh/app/ali_light/ali_light.c **** 	return led_cw_get_on_off();
+ 133              		.loc 1 74 0
+ 134 0050 FFF7FEFF 		bl	led_cw_get_on_off
+ 135              	.LVL9:
+  75:../../../mesh/app/ali_light/ali_light.c **** }
+ 136              		.loc 1 75 0
+ 137              		@ sp needed
+ 138 0054 10BD     		pop	{r4, pc}
+ 139              		.cfi_endproc
+ 140              	.LFE88:
+ 142              		.align	1
+ 143              		.global	ali_light_cw_set_lightness
+ 144              		.code	16
+ 145              		.thumb_func
+ 147              	ali_light_cw_set_lightness:
+ 148              	.LFB89:
+  76:../../../mesh/app/ali_light/ali_light.c **** void ali_light_cw_set_lightness(uint16_t ln)
+  77:../../../mesh/app/ali_light/ali_light.c **** {
+ 149              		.loc 1 77 0
+ 150              		.cfi_startproc
+ 151              		@ args = 0, pretend = 0, frame = 0
+ 152              		@ frame_needed = 0, uses_anonymous_args = 0
+ 153              	.LVL10:
+ 154 0056 70B5     		push	{r4, r5, r6, lr}
+ 155              	.LCFI3:
+ 156              		.cfi_def_cfa_offset 16
+ 157              		.cfi_offset 4, -16
+ 158              		.cfi_offset 5, -12
+ 159              		.cfi_offset 6, -8
+ 160              		.cfi_offset 14, -4
+ 161              		.loc 1 77 0
+ 162 0058 0600     		movs	r6, r0
+  78:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+  79:../../../mesh/app/ali_light/ali_light.c **** 	if(ln < ALI_MIN_LN_VAL){
+  80:../../../mesh/app/ali_light/ali_light.c **** 		ln = ALI_MIN_LN_VAL;
+  81:../../../mesh/app/ali_light/ali_light.c **** 	}
+  82:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.mode = BREATH_MODE_FLOW;
+  83:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.rCnt = 1;
+  84:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
+  85:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_lightness(ln, &p_ali_light->breath);
+  86:../../../mesh/app/ali_light/ali_light.c **** #else
+  87:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_lightness(ln, NULL);
+ 163              		.loc 1 87 0
+ 164 005a 0021     		movs	r1, #0
+ 165 005c FFF7FEFF 		bl	led_cw_set_lightness
+ 166              	.LVL11:
+  88:../../../mesh/app/ali_light/ali_light.c **** #endif
+  89:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->ln = ln;
+ 167              		.loc 1 89 0
+ 168 0060 084D     		ldr	r5, .L16
+  90:../../../mesh/app/ali_light/ali_light.c **** 	//do save
+  91:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 169              		.loc 1 91 0
+ 170 0062 0821     		movs	r1, #8
+  89:../../../mesh/app/ali_light/ali_light.c **** 	//do save
+ 171              		.loc 1 89 0
+ 172 0064 2C68     		ldr	r4, [r5]
+  92:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+  93:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_LIGHT_SAVE_LEN,(uint8_t*)p_ali_light);
+  94:../../../mesh/app/ali_light/ali_light.c **** }
+ 173              		.loc 1 94 0
+ 174              		@ sp needed
+  89:../../../mesh/app/ali_light/ali_light.c **** 	//do save
+ 175              		.loc 1 89 0
+ 176 0066 E680     		strh	r6, [r4, #6]
+  91:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 177              		.loc 1 91 0
+ 178 0068 2000     		movs	r0, r4
+ 179 006a FFF7FEFF 		bl	bc_sys_check_sum
+ 180              	.LVL12:
+  92:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 181              		.loc 1 92 0
+ 182 006e 0121     		movs	r1, #1
+  91:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 183              		.loc 1 91 0
+ 184 0070 2072     		strb	r0, [r4, #8]
+  92:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 185              		.loc 1 92 0
+ 186 0072 0020     		movs	r0, #0
+ 187 0074 FFF7FEFF 		bl	bc_flash_erase
+ 188              	.LVL13:
+  93:../../../mesh/app/ali_light/ali_light.c **** }
+ 189              		.loc 1 93 0
+ 190 0078 2A68     		ldr	r2, [r5]
+ 191 007a 0921     		movs	r1, #9
+ 192 007c 0020     		movs	r0, #0
+ 193 007e FFF7FEFF 		bl	bc_flash_write
+ 194              	.LVL14:
+ 195              		.loc 1 94 0
+ 196 0082 70BD     		pop	{r4, r5, r6, pc}
+ 197              	.L17:
+ 198              		.align	2
+ 199              	.L16:
+ 200 0084 00000000 		.word	.LANCHOR0
+ 201              		.cfi_endproc
+ 202              	.LFE89:
+ 204              		.align	1
+ 205              		.global	ali_light_cw_get_lightness
+ 206              		.code	16
+ 207              		.thumb_func
+ 209              	ali_light_cw_get_lightness:
+ 210              	.LFB90:
+  95:../../../mesh/app/ali_light/ali_light.c **** uint16_t ali_light_cw_get_lightness(void)
+  96:../../../mesh/app/ali_light/ali_light.c **** {
+ 211              		.loc 1 96 0
+ 212              		.cfi_startproc
+ 213              		@ args = 0, pretend = 0, frame = 0
+ 214              		@ frame_needed = 0, uses_anonymous_args = 0
+ 215 0088 10B5     		push	{r4, lr}
+ 216              	.LCFI4:
+ 217              		.cfi_def_cfa_offset 8
+ 218              		.cfi_offset 4, -8
+ 219              		.cfi_offset 14, -4
+  97:../../../mesh/app/ali_light/ali_light.c **** 	return led_cw_get_lightness();
+ 220              		.loc 1 97 0
+ 221 008a FFF7FEFF 		bl	led_cw_get_lightness
+ 222              	.LVL15:
+  98:../../../mesh/app/ali_light/ali_light.c **** }
+ 223              		.loc 1 98 0
+ 224              		@ sp needed
+ 225 008e 10BD     		pop	{r4, pc}
+ 226              		.cfi_endproc
+ 227              	.LFE90:
+ 229              		.align	1
+ 230              		.global	ali_light_cw_set_temperature
+ 231              		.code	16
+ 232              		.thumb_func
+ 234              	ali_light_cw_set_temperature:
+ 235              	.LFB91:
+  99:../../../mesh/app/ali_light/ali_light.c **** void ali_light_cw_set_temperature(uint16_t tp)
+ 100:../../../mesh/app/ali_light/ali_light.c **** {
+ 236              		.loc 1 100 0
+ 237              		.cfi_startproc
+ 238              		@ args = 0, pretend = 0, frame = 0
+ 239              		@ frame_needed = 0, uses_anonymous_args = 0
+ 240              	.LVL16:
+ 241 0090 70B5     		push	{r4, r5, r6, lr}
+ 242              	.LCFI5:
+ 243              		.cfi_def_cfa_offset 16
+ 244              		.cfi_offset 4, -16
+ 245              		.cfi_offset 5, -12
+ 246              		.cfi_offset 6, -8
+ 247              		.cfi_offset 14, -4
+ 248              		.loc 1 100 0
+ 249 0092 0600     		movs	r6, r0
+ 101:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+ 102:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.mode = BREATH_MODE_FLOW;
+ 103:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.rCnt = 1;
+ 104:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
+ 105:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_temperature(tp, &p_ali_light->breath);
+ 106:../../../mesh/app/ali_light/ali_light.c **** #else
+ 107:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_temperature(tp, NULL);
+ 250              		.loc 1 107 0
+ 251 0094 0021     		movs	r1, #0
+ 252 0096 FFF7FEFF 		bl	led_cw_set_temperature
+ 253              	.LVL17:
+ 108:../../../mesh/app/ali_light/ali_light.c **** #endif
+ 109:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->tp = tp;
+ 254              		.loc 1 109 0
+ 255 009a 094D     		ldr	r5, .L20
+ 110:../../../mesh/app/ali_light/ali_light.c **** 	//do save 
+ 111:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 256              		.loc 1 111 0
+ 257 009c 0821     		movs	r1, #8
+ 109:../../../mesh/app/ali_light/ali_light.c **** 	//do save 
+ 258              		.loc 1 109 0
+ 259 009e 2C68     		ldr	r4, [r5]
+ 112:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 113:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_LIGHT_SAVE_LEN,(uint8_t*)p_ali_light);
+ 114:../../../mesh/app/ali_light/ali_light.c **** }
+ 260              		.loc 1 114 0
+ 261              		@ sp needed
+ 109:../../../mesh/app/ali_light/ali_light.c **** 	//do save 
+ 262              		.loc 1 109 0
+ 263 00a0 A680     		strh	r6, [r4, #4]
+ 111:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 264              		.loc 1 111 0
+ 265 00a2 2000     		movs	r0, r4
+ 266 00a4 FFF7FEFF 		bl	bc_sys_check_sum
+ 267              	.LVL18:
+ 112:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 268              		.loc 1 112 0
+ 269 00a8 0121     		movs	r1, #1
+ 111:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 270              		.loc 1 111 0
+ 271 00aa 2072     		strb	r0, [r4, #8]
+ 112:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 272              		.loc 1 112 0
+ 273 00ac 0020     		movs	r0, #0
+ 274 00ae FFF7FEFF 		bl	bc_flash_erase
+ 275              	.LVL19:
+ 113:../../../mesh/app/ali_light/ali_light.c **** }
+ 276              		.loc 1 113 0
+ 277 00b2 2A68     		ldr	r2, [r5]
+ 278 00b4 0921     		movs	r1, #9
+ 279 00b6 0020     		movs	r0, #0
+ 280 00b8 FFF7FEFF 		bl	bc_flash_write
+ 281              	.LVL20:
+ 282              		.loc 1 114 0
+ 283 00bc 70BD     		pop	{r4, r5, r6, pc}
+ 284              	.L21:
+ 285 00be C046     		.align	2
+ 286              	.L20:
+ 287 00c0 00000000 		.word	.LANCHOR0
+ 288              		.cfi_endproc
+ 289              	.LFE91:
+ 291              		.align	1
+ 292              		.global	ali_light_cw_get_temperature
+ 293              		.code	16
+ 294              		.thumb_func
+ 296              	ali_light_cw_get_temperature:
+ 297              	.LFB92:
+ 115:../../../mesh/app/ali_light/ali_light.c **** uint16_t ali_light_cw_get_temperature(void)
+ 116:../../../mesh/app/ali_light/ali_light.c **** {
+ 298              		.loc 1 116 0
+ 299              		.cfi_startproc
+ 300              		@ args = 0, pretend = 0, frame = 0
+ 301              		@ frame_needed = 0, uses_anonymous_args = 0
+ 302 00c4 10B5     		push	{r4, lr}
+ 303              	.LCFI6:
+ 304              		.cfi_def_cfa_offset 8
+ 305              		.cfi_offset 4, -8
+ 306              		.cfi_offset 14, -4
+ 117:../../../mesh/app/ali_light/ali_light.c **** 	return led_cw_get_temperature();
+ 307              		.loc 1 117 0
+ 308 00c6 FFF7FEFF 		bl	led_cw_get_temperature
+ 309              	.LVL21:
+ 118:../../../mesh/app/ali_light/ali_light.c **** }
+ 310              		.loc 1 118 0
+ 311              		@ sp needed
+ 312 00ca 10BD     		pop	{r4, pc}
+ 313              		.cfi_endproc
+ 314              	.LFE92:
+ 316              		.align	1
+ 317              		.global	ali_light_ltn_set_on_off
+ 318              		.code	16
+ 319              		.thumb_func
+ 321              	ali_light_ltn_set_on_off:
+ 322              	.LFB93:
+ 119:../../../mesh/app/ali_light/ali_light.c **** 
+ 120:../../../mesh/app/ali_light/ali_light.c **** void ali_light_ltn_set_on_off(uint8_t on)
+ 121:../../../mesh/app/ali_light/ali_light.c **** {
+ 323              		.loc 1 121 0
+ 324              		.cfi_startproc
+ 325              		@ args = 0, pretend = 0, frame = 0
+ 326              		@ frame_needed = 0, uses_anonymous_args = 0
+ 327              	.LVL22:
+ 328 00cc 10B5     		push	{r4, lr}
+ 329              	.LCFI7:
+ 330              		.cfi_def_cfa_offset 8
+ 331              		.cfi_offset 4, -8
+ 332              		.cfi_offset 14, -4
+ 122:../../../mesh/app/ali_light/ali_light.c **** 	led_ltn_set_on_off(on);
+ 333              		.loc 1 122 0
+ 334 00ce FFF7FEFF 		bl	led_ltn_set_on_off
+ 335              	.LVL23:
+ 123:../../../mesh/app/ali_light/ali_light.c **** }
+ 336              		.loc 1 123 0
+ 337              		@ sp needed
+ 338 00d2 10BD     		pop	{r4, pc}
+ 339              		.cfi_endproc
+ 340              	.LFE93:
+ 342              		.align	1
+ 343              		.global	ali_light_ltn_get_on_off
+ 344              		.code	16
+ 345              		.thumb_func
+ 347              	ali_light_ltn_get_on_off:
+ 348              	.LFB94:
+ 124:../../../mesh/app/ali_light/ali_light.c **** uint8_t ali_light_ltn_get_on_off(void)
+ 125:../../../mesh/app/ali_light/ali_light.c **** {
+ 349              		.loc 1 125 0
+ 350              		.cfi_startproc
+ 351              		@ args = 0, pretend = 0, frame = 0
+ 352              		@ frame_needed = 0, uses_anonymous_args = 0
+ 353 00d4 10B5     		push	{r4, lr}
+ 354              	.LCFI8:
+ 355              		.cfi_def_cfa_offset 8
+ 356              		.cfi_offset 4, -8
+ 357              		.cfi_offset 14, -4
+ 126:../../../mesh/app/ali_light/ali_light.c **** 	return led_ltn_get_on_off();
+ 358              		.loc 1 126 0
+ 359 00d6 FFF7FEFF 		bl	led_ltn_get_on_off
+ 360              	.LVL24:
+ 127:../../../mesh/app/ali_light/ali_light.c **** }
+ 361              		.loc 1 127 0
+ 362              		@ sp needed
+ 363 00da 10BD     		pop	{r4, pc}
+ 364              		.cfi_endproc
+ 365              	.LFE94:
+ 367              		.align	1
+ 368              		.global	ali_light_ltn_set_lightness
+ 369              		.code	16
+ 370              		.thumb_func
+ 372              	ali_light_ltn_set_lightness:
+ 373              	.LFB95:
+ 128:../../../mesh/app/ali_light/ali_light.c **** 
+ 129:../../../mesh/app/ali_light/ali_light.c **** void ali_light_ltn_set_lightness(uint16_t ln)
+ 130:../../../mesh/app/ali_light/ali_light.c **** {
+ 374              		.loc 1 130 0
+ 375              		.cfi_startproc
+ 376              		@ args = 0, pretend = 0, frame = 0
+ 377              		@ frame_needed = 0, uses_anonymous_args = 0
+ 378              	.LVL25:
+ 379 00dc 10B5     		push	{r4, lr}
+ 380              	.LCFI9:
+ 381              		.cfi_def_cfa_offset 8
+ 382              		.cfi_offset 4, -8
+ 383              		.cfi_offset 14, -4
+ 131:../../../mesh/app/ali_light/ali_light.c **** 	led_ltn_set_lightness(ln);
+ 384              		.loc 1 131 0
+ 385 00de FFF7FEFF 		bl	led_ltn_set_lightness
+ 386              	.LVL26:
+ 132:../../../mesh/app/ali_light/ali_light.c **** }
+ 387              		.loc 1 132 0
+ 388              		@ sp needed
+ 389 00e2 10BD     		pop	{r4, pc}
+ 390              		.cfi_endproc
+ 391              	.LFE95:
+ 393              		.align	1
+ 394              		.global	ali_light_ltn_get_lightness
+ 395              		.code	16
+ 396              		.thumb_func
+ 398              	ali_light_ltn_get_lightness:
+ 399              	.LFB96:
+ 133:../../../mesh/app/ali_light/ali_light.c **** uint16_t ali_light_ltn_get_lightness(void)
+ 134:../../../mesh/app/ali_light/ali_light.c **** {
+ 400              		.loc 1 134 0
+ 401              		.cfi_startproc
+ 402              		@ args = 0, pretend = 0, frame = 0
+ 403              		@ frame_needed = 0, uses_anonymous_args = 0
+ 404 00e4 10B5     		push	{r4, lr}
+ 405              	.LCFI10:
+ 406              		.cfi_def_cfa_offset 8
+ 407              		.cfi_offset 4, -8
+ 408              		.cfi_offset 14, -4
+ 135:../../../mesh/app/ali_light/ali_light.c **** 	return led_ltn_get_lightness();
+ 409              		.loc 1 135 0
+ 410 00e6 FFF7FEFF 		bl	led_ltn_get_lightness
+ 411              	.LVL27:
+ 136:../../../mesh/app/ali_light/ali_light.c **** }
+ 412              		.loc 1 136 0
+ 413              		@ sp needed
+ 414 00ea 10BD     		pop	{r4, pc}
+ 415              		.cfi_endproc
+ 416              	.LFE96:
+ 418              		.align	1
+ 419              		.global	ali_light_rgb_get
+ 420              		.code	16
+ 421              		.thumb_func
+ 423              	ali_light_rgb_get:
+ 424              	.LFB97:
+ 137:../../../mesh/app/ali_light/ali_light.c **** int ali_light_rgb_get(uint16_t* l, uint16_t* h, uint16_t* s)
+ 138:../../../mesh/app/ali_light/ali_light.c **** {
+ 425              		.loc 1 138 0
+ 426              		.cfi_startproc
+ 427              		@ args = 0, pretend = 0, frame = 0
+ 428              		@ frame_needed = 0, uses_anonymous_args = 0
+ 429              		@ link register save eliminated.
+ 430              	.LVL28:
+ 139:../../../mesh/app/ali_light/ali_light.c **** 	*l = 0;
+ 431              		.loc 1 139 0
+ 432 00ec 0023     		movs	r3, #0
+ 140:../../../mesh/app/ali_light/ali_light.c **** 	*h = 0;
+ 141:../../../mesh/app/ali_light/ali_light.c **** 	*s = 0;
+ 142:../../../mesh/app/ali_light/ali_light.c **** 	return 0;
+ 143:../../../mesh/app/ali_light/ali_light.c **** }
+ 433              		.loc 1 143 0
+ 434              		@ sp needed
+ 139:../../../mesh/app/ali_light/ali_light.c **** 	*l = 0;
+ 435              		.loc 1 139 0
+ 436 00ee 0380     		strh	r3, [r0]
+ 140:../../../mesh/app/ali_light/ali_light.c **** 	*h = 0;
+ 437              		.loc 1 140 0
+ 438 00f0 0B80     		strh	r3, [r1]
+ 439              		.loc 1 143 0
+ 440 00f2 1800     		movs	r0, r3
+ 441              	.LVL29:
+ 141:../../../mesh/app/ali_light/ali_light.c **** 	return 0;
+ 442              		.loc 1 141 0
+ 443 00f4 1380     		strh	r3, [r2]
+ 444              		.loc 1 143 0
+ 445 00f6 7047     		bx	lr
+ 446              		.cfi_endproc
+ 447              	.LFE97:
+ 449              		.align	1
+ 450              		.global	ali_light_rgb_set
+ 451              		.code	16
+ 452              		.thumb_func
+ 454              	ali_light_rgb_set:
+ 455              	.LFB98:
+ 144:../../../mesh/app/ali_light/ali_light.c **** int ali_light_rgb_set(uint16_t l, uint16_t h, uint16_t s)
+ 145:../../../mesh/app/ali_light/ali_light.c **** {
+ 456              		.loc 1 145 0
+ 457              		.cfi_startproc
+ 458              		@ args = 0, pretend = 0, frame = 0
+ 459              		@ frame_needed = 0, uses_anonymous_args = 0
+ 460              		@ link register save eliminated.
+ 461              	.LVL30:
+ 146:../../../mesh/app/ali_light/ali_light.c **** #if (LIGHT_CW_WITH_RGB)
+ 147:../../../mesh/app/ali_light/ali_light.c **** 	uint16_t r,g,b;
+ 148:../../../mesh/app/ali_light/ali_light.c **** 	if(l == 0x8000 && h == 0xaaaa && s == 0xffff){
+ 149:../../../mesh/app/ali_light/ali_light.c **** 		//blue (0,0,255)
+ 150:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "color blue");
+ 151:../../../mesh/app/ali_light/ali_light.c **** 		r = 0;
+ 152:../../../mesh/app/ali_light/ali_light.c **** 		g = 0;
+ 153:../../../mesh/app/ali_light/ali_light.c **** 		b = 65535;
+ 154:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 155:../../../mesh/app/ali_light/ali_light.c **** 	else if(l == 0x8000 && h == 0x0000 && s == 0xffff){
+ 156:../../../mesh/app/ali_light/ali_light.c **** 		//red (255,0,0)
+ 157:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "color red");
+ 158:../../../mesh/app/ali_light/ali_light.c **** 		r = 65535;
+ 159:../../../mesh/app/ali_light/ali_light.c **** 		g = 0;
+ 160:../../../mesh/app/ali_light/ali_light.c **** 		b = 0;
+ 161:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 162:../../../mesh/app/ali_light/ali_light.c **** 	else if(l == 0x8000 && h == 0x5555 && s == 0xffff){
+ 163:../../../mesh/app/ali_light/ali_light.c **** 		//green (0, 255, 0)
+ 164:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "color green");
+ 165:../../../mesh/app/ali_light/ali_light.c **** 		r = 0;
+ 166:../../../mesh/app/ali_light/ali_light.c **** 		g = 65535;
+ 167:../../../mesh/app/ali_light/ali_light.c **** 		b = 0;
+ 168:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 169:../../../mesh/app/ali_light/ali_light.c **** 	else if(l == 0x8000 && h == 0x8000 && s == 0xffff){
+ 170:../../../mesh/app/ali_light/ali_light.c **** 		//cyan (0, 255, 255)
+ 171:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "color cyan");
+ 172:../../../mesh/app/ali_light/ali_light.c **** 		r = 0;
+ 173:../../../mesh/app/ali_light/ali_light.c **** 		g = 65535;
+ 174:../../../mesh/app/ali_light/ali_light.c **** 		b = 65535;
+ 175:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 176:../../../mesh/app/ali_light/ali_light.c **** 	else if(l == 0x4040 && h == 0xD555 && s == 0xffff){
+ 177:../../../mesh/app/ali_light/ali_light.c **** 		//Purple (128, 0, 128)
+ 178:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "color Purple");
+ 179:../../../mesh/app/ali_light/ali_light.c **** 		r = 32768;
+ 180:../../../mesh/app/ali_light/ali_light.c **** 		g = 0;
+ 181:../../../mesh/app/ali_light/ali_light.c **** 		b = 32768;
+ 182:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 183:../../../mesh/app/ali_light/ali_light.c **** 	else if(l == 0x8000 && h == 0x1b9b && s == 0xffff){
+ 184:../../../mesh/app/ali_light/ali_light.c **** 		//orange (255, 170, 0)
+ 185:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "color orange");
+ 186:../../../mesh/app/ali_light/ali_light.c **** 		r = 65535;
+ 187:../../../mesh/app/ali_light/ali_light.c **** 		g = 43520;
+ 188:../../../mesh/app/ali_light/ali_light.c **** 		b = 0;
+ 189:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 190:../../../mesh/app/ali_light/ali_light.c **** 	else if(l == 0x8000 && h == 0x2aaa && s == 0xffff){
+ 191:../../../mesh/app/ali_light/ali_light.c **** 		//yellow (255,255,0)
+ 192:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "color yellow");
+ 193:../../../mesh/app/ali_light/ali_light.c **** 		r = 65535;
+ 194:../../../mesh/app/ali_light/ali_light.c **** 		g = 65535;
+ 195:../../../mesh/app/ali_light/ali_light.c **** 		b = 0;
+ 196:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 197:../../../mesh/app/ali_light/ali_light.c **** 	else if(l == 0xffff && h == 0x0000 && s == 0x0000){
+ 198:../../../mesh/app/ali_light/ali_light.c **** 		//write (255,255,255)
+ 199:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "color write");
+ 200:../../../mesh/app/ali_light/ali_light.c **** 		r = 65535;
+ 201:../../../mesh/app/ali_light/ali_light.c **** 		g = 65535;
+ 202:../../../mesh/app/ali_light/ali_light.c **** 		b = 65535;
+ 203:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 204:../../../mesh/app/ali_light/ali_light.c **** 	else{
+ 205:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "color error");
+ 206:../../../mesh/app/ali_light/ali_light.c **** 		return 0;
+ 207:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 208:../../../mesh/app/ali_light/ali_light.c **** 
+ 209:../../../mesh/app/ali_light/ali_light.c **** 	led_cwrgb_set_color(r, g, b, NULL);
+ 210:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->r = r;
+ 211:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->g = g;
+ 212:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->b = b;
+ 213:../../../mesh/app/ali_light/ali_light.c **** 	//do save
+ 214:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 215:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 216:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_LIGHT_SAVE_LEN,(uint8_t*)p_ali_light);
+ 217:../../../mesh/app/ali_light/ali_light.c **** #endif
+ 218:../../../mesh/app/ali_light/ali_light.c **** 	return 0;
+ 219:../../../mesh/app/ali_light/ali_light.c **** }
+ 462              		.loc 1 219 0
+ 463 00f8 0020     		movs	r0, #0
+ 464              	.LVL31:
+ 465              		@ sp needed
+ 466 00fa 7047     		bx	lr
+ 467              		.cfi_endproc
+ 468              	.LFE98:
+ 470              		.align	1
+ 471              		.code	16
+ 472              		.thumb_func
+ 474              	ali_light_bind_timer_cb:
+ 475              	.LFB99:
+ 220:../../../mesh/app/ali_light/ali_light.c **** static void ali_light_bind_timer_cb(void* param)
+ 221:../../../mesh/app/ali_light/ali_light.c **** {
+ 476              		.loc 1 221 0
+ 477              		.cfi_startproc
+ 478              		@ args = 0, pretend = 0, frame = 8
+ 479              		@ frame_needed = 0, uses_anonymous_args = 0
+ 480              	.LVL32:
+ 481 00fc F0B5     		push	{r4, r5, r6, r7, lr}
+ 482              	.LCFI11:
+ 483              		.cfi_def_cfa_offset 20
+ 484              		.cfi_offset 4, -20
+ 485              		.cfi_offset 5, -16
+ 486              		.cfi_offset 6, -12
+ 487              		.cfi_offset 7, -8
+ 488              		.cfi_offset 14, -4
+ 222:../../../mesh/app/ali_light/ali_light.c **** 	uint16_t status;
+ 223:../../../mesh/app/ali_light/ali_light.c **** 
+ 224:../../../mesh/app/ali_light/ali_light.c **** 	if(!p_ali_light->provState){
+ 489              		.loc 1 224 0
+ 490 00fe 514E     		ldr	r6, .L47
+ 221:../../../mesh/app/ali_light/ali_light.c **** 	uint16_t status;
+ 491              		.loc 1 221 0
+ 492 0100 87B0     		sub	sp, sp, #28
+ 493              	.LCFI12:
+ 494              		.cfi_def_cfa_offset 48
+ 495              		.loc 1 224 0
+ 496 0102 3468     		ldr	r4, [r6]
+ 497 0104 6578     		ldrb	r5, [r4, #1]
+ 498 0106 002D     		cmp	r5, #0
+ 499 0108 0FD1     		bne	.L30
+ 225:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->provState = 1;
+ 500              		.loc 1 225 0
+ 501 010a 0127     		movs	r7, #1
+ 226:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 502              		.loc 1 226 0
+ 503 010c 0821     		movs	r1, #8
+ 225:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->provState = 1;
+ 504              		.loc 1 225 0
+ 505 010e 6770     		strb	r7, [r4, #1]
+ 506              		.loc 1 226 0
+ 507 0110 2000     		movs	r0, r4
+ 508              	.LVL33:
+ 509 0112 FFF7FEFF 		bl	bc_sys_check_sum
+ 510              	.LVL34:
+ 227:../../../mesh/app/ali_light/ali_light.c **** 		bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 511              		.loc 1 227 0
+ 512 0116 3900     		movs	r1, r7
+ 226:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 513              		.loc 1 226 0
+ 514 0118 2072     		strb	r0, [r4, #8]
+ 515              		.loc 1 227 0
+ 516 011a 2800     		movs	r0, r5
+ 517 011c FFF7FEFF 		bl	bc_flash_erase
+ 518              	.LVL35:
+ 228:../../../mesh/app/ali_light/ali_light.c **** 		bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_LIGHT_SAVE_LEN,(uint8_t*)p_ali_light);
+ 519              		.loc 1 228 0
+ 520 0120 3268     		ldr	r2, [r6]
+ 521 0122 0921     		movs	r1, #9
+ 522 0124 2800     		movs	r0, r5
+ 523 0126 FFF7FEFF 		bl	bc_flash_write
+ 524              	.LVL36:
+ 525              	.L30:
+ 229:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 230:../../../mesh/app/ali_light/ali_light.c **** 	//model bind
+ 231:../../../mesh/app/ali_light/ali_light.c **** 	m_lid_t app_key_lid = 0;
+ 526              		.loc 1 231 0
+ 527 012a 1725     		movs	r5, #23
+ 528 012c 0020     		movs	r0, #0
+ 529 012e 6D44     		add	r5, r5, sp
+ 232:../../../mesh/app/ali_light/ali_light.c **** 	status = bc_m_key_app_find(0, &app_key_lid);
+ 530              		.loc 1 232 0
+ 531 0130 2900     		movs	r1, r5
+ 231:../../../mesh/app/ali_light/ali_light.c **** 	status = bc_m_key_app_find(0, &app_key_lid);
+ 532              		.loc 1 231 0
+ 533 0132 2870     		strb	r0, [r5]
+ 534              		.loc 1 232 0
+ 535 0134 FFF7FEFF 		bl	bc_m_key_app_find
+ 536              	.LVL37:
+ 537 0138 041E     		subs	r4, r0, #0
+ 233:../../../mesh/app/ali_light/ali_light.c **** 	if (status != M_ERR_NO_ERROR){
+ 538              		.loc 1 233 0
+ 539 013a 27D0     		beq	.L32
+ 234:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_FND, "m_tb_key_app_find error");
+ 540              		.loc 1 234 0
+ 541 013c 424B     		ldr	r3, .L47+4
+ 542 013e 1B68     		ldr	r3, [r3]
+ 543 0140 1B05     		lsls	r3, r3, #20
+ 544 0142 7CD5     		bpl	.L29
+ 545              		.loc 1 234 0 is_stmt 0 discriminator 5
+ 546 0144 414C     		ldr	r4, .L47+8
+ 547 0146 2300     		movs	r3, r4
+ 548 0148 2200     		movs	r2, r4
+ 549 014a 2000     		movs	r0, r4
+ 550              	.LVL38:
+ 551 014c 4033     		adds	r3, r3, #64
+ 552 014e 2100     		movs	r1, r4
+ 553 0150 2532     		adds	r2, r2, #37
+ 554 0152 0093     		str	r3, [sp]
+ 555 0154 3130     		adds	r0, r0, #49
+ 556 0156 EA23     		movs	r3, #234
+ 557 0158 FFF7FEFF 		bl	m_print
+ 558              	.LVL39:
+ 559 015c 2000     		movs	r0, r4
+ 560 015e 5830     		adds	r0, r0, #88
+ 561 0160 FFF7FEFF 		bl	m_print
+ 562              	.LVL40:
+ 563 0164 2000     		movs	r0, r4
+ 564 0166 A11D     		adds	r1, r4, #6
+ 565 0168 7030     		adds	r0, r0, #112
+ 566 016a FFF7FEFF 		bl	m_print
+ 567              	.LVL41:
+ 568 016e 66E0     		b	.L29
+ 569              	.LVL42:
+ 570              	.L35:
+ 571              	.LBB16:
+ 572              	.LBB17:
+ 235:../../../mesh/app/ali_light/ali_light.c **** 		return;
+ 236:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 237:../../../mesh/app/ali_light/ali_light.c **** 	for(uint8_t i = 0; i < p_ali_light->model_cnt; ++i){
+ 238:../../../mesh/app/ali_light/ali_light.c **** 		mesh_model_t* t = &p_ali_light->model[i];
+ 239:../../../mesh/app/ali_light/ali_light.c **** 		status = bc_m_key_model_bind(app_key_lid, t->lid);
+ 573              		.loc 1 239 0 is_stmt 1
+ 574 0170 2301     		lsls	r3, r4, #4
+ 575 0172 FF18     		adds	r7, r7, r3
+ 576              	.LVL43:
+ 577 0174 5D37     		adds	r7, r7, #93
+ 578 0176 3978     		ldrb	r1, [r7]
+ 579 0178 2878     		ldrb	r0, [r5]
+ 580 017a FFF7FEFF 		bl	bc_m_key_model_bind
+ 581              	.LVL44:
+ 240:../../../mesh/app/ali_light/ali_light.c **** 		if (status == M_ERR_NO_ERROR){
+ 582              		.loc 1 240 0
+ 583 017e 0028     		cmp	r0, #0
+ 584 0180 02D1     		bne	.L34
+ 241:../../../mesh/app/ali_light/ali_light.c **** 			// Inform the Model IO manager
+ 242:../../../mesh/app/ali_light/ali_light.c **** 			bc_m_mio_bind(t->lid);
+ 585              		.loc 1 242 0
+ 586 0182 3878     		ldrb	r0, [r7]
+ 587              	.LVL45:
+ 588 0184 FFF7FEFF 		bl	bc_m_mio_bind
+ 589              	.LVL46:
+ 590              	.L34:
+ 591              	.LBE17:
+ 237:../../../mesh/app/ali_light/ali_light.c **** 		mesh_model_t* t = &p_ali_light->model[i];
+ 592              		.loc 1 237 0 discriminator 2
+ 593 0188 0134     		adds	r4, r4, #1
+ 594              	.LVL47:
+ 595 018a E4B2     		uxtb	r4, r4
+ 596              	.LVL48:
+ 597              	.L32:
+ 237:../../../mesh/app/ali_light/ali_light.c **** 		mesh_model_t* t = &p_ali_light->model[i];
+ 598              		.loc 1 237 0 is_stmt 0 discriminator 1
+ 599 018c 3768     		ldr	r7, [r6]
+ 600 018e 3B00     		movs	r3, r7
+ 601 0190 5433     		adds	r3, r3, #84
+ 602 0192 1B78     		ldrb	r3, [r3]
+ 603 0194 A342     		cmp	r3, r4
+ 604 0196 EBD8     		bhi	.L35
+ 605 0198 0027     		movs	r7, #0
+ 606              	.LVL49:
+ 607              	.L36:
+ 608              	.LBE16:
+ 609              	.LBB18:
+ 243:../../../mesh/app/ali_light/ali_light.c **** 		}
+ 244:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 245:../../../mesh/app/ali_light/ali_light.c **** 	
+ 246:../../../mesh/app/ali_light/ali_light.c **** 	//model subscription
+ 247:../../../mesh/app/ali_light/ali_light.c **** 	// Add address to the subscription list
+ 248:../../../mesh/app/ali_light/ali_light.c **** 	//灯的所有model自行绑定组播地址0xC000，0xCFFF。
+ 249:../../../mesh/app/ali_light/ali_light.c **** 	for(uint8_t i = 0; i < p_ali_light->model_cnt; ++i){
+ 610              		.loc 1 249 0 is_stmt 1 discriminator 1
+ 611 019a 3468     		ldr	r4, [r6]
+ 612 019c 2300     		movs	r3, r4
+ 613 019e 5433     		adds	r3, r3, #84
+ 614 01a0 1B78     		ldrb	r3, [r3]
+ 615 01a2 9F42     		cmp	r7, r3
+ 616 01a4 0ED2     		bcs	.L46
+ 617              	.LVL50:
+ 618              	.LBB19:
+ 250:../../../mesh/app/ali_light/ali_light.c **** 		mesh_model_t* t = &p_ali_light->model[i];
+ 251:../../../mesh/app/ali_light/ali_light.c **** 		//status = bc_m_mio_add_subscription(t->lid, 0xF000);
+ 252:../../../mesh/app/ali_light/ali_light.c **** 		bc_m_mio_add_subscription(t->lid, ALI_GROUP_ADDRESS_LIGHT);
+ 619              		.loc 1 252 0 discriminator 3
+ 620 01a6 C021     		movs	r1, #192
+ 621 01a8 3B01     		lsls	r3, r7, #4
+ 622 01aa E418     		adds	r4, r4, r3
+ 623              	.LVL51:
+ 624 01ac 5D34     		adds	r4, r4, #93
+ 625 01ae 0902     		lsls	r1, r1, #8
+ 626 01b0 2078     		ldrb	r0, [r4]
+ 627 01b2 FFF7FEFF 		bl	bc_m_mio_add_subscription
+ 628              	.LVL52:
+ 629              	.LBE19:
+ 249:../../../mesh/app/ali_light/ali_light.c **** 		mesh_model_t* t = &p_ali_light->model[i];
+ 630              		.loc 1 249 0 discriminator 3
+ 631 01b6 0137     		adds	r7, r7, #1
+ 632              	.LVL53:
+ 633              	.LBB20:
+ 253:../../../mesh/app/ali_light/ali_light.c **** 		bc_m_mio_add_subscription(t->lid, 0xCFFF);
+ 634              		.loc 1 253 0 discriminator 3
+ 635 01b8 2078     		ldrb	r0, [r4]
+ 636 01ba 2549     		ldr	r1, .L47+12
+ 637 01bc FFF7FEFF 		bl	bc_m_mio_add_subscription
+ 638              	.LVL54:
+ 639              	.LBE20:
+ 249:../../../mesh/app/ali_light/ali_light.c **** 		mesh_model_t* t = &p_ali_light->model[i];
+ 640              		.loc 1 249 0 discriminator 3
+ 641 01c0 FFB2     		uxtb	r7, r7
+ 642              	.LVL55:
+ 643 01c2 EAE7     		b	.L36
+ 644              	.L46:
+ 645              	.LBE18:
+ 254:../../../mesh/app/ali_light/ali_light.c **** 		
+ 255:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 256:../../../mesh/app/ali_light/ali_light.c **** 	mesh_model_t* t = &p_ali_light->model[p_ali_light->model_cnt-1];
+ 257:../../../mesh/app/ali_light/ali_light.c **** 	bc_m_mio_add_subscription(t->lid, M_ALI_VENDER_ADDR);
+ 646              		.loc 1 257 0
+ 647 01c4 F021     		movs	r1, #240
+ 256:../../../mesh/app/ali_light/ali_light.c **** 	bc_m_mio_add_subscription(t->lid, M_ALI_VENDER_ADDR);
+ 648              		.loc 1 256 0
+ 649 01c6 013B     		subs	r3, r3, #1
+ 650              	.LVL56:
+ 651              		.loc 1 257 0
+ 652 01c8 1B01     		lsls	r3, r3, #4
+ 653              	.LVL57:
+ 654 01ca E418     		adds	r4, r4, r3
+ 655              	.LVL58:
+ 656 01cc 5D34     		adds	r4, r4, #93
+ 657 01ce 0902     		lsls	r1, r1, #8
+ 658 01d0 2078     		ldrb	r0, [r4]
+ 659 01d2 FFF7FEFF 		bl	bc_m_mio_add_subscription
+ 660              	.LVL59:
+ 258:../../../mesh/app/ali_light/ali_light.c **** 
+ 259:../../../mesh/app/ali_light/ali_light.c **** 	// Set publication parameters
+ 260:../../../mesh/app/ali_light/ali_light.c ****     status = bc_m_mio_set_publi_param(t->lid, M_ALI_VENDER_ADDR, NULL,
+ 661              		.loc 1 260 0
+ 662 01d6 8221     		movs	r1, #130
+ 663 01d8 2B78     		ldrb	r3, [r5]
+ 664 01da 2078     		ldrb	r0, [r4]
+ 665 01dc 0291     		str	r1, [sp, #8]
+ 666 01de 5A39     		subs	r1, r1, #90
+ 667 01e0 0191     		str	r1, [sp, #4]
+ 668 01e2 2239     		subs	r1, r1, #34
+ 669 01e4 0022     		movs	r2, #0
+ 670 01e6 0091     		str	r1, [sp]
+ 671 01e8 F021     		movs	r1, #240
+ 672 01ea 0392     		str	r2, [sp, #12]
+ 673 01ec 0902     		lsls	r1, r1, #8
+ 674 01ee FFF7FEFF 		bl	bc_m_mio_set_publi_param
+ 675              	.LVL60:
+ 261:../../../mesh/app/ali_light/ali_light.c ****                                       app_key_lid, M_ALI_PUBLISH_TTL, M_ALI_PUBLISH_PERIOD,
+ 262:../../../mesh/app/ali_light/ali_light.c ****                                      M_ALI_PUBLISH_RETX, 0);
+ 263:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "t->lid[%x] p_ali_light->model_cnt[%x] status[%x]",t->lid, p_ali_light->model_cnt,
+ 676              		.loc 1 263 0
+ 677 01f2 154B     		ldr	r3, .L47+4
+ 260:../../../mesh/app/ali_light/ali_light.c ****                                       app_key_lid, M_ALI_PUBLISH_TTL, M_ALI_PUBLISH_PERIOD,
+ 678              		.loc 1 260 0
+ 679 01f4 0700     		movs	r7, r0
+ 680              	.LVL61:
+ 681              		.loc 1 263 0
+ 682 01f6 1B68     		ldr	r3, [r3]
+ 683 01f8 9B04     		lsls	r3, r3, #18
+ 684 01fa 1AD5     		bpl	.L38
+ 685              		.loc 1 263 0 is_stmt 0 discriminator 5
+ 686 01fc 134D     		ldr	r5, .L47+8
+ 687 01fe 2B00     		movs	r3, r5
+ 688 0200 4033     		adds	r3, r3, #64
+ 689 0202 0093     		str	r3, [sp]
+ 690 0204 2A00     		movs	r2, r5
+ 691 0206 2800     		movs	r0, r5
+ 692 0208 0823     		movs	r3, #8
+ 693 020a 2532     		adds	r2, r2, #37
+ 694 020c FF33     		adds	r3, r3, #255
+ 695 020e 2900     		movs	r1, r5
+ 696 0210 3130     		adds	r0, r0, #49
+ 697 0212 FFF7FEFF 		bl	m_print
+ 698              	.LVL62:
+ 699 0216 2800     		movs	r0, r5
+ 700 0218 3368     		ldr	r3, [r6]
+ 701 021a 2178     		ldrb	r1, [r4]
+ 702 021c 5433     		adds	r3, r3, #84
+ 703 021e 1A78     		ldrb	r2, [r3]
+ 704 0220 7330     		adds	r0, r0, #115
+ 705 0222 3B00     		movs	r3, r7
+ 706 0224 FFF7FEFF 		bl	m_print
+ 707              	.LVL63:
+ 708 0228 2800     		movs	r0, r5
+ 709 022a A91D     		adds	r1, r5, #6
+ 710 022c 7030     		adds	r0, r0, #112
+ 711 022e FFF7FEFF 		bl	m_print
+ 712              	.LVL64:
+ 713              	.L38:
+ 264:../../../mesh/app/ali_light/ali_light.c **** 
+ 265:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+ 266:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.mode = BREATH_MODE_H2L2H;
+ 267:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.rCnt = 3;
+ 268:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
+ 269:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_breath(&p_ali_light->breath);
+ 270:../../../mesh/app/ali_light/ali_light.c **** #endif
+ 271:../../../mesh/app/ali_light/ali_light.c **** 	_ready_to_indicate(true);
+ 714              		.loc 1 271 0 is_stmt 1
+ 715 0232 0120     		movs	r0, #1
+ 716 0234 FFF7E4FE 		bl	_ready_to_indicate
+ 717              	.LVL65:
+ 272:../../../mesh/app/ali_light/ali_light.c **** 
+ 273:../../../mesh/app/ali_light/ali_light.c **** 	mesh_con_stop(0);//disconncet ble
+ 718              		.loc 1 273 0
+ 719 0238 0020     		movs	r0, #0
+ 720 023a FFF7FEFF 		bl	mesh_con_stop
+ 721              	.LVL66:
+ 722              	.L29:
+ 274:../../../mesh/app/ali_light/ali_light.c **** }
+ 723              		.loc 1 274 0
+ 724 023e 07B0     		add	sp, sp, #28
+ 725              		@ sp needed
+ 726 0240 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 727              	.L48:
+ 728 0242 C046     		.align	2
+ 729              	.L47:
+ 730 0244 00000000 		.word	.LANCHOR0
+ 731 0248 00000000 		.word	L_LEV
+ 732 024c 00000000 		.word	.LANCHOR1
+ 733 0250 FFCF0000 		.word	53247
+ 734              		.cfi_endproc
+ 735              	.LFE99:
+ 737              		.align	1
+ 738              		.code	16
+ 739              		.thumb_func
+ 741              	ali_light_period_ind_timer_cb:
+ 742              	.LFB100:
+ 275:../../../mesh/app/ali_light/ali_light.c **** 
+ 276:../../../mesh/app/ali_light/ali_light.c **** static void ali_light_period_ind_timer_cb(void* param)
+ 277:../../../mesh/app/ali_light/ali_light.c **** {
+ 743              		.loc 1 277 0
+ 744              		.cfi_startproc
+ 745              		@ args = 0, pretend = 0, frame = 16
+ 746              		@ frame_needed = 0, uses_anonymous_args = 0
+ 747              	.LVL67:
+ 748 0254 7FB5     		push	{r0, r1, r2, r3, r4, r5, r6, lr}
+ 749              	.LCFI13:
+ 750              		.cfi_def_cfa_offset 32
+ 751              		.cfi_offset 0, -32
+ 752              		.cfi_offset 1, -28
+ 753              		.cfi_offset 2, -24
+ 754              		.cfi_offset 3, -20
+ 755              		.cfi_offset 4, -16
+ 756              		.cfi_offset 5, -12
+ 757              		.cfi_offset 6, -8
+ 758              		.cfi_offset 14, -4
+ 278:../../../mesh/app/ali_light/ali_light.c **** 	uint8_t data[12];
+ 279:../../../mesh/app/ali_light/ali_light.c **** 	
+ 280:../../../mesh/app/ali_light/ali_light.c **** 	int len = 1;
+ 281:../../../mesh/app/ali_light/ali_light.c **** 	data[0] = 0;
+ 759              		.loc 1 281 0
+ 760 0256 0026     		movs	r6, #0
+ 761 0258 01AD     		add	r5, sp, #4
+ 762 025a 2E70     		strb	r6, [r5]
+ 763              	.LBB21:
+ 764              	.LBB22:
+  74:../../../mesh/app/ali_light/ali_light.c **** }
+ 765              		.loc 1 74 0
+ 766 025c FFF7FEFF 		bl	led_cw_get_on_off
+ 767              	.LVL68:
+ 768              	.LBE22:
+ 769              	.LBE21:
+ 282:../../../mesh/app/ali_light/ali_light.c **** 	len += bc_mm_alis_set_onoff_status(&data[len], ali_light_cw_get_on_off());
+ 770              		.loc 1 282 0
+ 771 0260 6B46     		mov	r3, sp
+ 772 0262 411E     		subs	r1, r0, #1
+ 773 0264 8841     		sbcs	r0, r0, r1
+ 774 0266 C1B2     		uxtb	r1, r0
+ 775 0268 581D     		adds	r0, r3, #5
+ 776 026a FFF7FEFF 		bl	bc_mm_alis_set_onoff_status
+ 777              	.LVL69:
+ 778 026e 441C     		adds	r4, r0, #1
+ 779              	.LVL70:
+ 780              	.LBB23:
+ 781              	.LBB24:
+  97:../../../mesh/app/ali_light/ali_light.c **** }
+ 782              		.loc 1 97 0
+ 783 0270 FFF7FEFF 		bl	led_cw_get_lightness
+ 784              	.LVL71:
+ 785 0274 0100     		movs	r1, r0
+ 786              	.LBE24:
+ 787              	.LBE23:
+ 283:../../../mesh/app/ali_light/ali_light.c **** 	len += bc_mm_alis_set_ltn_status(&data[len], ali_light_cw_get_lightness());
+ 788              		.loc 1 283 0
+ 789 0276 2819     		adds	r0, r5, r4
+ 790 0278 FFF7FEFF 		bl	bc_mm_alis_set_ltn_status
+ 791              	.LVL72:
+ 792 027c 0419     		adds	r4, r0, r4
+ 793              	.LVL73:
+ 794              	.LBB25:
+ 795              	.LBB26:
+ 117:../../../mesh/app/ali_light/ali_light.c **** }
+ 796              		.loc 1 117 0
+ 797 027e FFF7FEFF 		bl	led_cw_get_temperature
+ 798              	.LVL74:
+ 799 0282 0100     		movs	r1, r0
+ 800              	.LBE26:
+ 801              	.LBE25:
+ 284:../../../mesh/app/ali_light/ali_light.c **** 	len += bc_mm_alis_set_tmp_status(&data[len], ali_light_cw_get_temperature());
+ 802              		.loc 1 284 0
+ 803 0284 2819     		adds	r0, r5, r4
+ 804 0286 FFF7FEFF 		bl	bc_mm_alis_set_tmp_status
+ 805              	.LVL75:
+ 806 028a 0419     		adds	r4, r0, r4
+ 807              	.LVL76:
+ 285:../../../mesh/app/ali_light/ali_light.c **** 	
+ 286:../../../mesh/app/ali_light/ali_light.c **** 	m_printf_hex(L_APP, "ali_light_period_ind_timer_cb", data, len);
+ 808              		.loc 1 286 0
+ 809 028c 8020     		movs	r0, #128
+ 810 028e 0B49     		ldr	r1, .L50
+ 811 0290 2A00     		movs	r2, r5
+ 812 0292 2300     		movs	r3, r4
+ 813 0294 2431     		adds	r1, r1, #36
+ 814 0296 8001     		lsls	r0, r0, #6
+ 815 0298 FFF7FEFF 		bl	m_printf_hex
+ 816              	.LVL77:
+ 287:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_ali_vendor_send(p_ali_light->model[3].lid, MM_MSG_ALIS_ATTR_INDICATION, data, len);
+ 817              		.loc 1 287 0
+ 818 029c 084A     		ldr	r2, .L50+4
+ 819 029e A3B2     		uxth	r3, r4
+ 820 02a0 1268     		ldr	r2, [r2]
+ 821 02a2 D421     		movs	r1, #212
+ 822 02a4 8D32     		adds	r2, r2, #141
+ 823 02a6 1078     		ldrb	r0, [r2]
+ 824 02a8 2A00     		movs	r2, r5
+ 825 02aa FFF7FEFF 		bl	bc_mm_ali_vendor_send
+ 826              	.LVL78:
+ 288:../../../mesh/app/ali_light/ali_light.c **** 	_ready_to_indicate(false);
+ 827              		.loc 1 288 0
+ 828 02ae 3000     		movs	r0, r6
+ 829 02b0 FFF7A6FE 		bl	_ready_to_indicate
+ 830              	.LVL79:
+ 289:../../../mesh/app/ali_light/ali_light.c **** 	bc_m_ali_save_seq_iv();
+ 290:../../../mesh/app/ali_light/ali_light.c **** }
+ 831              		.loc 1 290 0
+ 832              		@ sp needed
+ 289:../../../mesh/app/ali_light/ali_light.c **** 	bc_m_ali_save_seq_iv();
+ 833              		.loc 1 289 0
+ 834 02b4 FFF7FEFF 		bl	bc_m_ali_save_seq_iv
+ 835              	.LVL80:
+ 836              	.LVL81:
+ 837              		.loc 1 290 0
+ 838 02b8 7FBD     		pop	{r0, r1, r2, r3, r4, r5, r6, pc}
+ 839              	.L51:
+ 840 02ba C046     		.align	2
+ 841              	.L50:
+ 842 02bc 80000000 		.word	.LANCHOR2
+ 843 02c0 00000000 		.word	.LANCHOR0
+ 844              		.cfi_endproc
+ 845              	.LFE100:
+ 847              		.align	1
+ 848              		.code	16
+ 849              		.thumb_func
+ 851              	ali_light_quick_restore_timer_cb:
+ 852              	.LFB101:
+ 291:../../../mesh/app/ali_light/ali_light.c **** 
+ 292:../../../mesh/app/ali_light/ali_light.c **** static void ali_light_quick_restore_timer_cb(void *t)
+ 293:../../../mesh/app/ali_light/ali_light.c **** {
+ 853              		.loc 1 293 0
+ 854              		.cfi_startproc
+ 855              		@ args = 0, pretend = 0, frame = 0
+ 856              		@ frame_needed = 0, uses_anonymous_args = 0
+ 857              	.LVL82:
+ 294:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "");
+ 858              		.loc 1 294 0
+ 859 02c4 174B     		ldr	r3, .L57
+ 293:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "");
+ 860              		.loc 1 293 0
+ 861 02c6 73B5     		push	{r0, r1, r4, r5, r6, lr}
+ 862              	.LCFI14:
+ 863              		.cfi_def_cfa_offset 24
+ 864              		.cfi_offset 0, -24
+ 865              		.cfi_offset 1, -20
+ 866              		.cfi_offset 4, -16
+ 867              		.cfi_offset 5, -12
+ 868              		.cfi_offset 6, -8
+ 869              		.cfi_offset 14, -4
+ 870              		.loc 1 294 0
+ 871 02c8 1B68     		ldr	r3, [r3]
+ 872 02ca 9B04     		lsls	r3, r3, #18
+ 873 02cc 16D5     		bpl	.L53
+ 874              		.loc 1 294 0 is_stmt 0 discriminator 5
+ 875 02ce 164D     		ldr	r5, .L57+4
+ 876 02d0 164C     		ldr	r4, .L57+8
+ 877 02d2 2B00     		movs	r3, r5
+ 878 02d4 4233     		adds	r3, r3, #66
+ 879 02d6 0093     		str	r3, [sp]
+ 880 02d8 2200     		movs	r2, r4
+ 881 02da 2000     		movs	r0, r4
+ 882              	.LVL83:
+ 883 02dc 9323     		movs	r3, #147
+ 884 02de 2100     		movs	r1, r4
+ 885 02e0 2532     		adds	r2, r2, #37
+ 886 02e2 5B00     		lsls	r3, r3, #1
+ 887 02e4 3130     		adds	r0, r0, #49
+ 888 02e6 FFF7FEFF 		bl	m_print
+ 889              	.LVL84:
+ 890 02ea 2800     		movs	r0, r5
+ 891 02ec 6330     		adds	r0, r0, #99
+ 892 02ee FFF7FEFF 		bl	m_print
+ 893              	.LVL85:
+ 894 02f2 2000     		movs	r0, r4
+ 895 02f4 A11D     		adds	r1, r4, #6
+ 896 02f6 7030     		adds	r0, r0, #112
+ 897 02f8 FFF7FEFF 		bl	m_print
+ 898              	.LVL86:
+ 899              	.L53:
+ 295:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->quickTime = 0;
+ 900              		.loc 1 295 0 is_stmt 1
+ 901 02fc 0024     		movs	r4, #0
+ 902 02fe 0C4E     		ldr	r6, .L57+12
+ 296:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 903              		.loc 1 296 0
+ 904 0300 0821     		movs	r1, #8
+ 295:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->quickTime = 0;
+ 905              		.loc 1 295 0
+ 906 0302 3568     		ldr	r5, [r6]
+ 297:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 298:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_LIGHT_SAVE_LEN,(uint8_t*)p_ali_light);
+ 299:../../../mesh/app/ali_light/ali_light.c **** }
+ 907              		.loc 1 299 0
+ 908              		@ sp needed
+ 295:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 909              		.loc 1 295 0
+ 910 0304 2C70     		strb	r4, [r5]
+ 296:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 911              		.loc 1 296 0
+ 912 0306 2800     		movs	r0, r5
+ 913 0308 FFF7FEFF 		bl	bc_sys_check_sum
+ 914              	.LVL87:
+ 297:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 915              		.loc 1 297 0
+ 916 030c 0121     		movs	r1, #1
+ 296:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 917              		.loc 1 296 0
+ 918 030e 2872     		strb	r0, [r5, #8]
+ 297:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 919              		.loc 1 297 0
+ 920 0310 2000     		movs	r0, r4
+ 921 0312 FFF7FEFF 		bl	bc_flash_erase
+ 922              	.LVL88:
+ 298:../../../mesh/app/ali_light/ali_light.c **** }
+ 923              		.loc 1 298 0
+ 924 0316 3268     		ldr	r2, [r6]
+ 925 0318 0921     		movs	r1, #9
+ 926 031a 2000     		movs	r0, r4
+ 927 031c FFF7FEFF 		bl	bc_flash_write
+ 928              	.LVL89:
+ 929              		.loc 1 299 0
+ 930 0320 73BD     		pop	{r0, r1, r4, r5, r6, pc}
+ 931              	.L58:
+ 932 0322 C046     		.align	2
+ 933              	.L57:
+ 934 0324 00000000 		.word	L_LEV
+ 935 0328 80000000 		.word	.LANCHOR2
+ 936 032c 00000000 		.word	.LANCHOR1
+ 937 0330 00000000 		.word	.LANCHOR0
+ 938              		.cfi_endproc
+ 939              	.LFE101:
+ 941              		.align	1
+ 942              		.global	ali_light_quick_restore_init
+ 943              		.code	16
+ 944              		.thumb_func
+ 946              	ali_light_quick_restore_init:
+ 947              	.LFB102:
+ 300:../../../mesh/app/ali_light/ali_light.c **** 
+ 301:../../../mesh/app/ali_light/ali_light.c **** uint8_t ali_light_quick_restore_init(void)
+ 302:../../../mesh/app/ali_light/ali_light.c **** {
+ 948              		.loc 1 302 0
+ 949              		.cfi_startproc
+ 950              		@ args = 0, pretend = 0, frame = 8
+ 951              		@ frame_needed = 0, uses_anonymous_args = 0
+ 952 0334 F0B5     		push	{r4, r5, r6, r7, lr}
+ 953              	.LCFI15:
+ 954              		.cfi_def_cfa_offset 20
+ 955              		.cfi_offset 4, -20
+ 956              		.cfi_offset 5, -16
+ 957              		.cfi_offset 6, -12
+ 958              		.cfi_offset 7, -8
+ 959              		.cfi_offset 14, -4
+ 303:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light->quickTime++ < ALI_QUICK_START_CNT){//0 1 2 3 4
+ 960              		.loc 1 303 0
+ 961 0336 384D     		ldr	r5, .L73
+ 302:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light->quickTime++ < ALI_QUICK_START_CNT){//0 1 2 3 4
+ 962              		.loc 1 302 0
+ 963 0338 85B0     		sub	sp, sp, #20
+ 964              	.LCFI16:
+ 965              		.cfi_def_cfa_offset 40
+ 966              		.loc 1 303 0
+ 967 033a 2C68     		ldr	r4, [r5]
+ 968 033c 2378     		ldrb	r3, [r4]
+ 969 033e 5A1C     		adds	r2, r3, #1
+ 970 0340 2270     		strb	r2, [r4]
+ 971 0342 042B     		cmp	r3, #4
+ 972 0344 0FD8     		bhi	.L60
+ 304:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 973              		.loc 1 304 0
+ 974 0346 0821     		movs	r1, #8
+ 975 0348 2000     		movs	r0, r4
+ 976 034a FFF7FEFF 		bl	bc_sys_check_sum
+ 977              	.LVL90:
+ 305:../../../mesh/app/ali_light/ali_light.c **** 		bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 978              		.loc 1 305 0
+ 979 034e 0121     		movs	r1, #1
+ 304:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 980              		.loc 1 304 0
+ 981 0350 2072     		strb	r0, [r4, #8]
+ 982              		.loc 1 305 0
+ 983 0352 0020     		movs	r0, #0
+ 984 0354 FFF7FEFF 		bl	bc_flash_erase
+ 985              	.LVL91:
+ 306:../../../mesh/app/ali_light/ali_light.c **** 		bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_LIGHT_SAVE_LEN,(uint8_t*)p_ali_light);
+ 986              		.loc 1 306 0
+ 987 0358 2A68     		ldr	r2, [r5]
+ 988 035a 0921     		movs	r1, #9
+ 989 035c 0020     		movs	r0, #0
+ 990 035e FFF7FEFF 		bl	bc_flash_write
+ 991              	.LVL92:
+ 307:../../../mesh/app/ali_light/ali_light.c **** 		return 0;
+ 992              		.loc 1 307 0
+ 993 0362 0020     		movs	r0, #0
+ 994 0364 56E0     		b	.L61
+ 995              	.L60:
+ 308:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 309:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "");
+ 996              		.loc 1 309 0
+ 997 0366 2D4E     		ldr	r6, .L73+4
+ 998 0368 3368     		ldr	r3, [r6]
+ 999 036a 9B04     		lsls	r3, r3, #18
+ 1000 036c 16D5     		bpl	.L62
+ 1001              		.loc 1 309 0 is_stmt 0 discriminator 5
+ 1002 036e 2C4D     		ldr	r5, .L73+8
+ 1003 0370 2C4C     		ldr	r4, .L73+12
+ 1004 0372 2B00     		movs	r3, r5
+ 1005 0374 6433     		adds	r3, r3, #100
+ 1006 0376 0093     		str	r3, [sp]
+ 1007 0378 2200     		movs	r2, r4
+ 1008 037a 2000     		movs	r0, r4
+ 1009 037c 3623     		movs	r3, #54
+ 1010 037e 2100     		movs	r1, r4
+ 1011 0380 2532     		adds	r2, r2, #37
+ 1012 0382 FF33     		adds	r3, r3, #255
+ 1013 0384 3130     		adds	r0, r0, #49
+ 1014 0386 FFF7FEFF 		bl	m_print
+ 1015              	.LVL93:
+ 1016 038a 2800     		movs	r0, r5
+ 1017 038c 6330     		adds	r0, r0, #99
+ 1018 038e FFF7FEFF 		bl	m_print
+ 1019              	.LVL94:
+ 1020 0392 2000     		movs	r0, r4
+ 1021 0394 A11D     		adds	r1, r4, #6
+ 1022 0396 7030     		adds	r0, r0, #112
+ 1023 0398 FFF7FEFF 		bl	m_print
+ 1024              	.LVL95:
+ 1025              	.L62:
+ 310:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+ 311:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.mode = BREATH_MODE_FLOW;
+ 312:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.rCnt = 1;
+ 313:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
+ 314:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_on_off(ALI_CW_ON, &p_ali_light->breath);
+ 315:../../../mesh/app/ali_light/ali_light.c **** 
+ 316:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.mode = BREATH_MODE_H2L2H;
+ 317:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.rCnt = 5;
+ 318:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
+ 319:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_breath(&p_ali_light->breath);
+ 320:../../../mesh/app/ali_light/ali_light.c **** #else
+ 321:../../../mesh/app/ali_light/ali_light.c **** 	//TODO: 1HZ flash 3 timers
+ 322:../../../mesh/app/ali_light/ali_light.c **** 	uint8_t i = 6;
+ 323:../../../mesh/app/ali_light/ali_light.c **** 	uint32_t t = mesh_timer_get_time();
+ 1026              		.loc 1 323 0 is_stmt 1
+ 1027 039c FFF7FEFF 		bl	mesh_timer_get_time
+ 1028              	.LVL96:
+ 322:../../../mesh/app/ali_light/ali_light.c **** 	uint32_t t = mesh_timer_get_time();
+ 1029              		.loc 1 322 0
+ 1030 03a0 0624     		movs	r4, #6
+ 1031              		.loc 1 323 0
+ 1032 03a2 0700     		movs	r7, r0
+ 1033              	.LVL97:
+ 1034              	.L63:
+ 324:../../../mesh/app/ali_light/ali_light.c **** 	do{
+ 325:../../../mesh/app/ali_light/ali_light.c **** 		while(mesh_timer_get_time()-t < ALI_QUICK_BLINK_TIME){//delay 1s
+ 1035              		.loc 1 325 0
+ 1036 03a4 FFF7FEFF 		bl	mesh_timer_get_time
+ 1037              	.LVL98:
+ 1038 03a8 1F4B     		ldr	r3, .L73+16
+ 1039 03aa C01B     		subs	r0, r0, r7
+ 1040 03ac 9842     		cmp	r0, r3
+ 1041 03ae F9D9     		bls	.L63
+ 326:../../../mesh/app/ali_light/ali_light.c **** 			continue;
+ 327:../../../mesh/app/ali_light/ali_light.c **** 		}
+ 328:../../../mesh/app/ali_light/ali_light.c **** 		t = mesh_timer_get_time();
+ 1042              		.loc 1 328 0
+ 1043 03b0 FFF7FEFF 		bl	mesh_timer_get_time
+ 1044              	.LVL99:
+ 1045 03b4 0700     		movs	r7, r0
+ 1046              	.LVL100:
+ 329:../../../mesh/app/ali_light/ali_light.c **** 		if(i == 1){
+ 1047              		.loc 1 329 0
+ 1048 03b6 012C     		cmp	r4, #1
+ 1049 03b8 23D0     		beq	.L65
+ 330:../../../mesh/app/ali_light/ali_light.c **** 			break;
+ 331:../../../mesh/app/ali_light/ali_light.c **** 		}
+ 332:../../../mesh/app/ali_light/ali_light.c **** 		led_cw_set_on_off(i%2,NULL);
+ 1050              		.loc 1 332 0
+ 1051 03ba 0123     		movs	r3, #1
+ 1052 03bc 2340     		ands	r3, r4
+ 1053 03be 1800     		movs	r0, r3
+ 1054              	.LVL101:
+ 1055 03c0 0021     		movs	r1, #0
+ 1056 03c2 0393     		str	r3, [sp, #12]
+ 1057 03c4 FFF7FEFF 		bl	led_cw_set_on_off
+ 1058              	.LVL102:
+ 333:../../../mesh/app/ali_light/ali_light.c **** 		M_PRINTF(L_APP, "led status = %d", i%2);
+ 1059              		.loc 1 333 0
+ 1060 03c8 3368     		ldr	r3, [r6]
+ 1061 03ca 9B04     		lsls	r3, r3, #18
+ 1062 03cc 16D5     		bpl	.L66
+ 1063              		.loc 1 333 0 is_stmt 0 discriminator 5
+ 1064 03ce 144B     		ldr	r3, .L73+8
+ 1065 03d0 144D     		ldr	r5, .L73+12
+ 1066 03d2 6433     		adds	r3, r3, #100
+ 1067 03d4 0093     		str	r3, [sp]
+ 1068 03d6 2A00     		movs	r2, r5
+ 1069 03d8 2800     		movs	r0, r5
+ 1070 03da 4E23     		movs	r3, #78
+ 1071 03dc 2532     		adds	r2, r2, #37
+ 1072 03de FF33     		adds	r3, r3, #255
+ 1073 03e0 2900     		movs	r1, r5
+ 1074 03e2 3130     		adds	r0, r0, #49
+ 1075 03e4 FFF7FEFF 		bl	m_print
+ 1076              	.LVL103:
+ 1077 03e8 1048     		ldr	r0, .L73+20
+ 1078 03ea 0399     		ldr	r1, [sp, #12]
+ 1079 03ec 0130     		adds	r0, r0, #1
+ 1080 03ee FFF7FEFF 		bl	m_print
+ 1081              	.LVL104:
+ 1082 03f2 2800     		movs	r0, r5
+ 1083 03f4 A91D     		adds	r1, r5, #6
+ 1084 03f6 7030     		adds	r0, r0, #112
+ 1085 03f8 FFF7FEFF 		bl	m_print
+ 1086              	.LVL105:
+ 1087              	.L66:
+ 334:../../../mesh/app/ali_light/ali_light.c **** 	}while(i-->1);
+ 1088              		.loc 1 334 0 is_stmt 1
+ 1089 03fc 013C     		subs	r4, r4, #1
+ 1090              	.LVL106:
+ 1091 03fe E4B2     		uxtb	r4, r4
+ 1092              	.LVL107:
+ 1093 0400 D0E7     		b	.L63
+ 1094              	.LVL108:
+ 1095              	.L65:
+ 335:../../../mesh/app/ali_light/ali_light.c **** #endif
+ 336:../../../mesh/app/ali_light/ali_light.c **** 	//restore flash parameter
+ 337:../../../mesh/app/ali_light/ali_light.c **** 	bc_m_clear_config();
+ 1096              		.loc 1 337 0
+ 1097 0402 FFF7FEFF 		bl	bc_m_clear_config
+ 1098              	.LVL109:
+ 338:../../../mesh/app/ali_light/ali_light.c **** 	//clear quick count
+ 339:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 1099              		.loc 1 339 0
+ 1100 0406 2100     		movs	r1, r4
+ 1101 0408 0020     		movs	r0, #0
+ 1102 040a FFF7FEFF 		bl	bc_flash_erase
+ 1103              	.LVL110:
+ 340:../../../mesh/app/ali_light/ali_light.c **** 
+ 341:../../../mesh/app/ali_light/ali_light.c **** 	bc_sys_reset();
+ 1104              		.loc 1 341 0
+ 1105 040e FFF7FEFF 		bl	bc_sys_reset
+ 1106              	.LVL111:
+ 342:../../../mesh/app/ali_light/ali_light.c **** 	return 1;
+ 1107              		.loc 1 342 0
+ 1108 0412 2000     		movs	r0, r4
+ 1109              	.LVL112:
+ 1110              	.L61:
+ 343:../../../mesh/app/ali_light/ali_light.c **** }
+ 1111              		.loc 1 343 0
+ 1112 0414 05B0     		add	sp, sp, #20
+ 1113              		@ sp needed
+ 1114 0416 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1115              	.L74:
+ 1116              		.align	2
+ 1117              	.L73:
+ 1118 0418 00000000 		.word	.LANCHOR0
+ 1119 041c 00000000 		.word	L_LEV
+ 1120 0420 80000000 		.word	.LANCHOR2
+ 1121 0424 00000000 		.word	.LANCHOR1
+ 1122 0428 E7030000 		.word	999
+ 1123 042c 00010000 		.word	.LANCHOR3
+ 1124              		.cfi_endproc
+ 1125              	.LFE102:
+ 1127              		.align	1
+ 1128              		.global	ali_light_prov_state_cb
+ 1129              		.code	16
+ 1130              		.thumb_func
+ 1132              	ali_light_prov_state_cb:
+ 1133              	.LFB103:
+ 344:../../../mesh/app/ali_light/ali_light.c **** 
+ 345:../../../mesh/app/ali_light/ali_light.c **** void ali_light_prov_state_cb(uint8_t state)
+ 346:../../../mesh/app/ali_light/ali_light.c **** {
+ 1134              		.loc 1 346 0
+ 1135              		.cfi_startproc
+ 1136              		@ args = 0, pretend = 0, frame = 0
+ 1137              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1138              	.LVL113:
+ 1139 0430 10B5     		push	{r4, lr}
+ 1140              	.LCFI17:
+ 1141              		.cfi_def_cfa_offset 8
+ 1142              		.cfi_offset 4, -8
+ 1143              		.cfi_offset 14, -4
+ 347:../../../mesh/app/ali_light/ali_light.c **** #ifdef APP_FOR_ALI
+ 348:../../../mesh/app/ali_light/ali_light.c **** 	if(state == M_PROV_SUCCEED_APP){
+ 1144              		.loc 1 348 0
+ 1145 0432 0328     		cmp	r0, #3
+ 1146 0434 07D1     		bne	.L75
+ 349:../../../mesh/app/ali_light/ali_light.c **** 		SYS_SetTimer(&p_ali_light->bindDelayTimer, (int)50/10, 
+ 1147              		.loc 1 349 0
+ 1148 0436 044B     		ldr	r3, .L77
+ 1149 0438 0022     		movs	r2, #0
+ 1150 043a 1868     		ldr	r0, [r3]
+ 1151              	.LVL114:
+ 1152 043c 0521     		movs	r1, #5
+ 1153 043e 2430     		adds	r0, r0, #36
+ 1154 0440 024B     		ldr	r3, .L77+4
+ 1155 0442 FFF7FEFF 		bl	SYS_SetTimer
+ 1156              	.LVL115:
+ 1157              	.L75:
+ 350:../../../mesh/app/ali_light/ali_light.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_light_bind_timer_cb);
+ 351:../../../mesh/app/ali_light/ali_light.c **** 		return;
+ 352:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 353:../../../mesh/app/ali_light/ali_light.c **** #endif 
+ 354:../../../mesh/app/ali_light/ali_light.c **** }
+ 1158              		.loc 1 354 0
+ 1159              		@ sp needed
+ 1160 0446 10BD     		pop	{r4, pc}
+ 1161              	.L78:
+ 1162              		.align	2
+ 1163              	.L77:
+ 1164 0448 00000000 		.word	.LANCHOR0
+ 1165 044c 00000000 		.word	ali_light_bind_timer_cb
+ 1166              		.cfi_endproc
+ 1167              	.LFE103:
+ 1169              		.align	1
+ 1170              		.global	ali_light_prov_state_get
+ 1171              		.code	16
+ 1172              		.thumb_func
+ 1174              	ali_light_prov_state_get:
+ 1175              	.LFB104:
+ 355:../../../mesh/app/ali_light/ali_light.c **** 
+ 356:../../../mesh/app/ali_light/ali_light.c **** uint8_t ali_light_prov_state_get(void)
+ 357:../../../mesh/app/ali_light/ali_light.c **** {
+ 1176              		.loc 1 357 0
+ 1177              		.cfi_startproc
+ 1178              		@ args = 0, pretend = 0, frame = 0
+ 1179              		@ frame_needed = 0, uses_anonymous_args = 0
+ 358:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "bond status[%d]", p_ali_light->provState);
+ 1180              		.loc 1 358 0
+ 1181 0450 124B     		ldr	r3, .L84
+ 357:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "bond status[%d]", p_ali_light->provState);
+ 1182              		.loc 1 357 0
+ 1183 0452 73B5     		push	{r0, r1, r4, r5, r6, lr}
+ 1184              	.LCFI18:
+ 1185              		.cfi_def_cfa_offset 24
+ 1186              		.cfi_offset 0, -24
+ 1187              		.cfi_offset 1, -20
+ 1188              		.cfi_offset 4, -16
+ 1189              		.cfi_offset 5, -12
+ 1190              		.cfi_offset 6, -8
+ 1191              		.cfi_offset 14, -4
+ 1192              		.loc 1 358 0
+ 1193 0454 1B68     		ldr	r3, [r3]
+ 1194 0456 124E     		ldr	r6, .L84+4
+ 1195 0458 9B04     		lsls	r3, r3, #18
+ 1196 045a 18D5     		bpl	.L80
+ 1197              		.loc 1 358 0 is_stmt 0 discriminator 5
+ 1198 045c 114D     		ldr	r5, .L84+8
+ 1199 045e 124C     		ldr	r4, .L84+12
+ 1200 0460 2B00     		movs	r3, r5
+ 1201 0462 1133     		adds	r3, r3, #17
+ 1202 0464 0093     		str	r3, [sp]
+ 1203 0466 2200     		movs	r2, r4
+ 1204 0468 2000     		movs	r0, r4
+ 1205 046a B323     		movs	r3, #179
+ 1206 046c 2532     		adds	r2, r2, #37
+ 1207 046e 5B00     		lsls	r3, r3, #1
+ 1208 0470 2100     		movs	r1, r4
+ 1209 0472 3130     		adds	r0, r0, #49
+ 1210 0474 FFF7FEFF 		bl	m_print
+ 1211              	.LVL116:
+ 1212 0478 2800     		movs	r0, r5
+ 1213 047a 3368     		ldr	r3, [r6]
+ 1214 047c 2A30     		adds	r0, r0, #42
+ 1215 047e 5978     		ldrb	r1, [r3, #1]
+ 1216 0480 FFF7FEFF 		bl	m_print
+ 1217              	.LVL117:
+ 1218 0484 2000     		movs	r0, r4
+ 1219 0486 A11D     		adds	r1, r4, #6
+ 1220 0488 7030     		adds	r0, r0, #112
+ 1221 048a FFF7FEFF 		bl	m_print
+ 1222              	.LVL118:
+ 1223              	.L80:
+ 359:../../../mesh/app/ali_light/ali_light.c **** 	return p_ali_light->provState == 1;
+ 1224              		.loc 1 359 0 is_stmt 1
+ 1225 048e 3368     		ldr	r3, [r6]
+ 360:../../../mesh/app/ali_light/ali_light.c **** }
+ 1226              		.loc 1 360 0
+ 1227              		@ sp needed
+ 359:../../../mesh/app/ali_light/ali_light.c **** 	return p_ali_light->provState == 1;
+ 1228              		.loc 1 359 0
+ 1229 0490 5878     		ldrb	r0, [r3, #1]
+ 1230 0492 0138     		subs	r0, r0, #1
+ 1231 0494 4242     		rsbs	r2, r0, #0
+ 1232 0496 4241     		adcs	r2, r2, r0
+ 1233 0498 D0B2     		uxtb	r0, r2
+ 1234              		.loc 1 360 0
+ 1235 049a 76BD     		pop	{r1, r2, r4, r5, r6, pc}
+ 1236              	.L85:
+ 1237              		.align	2
+ 1238              	.L84:
+ 1239 049c 00000000 		.word	L_LEV
+ 1240 04a0 00000000 		.word	.LANCHOR0
+ 1241 04a4 00010000 		.word	.LANCHOR3
+ 1242 04a8 00000000 		.word	.LANCHOR1
+ 1243              		.cfi_endproc
+ 1244              	.LFE104:
+ 1246              		.align	1
+ 1247              		.global	ali_light_factory_reset
+ 1248              		.code	16
+ 1249              		.thumb_func
+ 1251              	ali_light_factory_reset:
+ 1252              	.LFB105:
+ 361:../../../mesh/app/ali_light/ali_light.c **** 
+ 362:../../../mesh/app/ali_light/ali_light.c **** void ali_light_factory_reset()
+ 363:../../../mesh/app/ali_light/ali_light.c **** {
+ 1253              		.loc 1 363 0
+ 1254              		.cfi_startproc
+ 1255              		@ args = 0, pretend = 0, frame = 0
+ 1256              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1257 04ac 10B5     		push	{r4, lr}
+ 1258              	.LCFI19:
+ 1259              		.cfi_def_cfa_offset 8
+ 1260              		.cfi_offset 4, -8
+ 1261              		.cfi_offset 14, -4
+ 364:../../../mesh/app/ali_light/ali_light.c **** 	bc_m_clear_config();
+ 1262              		.loc 1 364 0
+ 1263 04ae FFF7FEFF 		bl	bc_m_clear_config
+ 1264              	.LVL119:
+ 365:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 1265              		.loc 1 365 0
+ 1266 04b2 0121     		movs	r1, #1
+ 1267 04b4 0020     		movs	r0, #0
+ 1268 04b6 FFF7FEFF 		bl	bc_flash_erase
+ 1269              	.LVL120:
+ 366:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+ 367:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.mode = BREATH_MODE_H2L2H;
+ 368:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.rCnt = 5;
+ 369:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
+ 370:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_breath(&p_ali_light->breath);
+ 371:../../../mesh/app/ali_light/ali_light.c **** #endif
+ 372:../../../mesh/app/ali_light/ali_light.c **** 	bc_sys_reset();
+ 373:../../../mesh/app/ali_light/ali_light.c **** }
+ 1270              		.loc 1 373 0
+ 1271              		@ sp needed
+ 372:../../../mesh/app/ali_light/ali_light.c **** }
+ 1272              		.loc 1 372 0
+ 1273 04ba FFF7FEFF 		bl	bc_sys_reset
+ 1274              	.LVL121:
+ 1275              		.loc 1 373 0
+ 1276 04be 10BD     		pop	{r4, pc}
+ 1277              		.cfi_endproc
+ 1278              	.LFE105:
+ 1280              		.align	1
+ 1281              		.code	16
+ 1282              		.thumb_func
+ 1284              	_reload_defalut_param:
+ 1285              	.LFB106:
+ 374:../../../mesh/app/ali_light/ali_light.c **** #ifdef FOR_ALI_TEST
+ 375:../../../mesh/app/ali_light/ali_light.c **** static void ali_light_key_timer_cb(void* param)
+ 376:../../../mesh/app/ali_light/ali_light.c **** {
+ 377:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->key_pre = p_ali_light->key_next;
+ 378:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->key_next = bc_gpio_get(GPIO_PWM1);
+ 379:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light->key_next == 1 && p_ali_light->key_pre == 0){
+ 380:../../../mesh/app/ali_light/ali_light.c **** 		ali_light_cw_set_on_off(!ali_light_cw_get_on_off());
+ 381:../../../mesh/app/ali_light/ali_light.c **** 		//use vedor to indicate
+ 382:../../../mesh/app/ali_light/ali_light.c **** 		_ready_to_indicate(true);
+ 383:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 384:../../../mesh/app/ali_light/ali_light.c **** 	enable_intr(GPIO6_intr);
+ 385:../../../mesh/app/ali_light/ali_light.c **** }
+ 386:../../../mesh/app/ali_light/ali_light.c **** void gpio6_handler(void)
+ 387:../../../mesh/app/ali_light/ali_light.c **** {
+ 388:../../../mesh/app/ali_light/ali_light.c **** 	//printf("gpio6_handler\r\n");
+ 389:../../../mesh/app/ali_light/ali_light.c **** 	//start enable irq timer
+ 390:../../../mesh/app/ali_light/ali_light.c **** 	disable_intr(GPIO6_intr);
+ 391:../../../mesh/app/ali_light/ali_light.c **** 	SYS_SetTimer(&p_ali_light->keyTimer, (int)200/10, 
+ 392:../../../mesh/app/ali_light/ali_light.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_light_key_timer_cb);
+ 393:../../../mesh/app/ali_light/ali_light.c **** }
+ 394:../../../mesh/app/ali_light/ali_light.c **** void ali_light_key_init()
+ 395:../../../mesh/app/ali_light/ali_light.c **** {
+ 396:../../../mesh/app/ali_light/ali_light.c **** 	GPIO_CFG cfg;
+ 397:../../../mesh/app/ali_light/ali_light.c **** 	cfg.pin_func = FUNC_INPUT;
+ 398:../../../mesh/app/ali_light/ali_light.c **** 	cfg.pin_cfg = GFG_PULLDOWN;
+ 399:../../../mesh/app/ali_light/ali_light.c **** 	bc_gpio_init(GPIO_PWM1, &cfg);
+ 400:../../../mesh/app/ali_light/ali_light.c **** 
+ 401:../../../mesh/app/ali_light/ali_light.c **** 	enable_intr(GPIO6_intr);
+ 402:../../../mesh/app/ali_light/ali_light.c **** 
+ 403:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->key_pre = 0;
+ 404:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->key_next = 0;
+ 405:../../../mesh/app/ali_light/ali_light.c **** }
+ 406:../../../mesh/app/ali_light/ali_light.c **** #endif
+ 407:../../../mesh/app/ali_light/ali_light.c **** static void _reload_defalut_param()
+ 408:../../../mesh/app/ali_light/ali_light.c **** {
+ 1286              		.loc 1 408 0
+ 1287              		.cfi_startproc
+ 1288              		@ args = 0, pretend = 0, frame = 0
+ 1289              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1290 04c0 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 1291              	.LCFI20:
+ 1292              		.cfi_def_cfa_offset 24
+ 1293              		.cfi_offset 3, -24
+ 1294              		.cfi_offset 4, -20
+ 1295              		.cfi_offset 5, -16
+ 1296              		.cfi_offset 6, -12
+ 1297              		.cfi_offset 7, -8
+ 1298              		.cfi_offset 14, -4
+ 409:../../../mesh/app/ali_light/ali_light.c **** 	memset((uint8_t*)p_ali_light, 0, ALI_LIGHT_SAVE_LEN);
+ 1299              		.loc 1 409 0
+ 1300 04c2 0926     		movs	r6, #9
+ 1301 04c4 104D     		ldr	r5, .L88
+ 1302 04c6 3200     		movs	r2, r6
+ 1303 04c8 2C68     		ldr	r4, [r5]
+ 1304 04ca 0021     		movs	r1, #0
+ 1305 04cc 2000     		movs	r0, r4
+ 1306 04ce FFF7FEFF 		bl	memset
+ 1307              	.LVL122:
+ 410:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->dType = ali_config_device_type_get();
+ 1308              		.loc 1 410 0
+ 1309 04d2 FFF7FEFF 		bl	ali_config_device_type_get
+ 1310              	.LVL123:
+ 411:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->on = ALI_DEFAULT_ON_VAL;
+ 412:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->ln = ALI_DEFAULT_LN_VAL;
+ 1311              		.loc 1 412 0
+ 1312 04d6 2423     		movs	r3, #36
+ 411:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->on = ALI_DEFAULT_ON_VAL;
+ 1313              		.loc 1 411 0
+ 1314 04d8 0127     		movs	r7, #1
+ 410:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->dType = ali_config_device_type_get();
+ 1315              		.loc 1 410 0
+ 1316 04da A070     		strb	r0, [r4, #2]
+ 411:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->on = ALI_DEFAULT_ON_VAL;
+ 1317              		.loc 1 411 0
+ 1318 04dc 2C68     		ldr	r4, [r5]
+ 1319              		.loc 1 412 0
+ 1320 04de 5B42     		rsbs	r3, r3, #0
+ 1321 04e0 E380     		strh	r3, [r4, #6]
+ 413:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->tp = ALI_DEFAULT_TP_VAL;
+ 1322              		.loc 1 413 0
+ 1323 04e2 0A4B     		ldr	r3, .L88+4
+ 411:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->on = ALI_DEFAULT_ON_VAL;
+ 1324              		.loc 1 411 0
+ 1325 04e4 E770     		strb	r7, [r4, #3]
+ 1326              		.loc 1 413 0
+ 1327 04e6 A380     		strh	r3, [r4, #4]
+ 414:../../../mesh/app/ali_light/ali_light.c **** 	#if (LIGHT_CW_WITH_RGB)
+ 415:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->r = ALI_DEFAULT_R_VAL;
+ 416:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->g = ALI_DEFAULT_G_VAL;
+ 417:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->b = ALI_DEFAULT_B_VAL;
+ 418:../../../mesh/app/ali_light/ali_light.c **** 	#endif
+ 419:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 1328              		.loc 1 419 0
+ 1329 04e8 0821     		movs	r1, #8
+ 1330 04ea 2000     		movs	r0, r4
+ 1331 04ec FFF7FEFF 		bl	bc_sys_check_sum
+ 1332              	.LVL124:
+ 420:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 1333              		.loc 1 420 0
+ 1334 04f0 3900     		movs	r1, r7
+ 419:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+ 1335              		.loc 1 419 0
+ 1336 04f2 2072     		strb	r0, [r4, #8]
+ 1337              		.loc 1 420 0
+ 1338 04f4 0020     		movs	r0, #0
+ 1339 04f6 FFF7FEFF 		bl	bc_flash_erase
+ 1340              	.LVL125:
+ 421:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_write(FLASH_ALI_START_ADDRRESS, ALI_LIGHT_SAVE_LEN,(uint8_t*)p_ali_light);
+ 1341              		.loc 1 421 0
+ 1342 04fa 2A68     		ldr	r2, [r5]
+ 1343 04fc 3100     		movs	r1, r6
+ 1344 04fe 0020     		movs	r0, #0
+ 1345 0500 FFF7FEFF 		bl	bc_flash_write
+ 1346              	.LVL126:
+ 422:../../../mesh/app/ali_light/ali_light.c **** }
+ 1347              		.loc 1 422 0
+ 1348              		@ sp needed
+ 1349 0504 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 1350              	.L89:
+ 1351 0506 C046     		.align	2
+ 1352              	.L88:
+ 1353 0508 00000000 		.word	.LANCHOR0
+ 1354 050c A0280000 		.word	10400
+ 1355              		.cfi_endproc
+ 1356              	.LFE106:
+ 1358              		.align	1
+ 1359              		.global	ali_light_param_init
+ 1360              		.code	16
+ 1361              		.thumb_func
+ 1363              	ali_light_param_init:
+ 1364              	.LFB107:
+ 423:../../../mesh/app/ali_light/ali_light.c **** uint8_t ali_light_param_init()
+ 424:../../../mesh/app/ali_light/ali_light.c **** {
+ 1365              		.loc 1 424 0
+ 1366              		.cfi_startproc
+ 1367              		@ args = 0, pretend = 0, frame = 24
+ 1368              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1369 0510 F0B5     		push	{r4, r5, r6, r7, lr}
+ 1370              	.LCFI21:
+ 1371              		.cfi_def_cfa_offset 20
+ 1372              		.cfi_offset 4, -20
+ 1373              		.cfi_offset 5, -16
+ 1374              		.cfi_offset 6, -12
+ 1375              		.cfi_offset 7, -8
+ 1376              		.cfi_offset 14, -4
+ 425:../../../mesh/app/ali_light/ali_light.c **** 	memset(p_ali_light, 0, sizeof(ali_light_t));
+ 1377              		.loc 1 425 0
+ 1378 0512 2F4C     		ldr	r4, .L104
+ 424:../../../mesh/app/ali_light/ali_light.c **** 	memset(p_ali_light, 0, sizeof(ali_light_t));
+ 1379              		.loc 1 424 0
+ 1380 0514 89B0     		sub	sp, sp, #36
+ 1381              	.LCFI22:
+ 1382              		.cfi_def_cfa_offset 56
+ 1383              		.loc 1 425 0
+ 1384 0516 2568     		ldr	r5, [r4]
+ 1385 0518 B822     		movs	r2, #184
+ 1386 051a 0021     		movs	r1, #0
+ 1387 051c 2800     		movs	r0, r5
+ 1388 051e FFF7FEFF 		bl	memset
+ 1389              	.LVL127:
+ 426:../../../mesh/app/ali_light/ali_light.c **** 	//read saved parameter
+ 427:../../../mesh/app/ali_light/ali_light.c **** 	bc_flash_read(FLASH_ALI_START_ADDRRESS, ALI_LIGHT_SAVE_LEN,(uint8_t*)p_ali_light);
+ 1390              		.loc 1 427 0
+ 1391 0522 2A00     		movs	r2, r5
+ 1392 0524 0921     		movs	r1, #9
+ 1393 0526 0020     		movs	r0, #0
+ 1394 0528 FFF7FEFF 		bl	bc_flash_read
+ 1395              	.LVL128:
+ 428:../../../mesh/app/ali_light/ali_light.c **** 	uint8_t tCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
+ 1396              		.loc 1 428 0
+ 1397 052c 0821     		movs	r1, #8
+ 1398 052e 2068     		ldr	r0, [r4]
+ 1399 0530 FFF7FEFF 		bl	bc_sys_check_sum
+ 1400              	.LVL129:
+ 429:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light->saveCfgCrc != tCrc){
+ 1401              		.loc 1 429 0
+ 1402 0534 2368     		ldr	r3, [r4]
+ 1403 0536 1A7A     		ldrb	r2, [r3, #8]
+ 1404 0538 8242     		cmp	r2, r0
+ 1405 053a 27D1     		bne	.L103
+ 430:../../../mesh/app/ali_light/ali_light.c **** 		_reload_defalut_param();
+ 431:../../../mesh/app/ali_light/ali_light.c **** 	}else{
+ 432:../../../mesh/app/ali_light/ali_light.c **** 		if(p_ali_light->dType != ali_config_device_type_get()){//change device type
+ 1406              		.loc 1 432 0
+ 1407 053c 9D78     		ldrb	r5, [r3, #2]
+ 1408 053e FFF7FEFF 		bl	ali_config_device_type_get
+ 1409              	.LVL130:
+ 1410 0542 8542     		cmp	r5, r0
+ 1411 0544 24D0     		beq	.L92
+ 433:../../../mesh/app/ali_light/ali_light.c **** 			M_PRINTF(L_APP, "device type is changed [%d] to [%d]", p_ali_light->dType, ali_config_device_typ
+ 1412              		.loc 1 433 0
+ 1413 0546 234B     		ldr	r3, .L104+4
+ 1414 0548 1B68     		ldr	r3, [r3]
+ 1415 054a 9B04     		lsls	r3, r3, #18
+ 1416 054c 1CD5     		bpl	.L93
+ 1417              		.loc 1 433 0 is_stmt 0 discriminator 5
+ 1418 054e 224E     		ldr	r6, .L104+8
+ 1419 0550 224D     		ldr	r5, .L104+12
+ 1420 0552 3300     		movs	r3, r6
+ 1421 0554 3A33     		adds	r3, r3, #58
+ 1422 0556 0093     		str	r3, [sp]
+ 1423 0558 2A00     		movs	r2, r5
+ 1424 055a 2800     		movs	r0, r5
+ 1425 055c B223     		movs	r3, #178
+ 1426 055e 2532     		adds	r2, r2, #37
+ 1427 0560 2900     		movs	r1, r5
+ 1428 0562 FF33     		adds	r3, r3, #255
+ 1429 0564 3130     		adds	r0, r0, #49
+ 1430 0566 FFF7FEFF 		bl	m_print
+ 1431              	.LVL131:
+ 1432 056a 2368     		ldr	r3, [r4]
+ 1433 056c 9F78     		ldrb	r7, [r3, #2]
+ 1434 056e FFF7FEFF 		bl	ali_config_device_type_get
+ 1435              	.LVL132:
+ 1436 0572 0200     		movs	r2, r0
+ 1437 0574 3000     		movs	r0, r6
+ 1438 0576 3900     		movs	r1, r7
+ 1439 0578 4F30     		adds	r0, r0, #79
+ 1440 057a FFF7FEFF 		bl	m_print
+ 1441              	.LVL133:
+ 1442 057e 2800     		movs	r0, r5
+ 1443 0580 A91D     		adds	r1, r5, #6
+ 1444 0582 7030     		adds	r0, r0, #112
+ 1445 0584 FFF7FEFF 		bl	m_print
+ 1446              	.LVL134:
+ 1447              	.L93:
+ 434:../../../mesh/app/ali_light/ali_light.c **** 			bc_m_clear_config();
+ 1448              		.loc 1 434 0 is_stmt 1
+ 1449 0588 FFF7FEFF 		bl	bc_m_clear_config
+ 1450              	.LVL135:
+ 1451              	.L103:
+ 435:../../../mesh/app/ali_light/ali_light.c **** 			_reload_defalut_param();
+ 1452              		.loc 1 435 0
+ 1453 058c FFF798FF 		bl	_reload_defalut_param
+ 1454              	.LVL136:
+ 1455              	.L92:
+ 436:../../../mesh/app/ali_light/ali_light.c **** 		}
+ 437:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 438:../../../mesh/app/ali_light/ali_light.c **** 
+ 439:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light->dType == PID_CW){
+ 1456              		.loc 1 439 0
+ 1457 0590 2568     		ldr	r5, [r4]
+ 1458 0592 A978     		ldrb	r1, [r5, #2]
+ 1459 0594 0029     		cmp	r1, #0
+ 1460 0596 14D1     		bne	.L94
+ 1461              	.LBB29:
+ 1462              	.LBB30:
+  38:../../../mesh/app/ali_light/ali_light.c **** 		return;
+ 1463              		.loc 1 38 0
+ 1464 0598 2379     		ldrb	r3, [r4, #4]
+ 1465 059a 012B     		cmp	r3, #1
+ 1466 059c 14D0     		beq	.L96
+  40:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+ 1467              		.loc 1 40 0
+ 1468 059e 0126     		movs	r6, #1
+ 1469 05a0 2671     		strb	r6, [r4, #4]
+  47:../../../mesh/app/ali_light/ali_light.c **** 					.ln = ALI_DEFAULT_LN_VAL,
+ 1470              		.loc 1 47 0
+ 1471 05a2 03AC     		add	r4, sp, #12
+ 1472 05a4 1422     		movs	r2, #20
+ 1473 05a6 2000     		movs	r0, r4
+ 1474 05a8 FFF7FEFF 		bl	memset
+ 1475              	.LVL137:
+ 1476 05ac 0C4B     		ldr	r3, .L104+16
+ 1477 05ae 2672     		strb	r6, [r4, #8]
+ 1478 05b0 A380     		strh	r3, [r4, #4]
+  52:../../../mesh/app/ali_light/ali_light.c **** 	t.ln = p_ali_light->ln;
+ 1479              		.loc 1 52 0
+ 1480 05b2 AB88     		ldrh	r3, [r5, #4]
+  59:../../../mesh/app/ali_light/ali_light.c **** }
+ 1481              		.loc 1 59 0
+ 1482 05b4 2000     		movs	r0, r4
+  52:../../../mesh/app/ali_light/ali_light.c **** 	t.ln = p_ali_light->ln;
+ 1483              		.loc 1 52 0
+ 1484 05b6 E381     		strh	r3, [r4, #14]
+  53:../../../mesh/app/ali_light/ali_light.c **** #if (LIGHT_CW_WITH_RGB)
+ 1485              		.loc 1 53 0
+ 1486 05b8 EB88     		ldrh	r3, [r5, #6]
+ 1487 05ba 6381     		strh	r3, [r4, #10]
+  59:../../../mesh/app/ali_light/ali_light.c **** }
+ 1488              		.loc 1 59 0
+ 1489 05bc FFF7FEFF 		bl	led_cw_init
+ 1490              	.LVL138:
+ 1491 05c0 02E0     		b	.L96
+ 1492              	.L94:
+ 1493              	.LBE30:
+ 1494              	.LBE29:
+ 440:../../../mesh/app/ali_light/ali_light.c **** 		_light_cw_init();
+ 441:../../../mesh/app/ali_light/ali_light.c **** 	}else{//PID_LTN
+ 442:../../../mesh/app/ali_light/ali_light.c **** 		led_ltn_init(NULL);
+ 1495              		.loc 1 442 0
+ 1496 05c2 0020     		movs	r0, #0
+ 1497 05c4 FFF7FEFF 		bl	led_ltn_init
+ 1498              	.LVL139:
+ 1499              	.L96:
+ 443:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 444:../../../mesh/app/ali_light/ali_light.c **** 	return 0;
+ 445:../../../mesh/app/ali_light/ali_light.c **** }
+ 1500              		.loc 1 445 0
+ 1501 05c8 0020     		movs	r0, #0
+ 1502 05ca 09B0     		add	sp, sp, #36
+ 1503              		@ sp needed
+ 1504 05cc F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1505              	.L105:
+ 1506 05ce C046     		.align	2
+ 1507              	.L104:
+ 1508 05d0 00000000 		.word	.LANCHOR0
+ 1509 05d4 00000000 		.word	L_LEV
+ 1510 05d8 00010000 		.word	.LANCHOR3
+ 1511 05dc 00000000 		.word	.LANCHOR1
+ 1512 05e0 E02E0000 		.word	12000
+ 1513              		.cfi_endproc
+ 1514              	.LFE107:
+ 1516              		.align	1
+ 1517              		.code	16
+ 1518              		.thumb_func
+ 1520              	_ali_vendor_rx_cb:
+ 1521              	.LFB108:
+ 446:../../../mesh/app/ali_light/ali_light.c **** 
+ 447:../../../mesh/app/ali_light/ali_light.c **** static void _ali_vendor_rx_cb(const m_lid_t model_lid, const uint8_t opcode, const uint8_t* data, c
+ 448:../../../mesh/app/ali_light/ali_light.c **** {
+ 1522              		.loc 1 448 0
+ 1523              		.cfi_startproc
+ 1524              		@ args = 0, pretend = 0, frame = 8
+ 1525              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1526              	.LVL140:
+ 1527 05e4 F0B5     		push	{r4, r5, r6, r7, lr}
+ 1528              	.LCFI23:
+ 1529              		.cfi_def_cfa_offset 20
+ 1530              		.cfi_offset 4, -20
+ 1531              		.cfi_offset 5, -16
+ 1532              		.cfi_offset 6, -12
+ 1533              		.cfi_offset 7, -8
+ 1534              		.cfi_offset 14, -4
+ 1535 05e6 1E00     		movs	r6, r3
+ 449:../../../mesh/app/ali_light/ali_light.c **** 	if(model_lid != p_ali_light->model[3].lid){
+ 1536              		.loc 1 449 0
+ 1537 05e8 234B     		ldr	r3, .L115
+ 1538              	.LVL141:
+ 448:../../../mesh/app/ali_light/ali_light.c **** 	if(model_lid != p_ali_light->model[3].lid){
+ 1539              		.loc 1 448 0
+ 1540 05ea 85B0     		sub	sp, sp, #20
+ 1541              	.LCFI24:
+ 1542              		.cfi_def_cfa_offset 40
+ 1543              		.loc 1 449 0
+ 1544 05ec 1B68     		ldr	r3, [r3]
+ 448:../../../mesh/app/ali_light/ali_light.c **** 	if(model_lid != p_ali_light->model[3].lid){
+ 1545              		.loc 1 448 0
+ 1546 05ee 0F00     		movs	r7, r1
+ 1547              		.loc 1 449 0
+ 1548 05f0 8D33     		adds	r3, r3, #141
+ 1549 05f2 1B78     		ldrb	r3, [r3]
+ 448:../../../mesh/app/ali_light/ali_light.c **** 	if(model_lid != p_ali_light->model[3].lid){
+ 1550              		.loc 1 448 0
+ 1551 05f4 1500     		movs	r5, r2
+ 1552              		.loc 1 449 0
+ 1553 05f6 0393     		str	r3, [sp, #12]
+ 1554 05f8 8342     		cmp	r3, r0
+ 1555 05fa 3BD1     		bne	.L106
+ 450:../../../mesh/app/ali_light/ali_light.c **** 		return;
+ 451:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 452:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "opcode[%x]", opcode);
+ 1556              		.loc 1 452 0
+ 1557 05fc 1F4B     		ldr	r3, .L115+4
+ 1558 05fe 1B68     		ldr	r3, [r3]
+ 1559 0600 9B04     		lsls	r3, r3, #18
+ 1560 0602 16D5     		bpl	.L108
+ 1561              		.loc 1 452 0 is_stmt 0 discriminator 5
+ 1562 0604 1E4B     		ldr	r3, .L115+8
+ 1563 0606 1F4C     		ldr	r4, .L115+12
+ 1564 0608 7333     		adds	r3, r3, #115
+ 1565 060a 0093     		str	r3, [sp]
+ 1566 060c 2200     		movs	r2, r4
+ 1567              	.LVL142:
+ 1568 060e 2000     		movs	r0, r4
+ 1569              	.LVL143:
+ 1570 0610 E223     		movs	r3, #226
+ 1571 0612 2532     		adds	r2, r2, #37
+ 1572 0614 5B00     		lsls	r3, r3, #1
+ 1573 0616 2100     		movs	r1, r4
+ 1574              	.LVL144:
+ 1575 0618 3130     		adds	r0, r0, #49
+ 1576 061a FFF7FEFF 		bl	m_print
+ 1577              	.LVL145:
+ 1578 061e 1A48     		ldr	r0, .L115+16
+ 1579 0620 3900     		movs	r1, r7
+ 1580 0622 0530     		adds	r0, r0, #5
+ 1581 0624 FFF7FEFF 		bl	m_print
+ 1582              	.LVL146:
+ 1583 0628 2000     		movs	r0, r4
+ 1584 062a A11D     		adds	r1, r4, #6
+ 1585 062c 7030     		adds	r0, r0, #112
+ 1586 062e FFF7FEFF 		bl	m_print
+ 1587              	.LVL147:
+ 1588              	.L108:
+ 453:../../../mesh/app/ali_light/ali_light.c **** 	switch(opcode){
+ 1589              		.loc 1 453 0 is_stmt 1
+ 1590 0632 D12F     		cmp	r7, #209
+ 1591 0634 0AD0     		beq	.L109
+ 1592 0636 D52F     		cmp	r7, #213
+ 1593 0638 1CD1     		bne	.L106
+ 454:../../../mesh/app/ali_light/ali_light.c **** 	case MM_MSG_ALIS_ATTR_CONFIRMATION:{
+ 455:../../../mesh/app/ali_light/ali_light.c **** 		m_printf_hex(L_APP, "ALI VENDOR RECV", data, len);
+ 1594              		.loc 1 455 0
+ 1595 063a 8020     		movs	r0, #128
+ 1596 063c 1249     		ldr	r1, .L115+16
+ 1597 063e 3300     		movs	r3, r6
+ 1598 0640 2A00     		movs	r2, r5
+ 1599 0642 1031     		adds	r1, r1, #16
+ 1600 0644 8001     		lsls	r0, r0, #6
+ 1601 0646 FFF7FEFF 		bl	m_printf_hex
+ 1602              	.LVL148:
+ 456:../../../mesh/app/ali_light/ali_light.c **** 	}break;
+ 1603              		.loc 1 456 0
+ 1604 064a 13E0     		b	.L106
+ 1605              	.L109:
+ 1606              	.LVL149:
+ 1607              	.LBB36:
+ 1608              	.LBB37:
+ 1609              	.LBB38:
+ 457:../../../mesh/app/ali_light/ali_light.c **** 	case MM_MSG_ALIS_ATTR_SET:{
+ 458:../../../mesh/app/ali_light/ali_light.c **** 		m_printf_hex(L_APP, "ALI VENDOR SET RECV", data, len);
+ 1610              		.loc 1 458 0
+ 1611 064c 8020     		movs	r0, #128
+ 1612 064e 0E49     		ldr	r1, .L115+16
+ 1613 0650 3300     		movs	r3, r6
+ 1614 0652 2A00     		movs	r2, r5
+ 1615 0654 2031     		adds	r1, r1, #32
+ 1616 0656 8001     		lsls	r0, r0, #6
+ 1617 0658 FFF7FEFF 		bl	m_printf_hex
+ 1618              	.LVL150:
+ 459:../../../mesh/app/ali_light/ali_light.c **** 		static uint8_t tid = 0;
+ 460:../../../mesh/app/ali_light/ali_light.c **** 		if(tid != data[0]){
+ 1619              		.loc 1 460 0
+ 1620 065c 064B     		ldr	r3, .L115
+ 1621 065e 2A78     		ldrb	r2, [r5]
+ 1622 0660 5979     		ldrb	r1, [r3, #5]
+ 1623 0662 9142     		cmp	r1, r2
+ 1624 0664 00D0     		beq	.L111
+ 1625              	.LBB39:
+ 461:../../../mesh/app/ali_light/ali_light.c **** 			tid = data[0];
+ 1626              		.loc 1 461 0
+ 1627 0666 5A71     		strb	r2, [r3, #5]
+ 1628              	.LVL151:
+ 1629              	.L111:
+ 1630              	.LBE39:
+ 462:../../../mesh/app/ali_light/ali_light.c **** 			uint16_t cmd = data[1] + (data[2]<<8);
+ 463:../../../mesh/app/ali_light/ali_light.c **** 			if(cmd == 0x0123){
+ 464:../../../mesh/app/ali_light/ali_light.c **** 				uint16_t l = data[3] + (data[4]<<8);
+ 465:../../../mesh/app/ali_light/ali_light.c **** 				uint16_t h = data[5] + (data[6]<<8);
+ 466:../../../mesh/app/ali_light/ali_light.c **** 				uint16_t s = data[7] + (data[8]<<8);
+ 467:../../../mesh/app/ali_light/ali_light.c **** 				ali_light_rgb_set(l,h,s);
+ 468:../../../mesh/app/ali_light/ali_light.c **** 			}
+ 469:../../../mesh/app/ali_light/ali_light.c **** 		}
+ 470:../../../mesh/app/ali_light/ali_light.c **** 		//do response
+ 471:../../../mesh/app/ali_light/ali_light.c **** 		bc_mm_ali_vendor_send(model_lid, MM_MSG_ALIS_ATTR_STATUS, (uint8_t*)data, len);
+ 1631              		.loc 1 471 0
+ 1632 0668 3300     		movs	r3, r6
+ 1633 066a 2A00     		movs	r2, r5
+ 1634 066c D321     		movs	r1, #211
+ 1635 066e 0398     		ldr	r0, [sp, #12]
+ 1636 0670 FFF7FEFF 		bl	bc_mm_ali_vendor_send
+ 1637              	.LVL152:
+ 1638              	.L106:
+ 1639              	.LBE38:
+ 1640              	.LBE37:
+ 1641              	.LBE36:
+ 472:../../../mesh/app/ali_light/ali_light.c **** 	}break;
+ 473:../../../mesh/app/ali_light/ali_light.c **** 	default:break;
+ 474:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 475:../../../mesh/app/ali_light/ali_light.c **** }
+ 1642              		.loc 1 475 0
+ 1643 0674 05B0     		add	sp, sp, #20
+ 1644              		@ sp needed
+ 1645              	.LVL153:
+ 1646 0676 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1647              	.L116:
+ 1648              		.align	2
+ 1649              	.L115:
+ 1650 0678 00000000 		.word	.LANCHOR0
+ 1651 067c 00000000 		.word	L_LEV
+ 1652 0680 00010000 		.word	.LANCHOR3
+ 1653 0684 00000000 		.word	.LANCHOR1
+ 1654 0688 80010000 		.word	.LANCHOR4
+ 1655              		.cfi_endproc
+ 1656              	.LFE108:
+ 1658              		.align	1
+ 1659              		.global	ali_light_init
+ 1660              		.code	16
+ 1661              		.thumb_func
+ 1663              	ali_light_init:
+ 1664              	.LFB109:
+ 476:../../../mesh/app/ali_light/ali_light.c **** 
+ 477:../../../mesh/app/ali_light/ali_light.c **** uint8_t ali_light_init(mesh_model_t** mdl, uint8_t* mcnt)
+ 478:../../../mesh/app/ali_light/ali_light.c **** {
+ 1665              		.loc 1 478 0
+ 1666              		.cfi_startproc
+ 1667              		@ args = 0, pretend = 0, frame = 8
+ 1668              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1669              	.LVL154:
+ 1670 068c F0B5     		push	{r4, r5, r6, r7, lr}
+ 1671              	.LCFI25:
+ 1672              		.cfi_def_cfa_offset 20
+ 1673              		.cfi_offset 4, -20
+ 1674              		.cfi_offset 5, -16
+ 1675              		.cfi_offset 6, -12
+ 1676              		.cfi_offset 7, -8
+ 1677              		.cfi_offset 14, -4
+ 479:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "-------init light---------");
+ 1678              		.loc 1 479 0
+ 1679 068e 554B     		ldr	r3, .L128
+ 478:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "-------init light---------");
+ 1680              		.loc 1 478 0
+ 1681 0690 85B0     		sub	sp, sp, #20
+ 1682              	.LCFI26:
+ 1683              		.cfi_def_cfa_offset 40
+ 1684              		.loc 1 479 0
+ 1685 0692 1B68     		ldr	r3, [r3]
+ 478:../../../mesh/app/ali_light/ali_light.c **** 	M_PRINTF(L_APP, "-------init light---------");
+ 1686              		.loc 1 478 0
+ 1687 0694 0700     		movs	r7, r0
+ 1688 0696 0391     		str	r1, [sp, #12]
+ 1689              		.loc 1 479 0
+ 1690 0698 9B04     		lsls	r3, r3, #18
+ 1691 069a 16D5     		bpl	.L118
+ 1692              		.loc 1 479 0 is_stmt 0 discriminator 5
+ 1693 069c 524D     		ldr	r5, .L128+4
+ 1694 069e 534C     		ldr	r4, .L128+8
+ 1695 06a0 2B00     		movs	r3, r5
+ 1696 06a2 3433     		adds	r3, r3, #52
+ 1697 06a4 0093     		str	r3, [sp]
+ 1698 06a6 2200     		movs	r2, r4
+ 1699 06a8 2000     		movs	r0, r4
+ 1700              	.LVL155:
+ 1701 06aa E023     		movs	r3, #224
+ 1702 06ac 2100     		movs	r1, r4
+ 1703              	.LVL156:
+ 1704 06ae 2532     		adds	r2, r2, #37
+ 1705 06b0 FF33     		adds	r3, r3, #255
+ 1706 06b2 3130     		adds	r0, r0, #49
+ 1707 06b4 FFF7FEFF 		bl	m_print
+ 1708              	.LVL157:
+ 1709 06b8 2800     		movs	r0, r5
+ 1710 06ba 4330     		adds	r0, r0, #67
+ 1711 06bc FFF7FEFF 		bl	m_print
+ 1712              	.LVL158:
+ 1713 06c0 2000     		movs	r0, r4
+ 1714 06c2 A11D     		adds	r1, r4, #6
+ 1715 06c4 7030     		adds	r0, r0, #112
+ 1716 06c6 FFF7FEFF 		bl	m_print
+ 1717              	.LVL159:
+ 1718              	.L118:
+ 480:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light = ke_malloc(sizeof(ali_light_t), 0);
+ 1719              		.loc 1 480 0 is_stmt 1
+ 1720 06ca 0021     		movs	r1, #0
+ 1721 06cc B820     		movs	r0, #184
+ 1722 06ce FFF7FEFF 		bl	ke_malloc
+ 1723              	.LVL160:
+ 1724 06d2 474D     		ldr	r5, .L128+12
+ 481:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light == NULL)
+ 482:../../../mesh/app/ali_light/ali_light.c **** 		return 1;
+ 1725              		.loc 1 482 0
+ 1726 06d4 0124     		movs	r4, #1
+ 480:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light = ke_malloc(sizeof(ali_light_t), 0);
+ 1727              		.loc 1 480 0
+ 1728 06d6 2860     		str	r0, [r5]
+ 481:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light == NULL)
+ 1729              		.loc 1 481 0
+ 1730 06d8 0028     		cmp	r0, #0
+ 1731 06da 7FD0     		beq	.L119
+ 483:../../../mesh/app/ali_light/ali_light.c **** 	
+ 484:../../../mesh/app/ali_light/ali_light.c **** 	ali_light_param_init();
+ 1732              		.loc 1 484 0
+ 1733 06dc FFF7FEFF 		bl	ali_light_param_init
+ 1734              	.LVL161:
+ 485:../../../mesh/app/ali_light/ali_light.c **** 	//ali local quick restore parameter
+ 486:../../../mesh/app/ali_light/ali_light.c **** 	ali_light_quick_restore_init();
+ 1735              		.loc 1 486 0
+ 1736 06e0 FFF7FEFF 		bl	ali_light_quick_restore_init
+ 1737              	.LVL162:
+ 487:../../../mesh/app/ali_light/ali_light.c **** #ifdef BREATH_CONFIG
+ 488:../../../mesh/app/ali_light/ali_light.c **** 	//open light 
+ 489:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.mode = BREATH_MODE_FLOW;
+ 490:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.rCnt = 1;
+ 491:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
+ 492:../../../mesh/app/ali_light/ali_light.c **** 	led_cw_set_on_off(ALI_CW_ON, &p_ali_light->breath);
+ 493:../../../mesh/app/ali_light/ali_light.c **** #endif
+ 494:../../../mesh/app/ali_light/ali_light.c **** 	
+ 495:../../../mesh/app/ali_light/ali_light.c **** 	//start timer for clear
+ 496:../../../mesh/app/ali_light/ali_light.c **** 	SYS_SetTimer(&p_ali_light->startDelayTimer, (int)ALI_QUICK_START_TIME/10, 
+ 1738              		.loc 1 496 0
+ 1739 06e4 2868     		ldr	r0, [r5]
+ 1740 06e6 434B     		ldr	r3, .L128+16
+ 1741 06e8 0022     		movs	r2, #0
+ 1742 06ea C821     		movs	r1, #200
+ 1743 06ec 0C30     		adds	r0, r0, #12
+ 1744 06ee FFF7FEFF 		bl	SYS_SetTimer
+ 1745              	.LVL163:
+ 497:../../../mesh/app/ali_light/ali_light.c **** 					TIMER_SINGLE, (Timer_Expire_CB)ali_light_quick_restore_timer_cb);
+ 498:../../../mesh/app/ali_light/ali_light.c **** 
+ 499:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light->dType == PID_CW){
+ 1746              		.loc 1 499 0
+ 1747 06f2 2868     		ldr	r0, [r5]
+ 1748 06f4 0100     		movs	r1, r0
+ 1749 06f6 0300     		movs	r3, r0
+ 1750 06f8 8278     		ldrb	r2, [r0, #2]
+ 1751 06fa 9831     		adds	r1, r1, #152
+ 1752 06fc 9C33     		adds	r3, r3, #156
+ 1753 06fe 002A     		cmp	r2, #0
+ 1754 0700 04D1     		bne	.L120
+ 500:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->oo_ctrl.set = ali_light_cw_set_on_off;
+ 1755              		.loc 1 500 0
+ 1756 0702 3D4A     		ldr	r2, .L128+20
+ 1757 0704 0A60     		str	r2, [r1]
+ 501:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->oo_ctrl.get = ali_light_cw_get_on_off;
+ 1758              		.loc 1 501 0
+ 1759 0706 3D4A     		ldr	r2, .L128+24
+ 1760 0708 1A60     		str	r2, [r3]
+ 1761 070a 03E0     		b	.L121
+ 1762              	.L120:
+ 502:../../../mesh/app/ali_light/ali_light.c **** 	}else{//PID_LTN
+ 503:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->oo_ctrl.set = ali_light_ltn_set_on_off;
+ 1763              		.loc 1 503 0
+ 1764 070c 3C4A     		ldr	r2, .L128+28
+ 1765 070e 0A60     		str	r2, [r1]
+ 504:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->oo_ctrl.get = ali_light_ltn_get_on_off;
+ 1766              		.loc 1 504 0
+ 1767 0710 3C4A     		ldr	r2, .L128+32
+ 1768 0712 1A60     		str	r2, [r3]
+ 1769              	.L121:
+ 505:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 506:../../../mesh/app/ali_light/ali_light.c **** 	mesh_model_t* tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
+ 1770              		.loc 1 506 0
+ 1771 0714 0200     		movs	r2, r0
+ 1772 0716 5432     		adds	r2, r2, #84
+ 1773 0718 1378     		ldrb	r3, [r2]
+ 1774 071a 5C1C     		adds	r4, r3, #1
+ 1775 071c 1470     		strb	r4, [r2]
+ 1776              	.LVL164:
+ 507:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1777              		.loc 1 507 0
+ 1778 071e 0024     		movs	r4, #0
+ 1779 0720 1B01     		lsls	r3, r3, #4
+ 1780              	.LVL165:
+ 1781 0722 C218     		adds	r2, r0, r3
+ 1782 0724 5C32     		adds	r2, r2, #92
+ 506:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1783              		.loc 1 506 0
+ 1784 0726 5833     		adds	r3, r3, #88
+ 1785              		.loc 1 507 0
+ 1786 0728 1470     		strb	r4, [r2]
+ 506:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1787              		.loc 1 506 0
+ 1788 072a C018     		adds	r0, r0, r3
+ 508:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_gens_oo_init(tmModel, &p_ali_light->oo_ctrl);
+ 1789              		.loc 1 508 0
+ 1790 072c FFF7FEFF 		bl	bc_mm_gens_oo_init
+ 1791              	.LVL166:
+ 509:../../../mesh/app/ali_light/ali_light.c **** 
+ 510:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light->dType == PID_CW){
+ 1792              		.loc 1 510 0
+ 1793 0730 2868     		ldr	r0, [r5]
+ 1794 0732 0200     		movs	r2, r0
+ 1795 0734 0300     		movs	r3, r0
+ 1796 0736 8178     		ldrb	r1, [r0, #2]
+ 1797 0738 A032     		adds	r2, r2, #160
+ 1798 073a A433     		adds	r3, r3, #164
+ 1799 073c A142     		cmp	r1, r4
+ 1800 073e 04D1     		bne	.L122
+ 511:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->light_ln_ctrl.set = ali_light_cw_set_lightness;
+ 1801              		.loc 1 511 0
+ 1802 0740 3149     		ldr	r1, .L128+36
+ 1803 0742 1160     		str	r1, [r2]
+ 512:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->light_ln_ctrl.get = ali_light_cw_get_lightness;
+ 1804              		.loc 1 512 0
+ 1805 0744 314A     		ldr	r2, .L128+40
+ 1806 0746 1A60     		str	r2, [r3]
+ 1807 0748 03E0     		b	.L123
+ 1808              	.L122:
+ 513:../../../mesh/app/ali_light/ali_light.c **** 	}else{//PID_LTN
+ 514:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->light_ln_ctrl.set = ali_light_ltn_set_lightness;
+ 1809              		.loc 1 514 0
+ 1810 074a 3149     		ldr	r1, .L128+44
+ 1811 074c 1160     		str	r1, [r2]
+ 515:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light->light_ln_ctrl.get = ali_light_ltn_get_lightness;
+ 1812              		.loc 1 515 0
+ 1813 074e 314A     		ldr	r2, .L128+48
+ 1814 0750 1A60     		str	r2, [r3]
+ 1815              	.L123:
+ 516:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 517:../../../mesh/app/ali_light/ali_light.c **** 	tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
+ 1816              		.loc 1 517 0
+ 1817 0752 0200     		movs	r2, r0
+ 1818 0754 5432     		adds	r2, r2, #84
+ 1819 0756 1378     		ldrb	r3, [r2]
+ 518:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1820              		.loc 1 518 0
+ 1821 0758 0024     		movs	r4, #0
+ 517:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1822              		.loc 1 517 0
+ 1823 075a 591C     		adds	r1, r3, #1
+ 1824 075c 1170     		strb	r1, [r2]
+ 1825              	.LVL167:
+ 519:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_light_ln_init(tmModel, &p_ali_light->light_ln_ctrl);
+ 1826              		.loc 1 519 0
+ 1827 075e 0100     		movs	r1, r0
+ 518:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1828              		.loc 1 518 0
+ 1829 0760 1B01     		lsls	r3, r3, #4
+ 1830              	.LVL168:
+ 1831 0762 C218     		adds	r2, r0, r3
+ 1832 0764 5C32     		adds	r2, r2, #92
+ 517:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1833              		.loc 1 517 0
+ 1834 0766 5833     		adds	r3, r3, #88
+ 1835 0768 C018     		adds	r0, r0, r3
+ 518:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1836              		.loc 1 518 0
+ 1837 076a 1470     		strb	r4, [r2]
+ 1838              		.loc 1 519 0
+ 1839 076c A031     		adds	r1, r1, #160
+ 1840 076e FFF7FEFF 		bl	bc_mm_light_ln_init
+ 1841              	.LVL169:
+ 520:../../../mesh/app/ali_light/ali_light.c **** 
+ 521:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->light_ctl_ctrl.ctl_set = ali_light_cw_set_temperature;
+ 1842              		.loc 1 521 0
+ 1843 0772 1F4D     		ldr	r5, .L128+12
+ 1844 0774 284B     		ldr	r3, .L128+52
+ 1845 0776 2868     		ldr	r0, [r5]
+ 522:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->light_ctl_ctrl.ctl_get = ali_light_cw_get_temperature;
+ 1846              		.loc 1 522 0
+ 1847 0778 284A     		ldr	r2, .L128+56
+ 521:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->light_ctl_ctrl.ctl_get = ali_light_cw_get_temperature;
+ 1848              		.loc 1 521 0
+ 1849 077a 0100     		movs	r1, r0
+ 1850 077c A831     		adds	r1, r1, #168
+ 1851 077e 0B60     		str	r3, [r1]
+ 1852              		.loc 1 522 0
+ 1853 0780 0300     		movs	r3, r0
+ 1854 0782 AC33     		adds	r3, r3, #172
+ 1855 0784 1A60     		str	r2, [r3]
+ 523:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->light_ctl_ctrl.ln_set = ali_light_cw_set_lightness;
+ 1856              		.loc 1 523 0
+ 1857 0786 204A     		ldr	r2, .L128+36
+ 1858 0788 5A60     		str	r2, [r3, #4]
+ 524:../../../mesh/app/ali_light/ali_light.c **** 	p_ali_light->light_ctl_ctrl.ln_get = ali_light_cw_get_lightness;
+ 1859              		.loc 1 524 0
+ 1860 078a 204A     		ldr	r2, .L128+40
+ 1861 078c 9A60     		str	r2, [r3, #8]
+ 525:../../../mesh/app/ali_light/ali_light.c **** 	tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
+ 1862              		.loc 1 525 0
+ 1863 078e 0200     		movs	r2, r0
+ 1864 0790 5432     		adds	r2, r2, #84
+ 1865 0792 1378     		ldrb	r3, [r2]
+ 1866 0794 5E1C     		adds	r6, r3, #1
+ 526:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1867              		.loc 1 526 0
+ 1868 0796 1B01     		lsls	r3, r3, #4
+ 525:../../../mesh/app/ali_light/ali_light.c **** 	tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
+ 1869              		.loc 1 525 0
+ 1870 0798 1670     		strb	r6, [r2]
+ 1871              		.loc 1 526 0
+ 1872 079a C218     		adds	r2, r0, r3
+ 1873 079c 5C32     		adds	r2, r2, #92
+ 525:../../../mesh/app/ali_light/ali_light.c **** 	tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
+ 1874              		.loc 1 525 0
+ 1875 079e 5833     		adds	r3, r3, #88
+ 1876 07a0 C018     		adds	r0, r0, r3
+ 1877              		.loc 1 526 0
+ 1878 07a2 1470     		strb	r4, [r2]
+ 527:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_light_ctl_init(tmModel, &p_ali_light->light_ctl_ctrl);
+ 1879              		.loc 1 527 0
+ 1880 07a4 FFF7FEFF 		bl	bc_mm_light_ctl_init
+ 1881              	.LVL170:
+ 528:../../../mesh/app/ali_light/ali_light.c **** 
+ 529:../../../mesh/app/ali_light/ali_light.c **** 	tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
+ 1882              		.loc 1 529 0
+ 1883 07a8 2A68     		ldr	r2, [r5]
+ 1884 07aa 1100     		movs	r1, r2
+ 1885 07ac 5431     		adds	r1, r1, #84
+ 1886 07ae 0B78     		ldrb	r3, [r1]
+ 1887 07b0 581C     		adds	r0, r3, #1
+ 530:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1888              		.loc 1 530 0
+ 1889 07b2 1B01     		lsls	r3, r3, #4
+ 529:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1890              		.loc 1 529 0
+ 1891 07b4 0870     		strb	r0, [r1]
+ 1892              		.loc 1 530 0
+ 1893 07b6 D118     		adds	r1, r2, r3
+ 1894 07b8 5C31     		adds	r1, r1, #92
+ 529:../../../mesh/app/ali_light/ali_light.c **** 	tmModel->offset = 0;//element num
+ 1895              		.loc 1 529 0
+ 1896 07ba 5833     		adds	r3, r3, #88
+ 1897 07bc D018     		adds	r0, r2, r3
+ 1898              		.loc 1 530 0
+ 1899 07be 0C70     		strb	r4, [r1]
+ 531:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_alis_vendor_init(tmModel, _ali_vendor_rx_cb);
+ 1900              		.loc 1 531 0
+ 1901 07c0 1749     		ldr	r1, .L128+60
+ 1902 07c2 FFF7FEFF 		bl	bc_mm_alis_vendor_init
+ 1903              	.LVL171:
+ 532:../../../mesh/app/ali_light/ali_light.c **** 	
+ 533:../../../mesh/app/ali_light/ali_light.c **** 	*mdl = p_ali_light->model;
+ 1904              		.loc 1 533 0
+ 1905 07c6 2B68     		ldr	r3, [r5]
+ 534:../../../mesh/app/ali_light/ali_light.c **** 	*mcnt = p_ali_light->model_cnt;
+ 535:../../../mesh/app/ali_light/ali_light.c **** 
+ 536:../../../mesh/app/ali_light/ali_light.c **** 	_ready_to_indicate(true);
+ 1906              		.loc 1 536 0
+ 1907 07c8 0120     		movs	r0, #1
+ 533:../../../mesh/app/ali_light/ali_light.c **** 	*mcnt = p_ali_light->model_cnt;
+ 1908              		.loc 1 533 0
+ 1909 07ca 1A00     		movs	r2, r3
+ 1910 07cc 5832     		adds	r2, r2, #88
+ 1911 07ce 3A60     		str	r2, [r7]
+ 534:../../../mesh/app/ali_light/ali_light.c **** 	*mcnt = p_ali_light->model_cnt;
+ 1912              		.loc 1 534 0
+ 1913 07d0 5433     		adds	r3, r3, #84
+ 1914 07d2 1B78     		ldrb	r3, [r3]
+ 1915 07d4 039A     		ldr	r2, [sp, #12]
+ 1916 07d6 1370     		strb	r3, [r2]
+ 1917              		.loc 1 536 0
+ 1918 07d8 FFF712FC 		bl	_ready_to_indicate
+ 1919              	.LVL172:
+ 1920              	.L119:
+ 537:../../../mesh/app/ali_light/ali_light.c **** 
+ 538:../../../mesh/app/ali_light/ali_light.c **** #ifdef FOR_ALI_TEST
+ 539:../../../mesh/app/ali_light/ali_light.c **** 	ali_light_key_init();
+ 540:../../../mesh/app/ali_light/ali_light.c **** #endif
+ 541:../../../mesh/app/ali_light/ali_light.c **** 	return 0;
+ 542:../../../mesh/app/ali_light/ali_light.c **** }
+ 1921              		.loc 1 542 0
+ 1922 07dc 2000     		movs	r0, r4
+ 1923 07de 05B0     		add	sp, sp, #20
+ 1924              		@ sp needed
+ 1925              	.LVL173:
+ 1926 07e0 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1927              	.L129:
+ 1928 07e2 C046     		.align	2
+ 1929              	.L128:
+ 1930 07e4 00000000 		.word	L_LEV
+ 1931 07e8 80010000 		.word	.LANCHOR4
+ 1932 07ec 00000000 		.word	.LANCHOR1
+ 1933 07f0 00000000 		.word	.LANCHOR0
+ 1934 07f4 00000000 		.word	ali_light_quick_restore_timer_cb
+ 1935 07f8 00000000 		.word	ali_light_cw_set_on_off
+ 1936 07fc 00000000 		.word	ali_light_cw_get_on_off
+ 1937 0800 00000000 		.word	ali_light_ltn_set_on_off
+ 1938 0804 00000000 		.word	ali_light_ltn_get_on_off
+ 1939 0808 00000000 		.word	ali_light_cw_set_lightness
+ 1940 080c 00000000 		.word	ali_light_cw_get_lightness
+ 1941 0810 00000000 		.word	ali_light_ltn_set_lightness
+ 1942 0814 00000000 		.word	ali_light_ltn_get_lightness
+ 1943 0818 00000000 		.word	ali_light_cw_set_temperature
+ 1944 081c 00000000 		.word	ali_light_cw_get_temperature
+ 1945 0820 00000000 		.word	_ali_vendor_rx_cb
+ 1946              		.cfi_endproc
+ 1947              	.LFE109:
+ 1949              		.align	1
+ 1950              		.global	ali_light_deinit
+ 1951              		.code	16
+ 1952              		.thumb_func
+ 1954              	ali_light_deinit:
+ 1955              	.LFB110:
+ 543:../../../mesh/app/ali_light/ali_light.c **** 
+ 544:../../../mesh/app/ali_light/ali_light.c **** uint8_t ali_light_deinit(mesh_model_t** mdl)
+ 545:../../../mesh/app/ali_light/ali_light.c **** {
+ 1956              		.loc 1 545 0
+ 1957              		.cfi_startproc
+ 1958              		@ args = 0, pretend = 0, frame = 0
+ 1959              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1960              	.LVL174:
+ 1961 0824 70B5     		push	{r4, r5, r6, lr}
+ 1962              	.LCFI27:
+ 1963              		.cfi_def_cfa_offset 16
+ 1964              		.cfi_offset 4, -16
+ 1965              		.cfi_offset 5, -12
+ 1966              		.cfi_offset 6, -8
+ 1967              		.cfi_offset 14, -4
+ 546:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_alis_vendor_deinit(&p_ali_light->model[--p_ali_light->model_cnt]);
+ 1968              		.loc 1 546 0
+ 1969 0826 1E4C     		ldr	r4, .L135
+ 545:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_alis_vendor_deinit(&p_ali_light->model[--p_ali_light->model_cnt]);
+ 1970              		.loc 1 545 0
+ 1971 0828 0500     		movs	r5, r0
+ 1972              		.loc 1 546 0
+ 1973 082a 2268     		ldr	r2, [r4]
+ 1974 082c 1100     		movs	r1, r2
+ 1975 082e 5431     		adds	r1, r1, #84
+ 1976 0830 0B78     		ldrb	r3, [r1]
+ 1977 0832 013B     		subs	r3, r3, #1
+ 1978 0834 DBB2     		uxtb	r3, r3
+ 1979 0836 0B70     		strb	r3, [r1]
+ 1980 0838 1B01     		lsls	r3, r3, #4
+ 1981 083a 5833     		adds	r3, r3, #88
+ 1982 083c D018     		adds	r0, r2, r3
+ 1983              	.LVL175:
+ 1984 083e FFF7FEFF 		bl	bc_mm_alis_vendor_deinit
+ 1985              	.LVL176:
+ 547:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_light_ctl_deinit(&p_ali_light->model[--p_ali_light->model_cnt]);
+ 1986              		.loc 1 547 0
+ 1987 0842 2268     		ldr	r2, [r4]
+ 1988 0844 1100     		movs	r1, r2
+ 1989 0846 5431     		adds	r1, r1, #84
+ 1990 0848 0B78     		ldrb	r3, [r1]
+ 1991 084a 013B     		subs	r3, r3, #1
+ 1992 084c DBB2     		uxtb	r3, r3
+ 1993 084e 0B70     		strb	r3, [r1]
+ 1994 0850 1B01     		lsls	r3, r3, #4
+ 1995 0852 5833     		adds	r3, r3, #88
+ 1996 0854 D018     		adds	r0, r2, r3
+ 1997 0856 FFF7FEFF 		bl	bc_mm_light_ctl_deinit
+ 1998              	.LVL177:
+ 548:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_light_ln_deinit(&p_ali_light->model[--p_ali_light->model_cnt]);
+ 1999              		.loc 1 548 0
+ 2000 085a 2268     		ldr	r2, [r4]
+ 2001 085c 1100     		movs	r1, r2
+ 2002 085e 5431     		adds	r1, r1, #84
+ 2003 0860 0B78     		ldrb	r3, [r1]
+ 2004 0862 013B     		subs	r3, r3, #1
+ 2005 0864 DBB2     		uxtb	r3, r3
+ 2006 0866 0B70     		strb	r3, [r1]
+ 2007 0868 1B01     		lsls	r3, r3, #4
+ 2008 086a 5833     		adds	r3, r3, #88
+ 2009 086c D018     		adds	r0, r2, r3
+ 2010 086e FFF7FEFF 		bl	bc_mm_light_ln_deinit
+ 2011              	.LVL178:
+ 549:../../../mesh/app/ali_light/ali_light.c **** 	bc_mm_gens_oo_deinit(&p_ali_light->model[--p_ali_light->model_cnt]);
+ 2012              		.loc 1 549 0
+ 2013 0872 2268     		ldr	r2, [r4]
+ 2014 0874 1100     		movs	r1, r2
+ 2015 0876 5431     		adds	r1, r1, #84
+ 2016 0878 0B78     		ldrb	r3, [r1]
+ 2017 087a 013B     		subs	r3, r3, #1
+ 2018 087c DBB2     		uxtb	r3, r3
+ 2019 087e 0B70     		strb	r3, [r1]
+ 2020 0880 1B01     		lsls	r3, r3, #4
+ 2021 0882 5833     		adds	r3, r3, #88
+ 2022 0884 D018     		adds	r0, r2, r3
+ 2023 0886 FFF7FEFF 		bl	bc_mm_gens_oo_deinit
+ 2024              	.LVL179:
+ 550:../../../mesh/app/ali_light/ali_light.c **** 	if(p_ali_light){
+ 2025              		.loc 1 550 0
+ 2026 088a 2068     		ldr	r0, [r4]
+ 2027 088c 0028     		cmp	r0, #0
+ 2028 088e 03D0     		beq	.L131
+ 551:../../../mesh/app/ali_light/ali_light.c **** 		ke_free(p_ali_light);
+ 2029              		.loc 1 551 0
+ 2030 0890 FFF7FEFF 		bl	ke_free
+ 2031              	.LVL180:
+ 552:../../../mesh/app/ali_light/ali_light.c **** 		p_ali_light = NULL;
+ 2032              		.loc 1 552 0
+ 2033 0894 0023     		movs	r3, #0
+ 2034 0896 2360     		str	r3, [r4]
+ 2035              	.L131:
+ 553:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 554:../../../mesh/app/ali_light/ali_light.c **** 	*mdl = NULL;
+ 2036              		.loc 1 554 0
+ 2037 0898 0020     		movs	r0, #0
+ 2038 089a 2860     		str	r0, [r5]
+ 555:../../../mesh/app/ali_light/ali_light.c **** 	return 0;
+ 556:../../../mesh/app/ali_light/ali_light.c **** }
+ 2039              		.loc 1 556 0
+ 2040              		@ sp needed
+ 2041              	.LVL181:
+ 2042 089c 70BD     		pop	{r4, r5, r6, pc}
+ 2043              	.L136:
+ 2044 089e C046     		.align	2
+ 2045              	.L135:
+ 2046 08a0 00000000 		.word	.LANCHOR0
+ 2047              		.cfi_endproc
+ 2048              	.LFE110:
+ 2050              		.align	1
+ 2051              		.global	ali_light_hal_rx
+ 2052              		.code	16
+ 2053              		.thumb_func
+ 2055              	ali_light_hal_rx:
+ 2056              	.LFB111:
+ 557:../../../mesh/app/ali_light/ali_light.c **** 
+ 558:../../../mesh/app/ali_light/ali_light.c **** void ali_light_hal_rx(const HAL_TYPE type,const uint8_t *data , uint8_t len)
+ 559:../../../mesh/app/ali_light/ali_light.c **** {
+ 2057              		.loc 1 559 0
+ 2058              		.cfi_startproc
+ 2059              		@ args = 0, pretend = 0, frame = 0
+ 2060              		@ frame_needed = 0, uses_anonymous_args = 0
+ 2061              		@ link register save eliminated.
+ 2062              	.LVL182:
+ 560:../../../mesh/app/ali_light/ali_light.c **** 	if(type == HAL_TST){
+ 561:../../../mesh/app/ali_light/ali_light.c **** #ifdef CONFIG_FACTORY_TEST
+ 562:../../../mesh/app/ali_light/ali_light.c **** 		if(p_ali_light->provState != 1 && len == 25 
+ 563:../../../mesh/app/ali_light/ali_light.c **** 			&&data[len-4] == 0x78 && data[len-3] == 0x56
+ 564:../../../mesh/app/ali_light/ali_light.c **** 			&&data[len-2] == 0x34 && data[len-1] == 0x12
+ 565:../../../mesh/app/ali_light/ali_light.c **** 			){
+ 566:../../../mesh/app/ali_light/ali_light.c **** 			
+ 567:../../../mesh/app/ali_light/ali_light.c **** 			static uint8_t tid;
+ 568:../../../mesh/app/ali_light/ali_light.c **** 			if(tid == data[9]){
+ 569:../../../mesh/app/ali_light/ali_light.c **** 				return;
+ 570:../../../mesh/app/ali_light/ali_light.c **** 			}
+ 571:../../../mesh/app/ali_light/ali_light.c **** 			tid = data[9];
+ 572:../../../mesh/app/ali_light/ali_light.c **** 			m_printf_hex(L_APP, "RECV FROM HAL_TST", data, len);
+ 573:../../../mesh/app/ali_light/ali_light.c **** 			//do light test
+ 574:../../../mesh/app/ali_light/ali_light.c **** 			const uint8_t*attVal = data+10;
+ 575:../../../mesh/app/ali_light/ali_light.c **** 			uint8_t attLen = len-10-4;
+ 576:../../../mesh/app/ali_light/ali_light.c **** 			uint8_t pos = 0;
+ 577:../../../mesh/app/ali_light/ali_light.c **** 			do{
+ 578:../../../mesh/app/ali_light/ali_light.c **** 				const uint8_t* attTmp = attVal+pos;
+ 579:../../../mesh/app/ali_light/ali_light.c **** 				uint16_t cmd = attTmp[0]+(attTmp[1]<<8);
+ 580:../../../mesh/app/ali_light/ali_light.c **** 				M_PRINTF(L_APP, "CMD[%x]", cmd);
+ 581:../../../mesh/app/ali_light/ali_light.c **** 				switch(cmd){
+ 582:../../../mesh/app/ali_light/ali_light.c **** 					case M_ATTR_ONOFF:{
+ 583:../../../mesh/app/ali_light/ali_light.c **** 						pos+=3;
+ 584:../../../mesh/app/ali_light/ali_light.c **** 						led_cw_set_on_off(attTmp[2], NULL);
+ 585:../../../mesh/app/ali_light/ali_light.c **** 						M_PRINTF(L_APP, "M_ATTR_ONOFF[%x]", attTmp[2]);
+ 586:../../../mesh/app/ali_light/ali_light.c **** 					}break;
+ 587:../../../mesh/app/ali_light/ali_light.c **** 					case M_ATTR_LTN:{
+ 588:../../../mesh/app/ali_light/ali_light.c **** 						uint16_t val = attTmp[2]+(attTmp[3]<<8);
+ 589:../../../mesh/app/ali_light/ali_light.c **** 						pos+=4;
+ 590:../../../mesh/app/ali_light/ali_light.c **** 						led_cw_set_lightness(val, NULL);
+ 591:../../../mesh/app/ali_light/ali_light.c **** 						M_PRINTF(L_APP, "M_ATTR_LTN[%x]", val);
+ 592:../../../mesh/app/ali_light/ali_light.c **** 					}break;
+ 593:../../../mesh/app/ali_light/ali_light.c **** 					case M_ATTR_TEMP:{
+ 594:../../../mesh/app/ali_light/ali_light.c **** 						uint16_t val = attTmp[2]+(attTmp[3]<<8);
+ 595:../../../mesh/app/ali_light/ali_light.c **** 						pos+=4;
+ 596:../../../mesh/app/ali_light/ali_light.c **** 						led_cw_set_temperature(val, NULL);
+ 597:../../../mesh/app/ali_light/ali_light.c **** 						M_PRINTF(L_APP, "M_ATTR_TEMP[%x]", val);
+ 598:../../../mesh/app/ali_light/ali_light.c **** 					}break;
+ 599:../../../mesh/app/ali_light/ali_light.c **** 					default:return;
+ 600:../../../mesh/app/ali_light/ali_light.c **** 				}
+ 601:../../../mesh/app/ali_light/ali_light.c **** 			}while(pos<attLen);
+ 602:../../../mesh/app/ali_light/ali_light.c **** 		}
+ 603:../../../mesh/app/ali_light/ali_light.c **** #endif
+ 604:../../../mesh/app/ali_light/ali_light.c **** 	}
+ 605:../../../mesh/app/ali_light/ali_light.c **** }
+ 2063              		.loc 1 605 0
+ 2064              		@ sp needed
+ 2065 08a4 7047     		bx	lr
+ 2066              		.cfi_endproc
+ 2067              	.LFE111:
+ 2069              		.section	.rodata
+ 2070              		.set	.LANCHOR1,. + 0
+ 2071              		.set	.LANCHOR2,. + 128
+ 2072              		.set	.LANCHOR3,. + 256
+ 2073              		.set	.LANCHOR4,. + 384
+ 2076              	lgs:
+ 2077 0000 5B4D4C47 		.ascii	"[MLG]\000"
+ 2077      5D00
+ 2080              	lge:
+ 2081 0006 0D0A00   		.ascii	"\015\012\000"
+ 2082              	.LC6:
+ 2083 0009 2E2E2F2E 		.ascii	"../../../mesh/app/ali_light/ali_light.c\000"
+ 2083      2E2F2E2E 
+ 2083      2F6D6573 
+ 2083      682F6170 
+ 2083      702F616C 
+ 2084              	.LC8:
+ 2085 0031 25735B25 		.ascii	"%s[%10s:%d]%s:\000"
+ 2085      3130733A 
+ 2085      25645D25 
+ 2085      733A00
+ 2088              	__FUNCTION__.9426:
+ 2089 0040 616C695F 		.ascii	"ali_light_bind_timer_cb\000"
+ 2089      6C696768 
+ 2089      745F6269 
+ 2089      6E645F74 
+ 2089      696D6572 
+ 2090              	.LC9:
+ 2091 0058 6D5F7462 		.ascii	"m_tb_key_app_find error\000"
+ 2091      5F6B6579 
+ 2091      5F617070 
+ 2091      5F66696E 
+ 2091      64206572 
+ 2092              	.LC10:
+ 2093 0070 257300   		.ascii	"%s\000"
+ 2094              	.LC11:
+ 2095 0073 742D3E6C 		.ascii	"t->lid[%x] p_ali_light->model_cnt[%x] status[%x]\000"
+ 2095      69645B25 
+ 2095      785D2070 
+ 2095      5F616C69 
+ 2095      5F6C6967 
+ 2096              	.LC19:
+ 2097 00a4 616C695F 		.ascii	"ali_light_period_ind_timer_cb\000"
+ 2097      6C696768 
+ 2097      745F7065 
+ 2097      72696F64 
+ 2097      5F696E64 
+ 2100              	__FUNCTION__.9450:
+ 2101 00c2 616C695F 		.ascii	"ali_light_quick_restore_timer_cb\000"
+ 2101      6C696768 
+ 2101      745F7175 
+ 2101      69636B5F 
+ 2101      72657374 
+ 2102              	.LC25:
+ 2103 00e3 00       		.ascii	"\000"
+ 2106              	__FUNCTION__.9455:
+ 2107 00e4 616C695F 		.ascii	"ali_light_quick_restore_init\000"
+ 2107      6C696768 
+ 2107      745F7175 
+ 2107      69636B5F 
+ 2107      72657374 
+ 2108              	.LC37:
+ 2109 0101 6C656420 		.ascii	"led status = %d\000"
+ 2109      73746174 
+ 2109      7573203D 
+ 2109      20256400 
+ 2112              	__FUNCTION__.9471:
+ 2113 0111 616C695F 		.ascii	"ali_light_prov_state_get\000"
+ 2113      6C696768 
+ 2113      745F7072 
+ 2113      6F765F73 
+ 2113      74617465 
+ 2114              	.LC51:
+ 2115 012a 626F6E64 		.ascii	"bond status[%d]\000"
+ 2115      20737461 
+ 2115      7475735B 
+ 2115      25645D00 
+ 2118              	__FUNCTION__.9480:
+ 2119 013a 616C695F 		.ascii	"ali_light_param_init\000"
+ 2119      6C696768 
+ 2119      745F7061 
+ 2119      72616D5F 
+ 2119      696E6974 
+ 2120              	.LC63:
+ 2121 014f 64657669 		.ascii	"device type is changed [%d] to [%d]\000"
+ 2121      63652074 
+ 2121      79706520 
+ 2121      69732063 
+ 2121      68616E67 
+ 2124              	__FUNCTION__.9488:
+ 2125 0173 5F616C69 		.ascii	"_ali_vendor_rx_cb\000"
+ 2125      5F76656E 
+ 2125      646F725F 
+ 2125      72785F63 
+ 2125      6200
+ 2126              	.LC75:
+ 2127 0185 6F70636F 		.ascii	"opcode[%x]\000"
+ 2127      64655B25 
+ 2127      785D00
+ 2128              	.LC77:
+ 2129 0190 414C4920 		.ascii	"ALI VENDOR RECV\000"
+ 2129      56454E44 
+ 2129      4F522052 
+ 2129      45435600 
+ 2130              	.LC78:
+ 2131 01a0 414C4920 		.ascii	"ALI VENDOR SET RECV\000"
+ 2131      56454E44 
+ 2131      4F522053 
+ 2131      45542052 
+ 2131      45435600 
+ 2134              	__FUNCTION__.9503:
+ 2135 01b4 616C695F 		.ascii	"ali_light_init\000"
+ 2135      6C696768 
+ 2135      745F696E 
+ 2135      697400
+ 2136              	.LC87:
+ 2137 01c3 2D2D2D2D 		.ascii	"-------init light---------\000"
+ 2137      2D2D2D69 
+ 2137      6E697420 
+ 2137      6C696768 
+ 2137      742D2D2D 
+ 2138              		.bss
+ 2139              		.align	2
+ 2140              		.set	.LANCHOR0,. + 0
+ 2143              	p_ali_light:
+ 2144 0000 00000000 		.space	4
+ 2147              	_init.9378:
+ 2148 0004 00       		.space	1
+ 2151              	tid.9492:
+ 2152 0005 00       		.space	1
+ 2153              		.text
+ 2154              	.Letext0:
+ 2155              		.file 2 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 2156              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 2157              		.file 4 "../../../mesh/api/m_defines.h"
+ 2158              		.file 5 "../../../mesh/api/m_api_msg.h"
+ 2159              		.file 6 "../../../mesh/models/inc/mm_com.h"
+ 2160              		.file 7 "../../../drivers/hal/inc/bc62xx_timer.h"
+ 2161              		.file 8 "../../../mesh/app/ali_config.h"
+ 2162              		.file 9 "../../../mesh/models/inc/bc_mm_gen_oo.h"
+ 2163              		.file 10 "../../../mesh/models/inc/bc_mm_light_ln.h"
+ 2164              		.file 11 "../../../mesh/models/inc/bc_mm_light_ctl.h"
+ 2165              		.file 12 "../../../drivers/hal/inc/bc62xx_gpio.h"
+ 2166              		.file 13 "../../../drivers/led/inc/led.h"
+ 2167              		.file 14 "../../../mesh/app/app_mesh.h"
+ 2168              		.file 15 "../../../mesh/app/ali_light/ali_light.h"
+ 2169              		.file 16 "../../../mesh/models/inc/mm_ali.h"
+ 2170              		.file 17 "../../../mesh/common/api/co_log.h"
+ 2171              		.file 18 "../../../device/inc/bc_sys.h"
+ 2172              		.file 19 "../../../drivers/hal/inc/bc_flash.h"
+ 2173              		.file 20 "../../../mesh/api/m_api.h"
+ 2174              		.file 21 "../../../mesh/port/meshTimer.h"
+ 2175              		.file 22 "../../../mesh/port/port.h"

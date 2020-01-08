@@ -1,0 +1,877 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"ProtocolRln.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.global	frmHead
+  20              		.align	1
+  21              		.code	16
+  22              		.thumb_func
+  24              	_get_recved_len:
+  25              	.LFB41:
+  26              		.file 1 "../../../drivers/ProtocolResolution/ProtocolRln.c"
+   1:../../../drivers/ProtocolResolution/ProtocolRln.c **** #include "ProtocolRln.h"
+   2:../../../drivers/ProtocolResolution/ProtocolRln.c **** #include "systick.h"
+   3:../../../drivers/ProtocolResolution/ProtocolRln.c **** #include "bc_sys.h"
+   4:../../../drivers/ProtocolResolution/ProtocolRln.c **** #include "bc62xx_timer.h"
+   5:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+   6:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+   7:../../../drivers/ProtocolResolution/ProtocolRln.c **** #define RELEASE
+   8:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+   9:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  10:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  11:../../../drivers/ProtocolResolution/ProtocolRln.c **** #define SIZE_MASK	(0x7F)
+  12:../../../drivers/ProtocolResolution/ProtocolRln.c **** #define BUFF_SIZE	(128)
+  13:../../../drivers/ProtocolResolution/ProtocolRln.c **** #define FRAME_MIN_TIME	(10)//100ms
+  14:../../../drivers/ProtocolResolution/ProtocolRln.c **** #define FRAME_MIN_SIZE	(4)
+  15:../../../drivers/ProtocolResolution/ProtocolRln.c **** #define FRAME_MAX_SIZE	(BUFF_SIZE)
+  16:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  17:../../../drivers/ProtocolResolution/ProtocolRln.c **** #define FRAME_LEN_POS	(2)
+  18:../../../drivers/ProtocolResolution/ProtocolRln.c **** #define FRAME_DAT_POS	(3)
+  19:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  20:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  21:../../../drivers/ProtocolResolution/ProtocolRln.c **** typedef struct{
+  22:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	uint8_t buff[BUFF_SIZE];
+  23:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	uint16_t head:7;
+  24:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	uint16_t tail:7;
+  25:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	uint16_t rsv:2;
+  26:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	prorocol_rln_cb rCb;
+  27:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	prorocol_send_cb sCb;
+  28:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	SYS_TIMER_TYPE dTmr;//delay timer
+  29:../../../drivers/ProtocolResolution/ProtocolRln.c **** }proto_t;
+  30:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  31:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  32:../../../drivers/ProtocolResolution/ProtocolRln.c **** const uint8_t frmHead[] = {0x3a, 0xff};
+  33:../../../drivers/ProtocolResolution/ProtocolRln.c **** static proto_t proto;
+  34:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  35:../../../drivers/ProtocolResolution/ProtocolRln.c **** static __INLINE uint8_t _get_recved_len(void)
+  36:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+  27              		.loc 1 36 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  37:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	return proto.head>=proto.tail?
+  32              		.loc 1 37 0
+  33 0000 064A     		ldr	r2, .L6
+  34 0002 8032     		adds	r2, r2, #128
+  35 0004 1378     		ldrb	r3, [r2]
+  36 0006 1088     		ldrh	r0, [r2]
+  37 0008 5B06     		lsls	r3, r3, #25
+  38 000a 8004     		lsls	r0, r0, #18
+  39 000c 5B0E     		lsrs	r3, r3, #25
+  40 000e 400E     		lsrs	r0, r0, #25
+  41 0010 8342     		cmp	r3, r0
+  42 0012 00DA     		bge	.L4
+  43              		.loc 1 37 0 is_stmt 0 discriminator 2
+  44 0014 803B     		subs	r3, r3, #128
+  45              	.L4:
+  46 0016 181A     		subs	r0, r3, r0
+  47 0018 C0B2     		uxtb	r0, r0
+  38:../../../drivers/ProtocolResolution/ProtocolRln.c **** 			proto.head-proto.tail:
+  39:../../../drivers/ProtocolResolution/ProtocolRln.c **** 			BUFF_SIZE - proto.tail + proto.head;
+  40:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+  48              		.loc 1 40 0 is_stmt 1 discriminator 2
+  49              		@ sp needed
+  50 001a 7047     		bx	lr
+  51              	.L7:
+  52              		.align	2
+  53              	.L6:
+  54 001c 00000000 		.word	.LANCHOR0
+  55              		.cfi_endproc
+  56              	.LFE41:
+  58              		.align	1
+  59              		.code	16
+  60              		.thumb_func
+  62              	_delay_timer_cb:
+  63              	.LFB47:
+  41:../../../drivers/ProtocolResolution/ProtocolRln.c **** static __INLINE void _clear_buff()
+  42:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+  43:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.tail = 0;
+  44:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.head = 0; 
+  45:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+  46:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  47:../../../drivers/ProtocolResolution/ProtocolRln.c **** static __INLINE uint8_t _get_byte()
+  48:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+  49:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	return proto.buff[proto.tail++];
+  50:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+  51:../../../drivers/ProtocolResolution/ProtocolRln.c **** static __INLINE void _set_byte(uint8_t data)
+  52:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+  53:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.buff[proto.head] = data;
+  54:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(++proto.head == proto.tail){
+  55:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		proto.tail++;
+  56:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+  57:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+  58:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  59:../../../drivers/ProtocolResolution/ProtocolRln.c **** static __INLINE void _updata_pos(uint8_t idx)
+  60:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+  61:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.tail+=idx;
+  62:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+  63:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  64:../../../drivers/ProtocolResolution/ProtocolRln.c **** static __INLINE uint8_t _show_byte(uint8_t idx)
+  65:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+  66:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	return proto.buff[(proto.tail+idx)&SIZE_MASK];
+  67:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+  68:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  69:../../../drivers/ProtocolResolution/ProtocolRln.c **** static void _delay_timer_cb(int params)
+  70:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+  64              		.loc 1 70 0
+  65              		.cfi_startproc
+  66              		@ args = 0, pretend = 0, frame = 0
+  67              		@ frame_needed = 0, uses_anonymous_args = 0
+  68              		@ link register save eliminated.
+  69              	.LVL0:
+  70              	.LBB4:
+  71              	.LBB5:
+  43:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.head = 0; 
+  72              		.loc 1 43 0
+  73 0020 044B     		ldr	r3, .L9
+  74 0022 054A     		ldr	r2, .L9+4
+  75 0024 8033     		adds	r3, r3, #128
+  76 0026 1988     		ldrh	r1, [r3]
+  77              	.LBE5:
+  78              	.LBE4:
+  71:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+  72:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	printf("clear ring buff");
+  73:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+  74:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	_clear_buff();
+  75:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+  79              		.loc 1 75 0
+  80              		@ sp needed
+  81              	.LBB7:
+  82              	.LBB6:
+  43:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.head = 0; 
+  83              		.loc 1 43 0
+  84 0028 0A40     		ands	r2, r1
+  85 002a 1A80     		strh	r2, [r3]
+  44:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+  86              		.loc 1 44 0
+  87 002c 0022     		movs	r2, #0
+  88 002e 1A70     		strb	r2, [r3]
+  89              	.LBE6:
+  90              	.LBE7:
+  91              		.loc 1 75 0
+  92 0030 7047     		bx	lr
+  93              	.L10:
+  94 0032 C046     		.align	2
+  95              	.L9:
+  96 0034 00000000 		.word	.LANCHOR0
+  97 0038 7FC0FFFF 		.word	-16257
+  98              		.cfi_endproc
+  99              	.LFE47:
+ 101              		.align	1
+ 102              		.global	protocol_init
+ 103              		.code	16
+ 104              		.thumb_func
+ 106              	protocol_init:
+ 107              	.LFB49:
+  76:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  77:../../../drivers/ProtocolResolution/ProtocolRln.c **** static void protocol_do(void)
+  78:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+  79:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	uint8_t _rLen = _get_recved_len();
+  80:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+  81:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	printf("RECV LEN[%x]\r\n", _rLen);
+  82:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+  83:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+  84:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	bool _found = true;
+  85:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	//find head
+  86:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	for(int j = 0; j < _rLen; ++j){
+  87:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		for(int i = 0; i < sizeof(frmHead) && i+j<_rLen; ++i){
+  88:../../../drivers/ProtocolResolution/ProtocolRln.c **** 			if(frmHead[i] != _show_byte(i)){
+  89:../../../drivers/ProtocolResolution/ProtocolRln.c **** 				_found = false;
+  90:../../../drivers/ProtocolResolution/ProtocolRln.c **** 			}
+  91:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		}
+  92:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		if(true)
+  93:../../../drivers/ProtocolResolution/ProtocolRln.c **** 			break;
+  94:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		_get_byte();
+  95:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+  96:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+  97:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	printf("find head[%x]\r\n", _found);
+  98:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+  99:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(!_found)
+ 100:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		return;
+ 101:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+ 102:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	//check min len
+ 103:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(_get_recved_len() < FRAME_MIN_SIZE){
+ 104:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 105:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		printf("little than FRAME_MIN_SIZE\r\n");
+ 106:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+ 107:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		return;
+ 108:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 109:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	//check all len
+ 110:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(_get_recved_len() < FRAME_MIN_SIZE+_show_byte(FRAME_LEN_POS)){
+ 111:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 112:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		printf("little than FRAME SIZE\r\n");
+ 113:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+ 114:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		return;
+ 115:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 116:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	uint8_t _len = _show_byte(FRAME_LEN_POS);
+ 117:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	uint8_t* _data = NULL;
+ 118:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(_len){
+ 119:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		_data = malloc(_len);
+ 120:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		if(!_data){
+ 121:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 122:../../../drivers/ProtocolResolution/ProtocolRln.c **** 			printf("malloc error\r\n");
+ 123:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+ 124:../../../drivers/ProtocolResolution/ProtocolRln.c **** 			return;
+ 125:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		}
+ 126:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 127:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	_updata_pos(FRAME_DAT_POS);
+ 128:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	for(int i=0; i<_len; ++i){
+ 129:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		_data[i] = _get_byte();
+ 130:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 131:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	//check sum
+ 132:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(_get_byte() != bc_sys_check_sum(_data, _len)+_len){
+ 133:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 134:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		printf("check sum error\r\n");
+ 135:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+ 136:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		return;
+ 137:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 138:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.rCb(_data, _len);
+ 139:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(_data){
+ 140:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		free(_data);
+ 141:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 142:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(_get_recved_len() >= FRAME_MIN_SIZE){
+ 143:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 144:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		printf("redo\r\n");
+ 145:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+ 146:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		protocol_do();
+ 147:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 148:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	
+ 149:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 150:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+ 151:../../../drivers/ProtocolResolution/ProtocolRln.c **** void protocol_init(prorocol_rln_cb rcb, prorocol_send_cb scb)
+ 152:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+ 108              		.loc 1 152 0
+ 109              		.cfi_startproc
+ 110              		@ args = 0, pretend = 0, frame = 0
+ 111              		@ frame_needed = 0, uses_anonymous_args = 0
+ 112              		@ link register save eliminated.
+ 113              	.LVL1:
+ 153:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.rCb = rcb;
+ 114              		.loc 1 153 0
+ 115 003c 074B     		ldr	r3, .L12
+ 154:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.sCb = scb;
+ 155:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	_clear_buff();
+ 156:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 116              		.loc 1 156 0
+ 117              		@ sp needed
+ 153:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.rCb = rcb;
+ 118              		.loc 1 153 0
+ 119 003e 1A00     		movs	r2, r3
+ 120 0040 0832     		adds	r2, r2, #8
+ 121 0042 D067     		str	r0, [r2, #124]
+ 154:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.sCb = scb;
+ 122              		.loc 1 154 0
+ 123 0044 1A00     		movs	r2, r3
+ 124 0046 8832     		adds	r2, r2, #136
+ 125 0048 1160     		str	r1, [r2]
+ 126              	.LBB10:
+ 127              	.LBB11:
+  43:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.head = 0; 
+ 128              		.loc 1 43 0
+ 129 004a 8033     		adds	r3, r3, #128
+ 130 004c 1988     		ldrh	r1, [r3]
+ 131              	.LVL2:
+ 132 004e 044A     		ldr	r2, .L12+4
+ 133 0050 0A40     		ands	r2, r1
+ 134 0052 1A80     		strh	r2, [r3]
+  44:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 135              		.loc 1 44 0
+ 136 0054 0022     		movs	r2, #0
+ 137 0056 1A70     		strb	r2, [r3]
+ 138              	.LBE11:
+ 139              	.LBE10:
+ 140              		.loc 1 156 0
+ 141 0058 7047     		bx	lr
+ 142              	.L13:
+ 143 005a C046     		.align	2
+ 144              	.L12:
+ 145 005c 00000000 		.word	.LANCHOR0
+ 146 0060 7FC0FFFF 		.word	-16257
+ 147              		.cfi_endproc
+ 148              	.LFE49:
+ 150              		.align	1
+ 151              		.global	protocol_send
+ 152              		.code	16
+ 153              		.thumb_func
+ 155              	protocol_send:
+ 156              	.LFB50:
+ 157:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+ 158:../../../drivers/ProtocolResolution/ProtocolRln.c **** void protocol_send(const uint8_t* data, uint8_t len)
+ 159:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+ 157              		.loc 1 159 0
+ 158              		.cfi_startproc
+ 159              		@ args = 0, pretend = 0, frame = 16
+ 160              		@ frame_needed = 0, uses_anonymous_args = 0
+ 161              	.LVL3:
+ 162 0064 F0B5     		push	{r4, r5, r6, r7, lr}
+ 163              	.LCFI0:
+ 164              		.cfi_def_cfa_offset 20
+ 165              		.cfi_offset 4, -20
+ 166              		.cfi_offset 5, -16
+ 167              		.cfi_offset 6, -12
+ 168              		.cfi_offset 7, -8
+ 169              		.cfi_offset 14, -4
+ 170 0066 85B0     		sub	sp, sp, #20
+ 171              	.LCFI1:
+ 172              		.cfi_def_cfa_offset 40
+ 173              		.loc 1 159 0
+ 174 0068 6B46     		mov	r3, sp
+ 175 006a DC1D     		adds	r4, r3, #7
+ 176 006c D971     		strb	r1, [r3, #7]
+ 160:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(proto.sCb == NULL)
+ 177              		.loc 1 160 0
+ 178 006e 144B     		ldr	r3, .L27
+ 159:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(proto.sCb == NULL)
+ 179              		.loc 1 159 0
+ 180 0070 0600     		movs	r6, r0
+ 181              		.loc 1 160 0
+ 182 0072 1D00     		movs	r5, r3
+ 183 0074 8835     		adds	r5, r5, #136
+ 184 0076 0093     		str	r3, [sp]
+ 185 0078 2B68     		ldr	r3, [r5]
+ 186 007a 002B     		cmp	r3, #0
+ 187 007c 1DD0     		beq	.L14
+ 161:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		return;
+ 162:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	//calc check sum
+ 163:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	uint8_t _sum = bc_sys_check_sum((uint8_t *)data, len)+len;
+ 188              		.loc 1 163 0
+ 189 007e C9B2     		uxtb	r1, r1
+ 190              	.LVL4:
+ 191 0080 FFF7FEFF 		bl	bc_sys_check_sum
+ 192              	.LVL5:
+ 193 0084 0F27     		movs	r7, #15
+ 194 0086 2378     		ldrb	r3, [r4]
+ 195 0088 6F44     		add	r7, r7, sp
+ 196 008a C018     		adds	r0, r0, r3
+ 197 008c 3870     		strb	r0, [r7]
+ 164:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	//send head
+ 165:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.sCb(frmHead, sizeof(frmHead));
+ 198              		.loc 1 165 0
+ 199 008e 0221     		movs	r1, #2
+ 200 0090 0C48     		ldr	r0, .L27+4
+ 201 0092 2B68     		ldr	r3, [r5]
+ 202 0094 9847     		blx	r3
+ 203              	.LVL6:
+ 166:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	//send len
+ 167:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.sCb(&len, sizeof(len));
+ 204              		.loc 1 167 0
+ 205 0096 0121     		movs	r1, #1
+ 206 0098 2000     		movs	r0, r4
+ 207 009a 2B68     		ldr	r3, [r5]
+ 208 009c 9847     		blx	r3
+ 209              	.LVL7:
+ 168:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	//send data
+ 169:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(data != NULL&& len != 0)
+ 210              		.loc 1 169 0
+ 211 009e 002E     		cmp	r6, #0
+ 212 00a0 05D0     		beq	.L16
+ 213              		.loc 1 169 0 is_stmt 0 discriminator 1
+ 214 00a2 2178     		ldrb	r1, [r4]
+ 215 00a4 0029     		cmp	r1, #0
+ 216 00a6 02D0     		beq	.L16
+ 170:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		proto.sCb(data, len);
+ 217              		.loc 1 170 0 is_stmt 1
+ 218 00a8 2B68     		ldr	r3, [r5]
+ 219 00aa 3000     		movs	r0, r6
+ 220 00ac 9847     		blx	r3
+ 221              	.LVL8:
+ 222              	.L16:
+ 171:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	//send check sum
+ 172:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	proto.sCb(&_sum, sizeof(_sum));
+ 223              		.loc 1 172 0
+ 224 00ae 009B     		ldr	r3, [sp]
+ 225 00b0 0121     		movs	r1, #1
+ 226 00b2 8833     		adds	r3, r3, #136
+ 227 00b4 1B68     		ldr	r3, [r3]
+ 228 00b6 3800     		movs	r0, r7
+ 229 00b8 9847     		blx	r3
+ 230              	.LVL9:
+ 231              	.L14:
+ 173:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 232              		.loc 1 173 0
+ 233 00ba 05B0     		add	sp, sp, #20
+ 234              		@ sp needed
+ 235              	.LVL10:
+ 236              	.LVL11:
+ 237 00bc F0BD     		pop	{r4, r5, r6, r7, pc}
+ 238              	.L28:
+ 239 00be C046     		.align	2
+ 240              	.L27:
+ 241 00c0 00000000 		.word	.LANCHOR0
+ 242 00c4 00000000 		.word	.LANCHOR1
+ 243              		.cfi_endproc
+ 244              	.LFE50:
+ 246              		.align	1
+ 247              		.global	protocol_recv
+ 248              		.code	16
+ 249              		.thumb_func
+ 251              	protocol_recv:
+ 252              	.LFB51:
+ 174:../../../drivers/ProtocolResolution/ProtocolRln.c **** 
+ 175:../../../drivers/ProtocolResolution/ProtocolRln.c **** void protocol_recv(uint8_t* data, uint8_t len)
+ 176:../../../drivers/ProtocolResolution/ProtocolRln.c **** {
+ 253              		.loc 1 176 0
+ 254              		.cfi_startproc
+ 255              		@ args = 0, pretend = 0, frame = 8
+ 256              		@ frame_needed = 0, uses_anonymous_args = 0
+ 257              	.LVL12:
+ 177:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(proto.rCb == NULL || data == NULL || len == 0)
+ 258              		.loc 1 177 0
+ 259 00c8 5C4B     		ldr	r3, .L69
+ 176:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(proto.rCb == NULL || data == NULL || len == 0)
+ 260              		.loc 1 176 0
+ 261 00ca F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 262              	.LCFI2:
+ 263              		.cfi_def_cfa_offset 32
+ 264              		.cfi_offset 0, -32
+ 265              		.cfi_offset 1, -28
+ 266              		.cfi_offset 2, -24
+ 267              		.cfi_offset 4, -20
+ 268              		.cfi_offset 5, -16
+ 269              		.cfi_offset 6, -12
+ 270              		.cfi_offset 7, -8
+ 271              		.cfi_offset 14, -4
+ 272              		.loc 1 177 0
+ 273 00cc 1A00     		movs	r2, r3
+ 274 00ce 0832     		adds	r2, r2, #8
+ 275 00d0 D26F     		ldr	r2, [r2, #124]
+ 176:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(proto.rCb == NULL || data == NULL || len == 0)
+ 276              		.loc 1 176 0
+ 277 00d2 0400     		movs	r4, r0
+ 278 00d4 0191     		str	r1, [sp, #4]
+ 279 00d6 0093     		str	r3, [sp]
+ 280              		.loc 1 177 0
+ 281 00d8 002A     		cmp	r2, #0
+ 282 00da 00D1     		bne	.LCB232
+ 283 00dc ACE0     		b	.L29	@long jump
+ 284              	.LCB232:
+ 285              		.loc 1 177 0 is_stmt 0 discriminator 1
+ 286 00de 0028     		cmp	r0, #0
+ 287 00e0 00D1     		bne	.LCB234
+ 288 00e2 A9E0     		b	.L29	@long jump
+ 289              	.LCB234:
+ 290              		.loc 1 177 0 discriminator 2
+ 291 00e4 0029     		cmp	r1, #0
+ 292 00e6 00D1     		bne	.LCB236
+ 293 00e8 A6E0     		b	.L29	@long jump
+ 294              	.LCB236:
+ 178:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		return;
+ 179:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	SYS_SetTimer(&proto.dTmr, FRAME_MIN_TIME, TIMER_SINGLE, _delay_timer_cb);
+ 295              		.loc 1 179 0 is_stmt 1
+ 296 00ea 0098     		ldr	r0, [sp]
+ 297              	.LVL13:
+ 298 00ec 544B     		ldr	r3, .L69+4
+ 299 00ee 0022     		movs	r2, #0
+ 300 00f0 0A21     		movs	r1, #10
+ 301              	.LVL14:
+ 302 00f2 8C30     		adds	r0, r0, #140
+ 303 00f4 FFF7FEFF 		bl	SYS_SetTimer
+ 304              	.LVL15:
+ 305              	.LBB30:
+ 306              	.LBB31:
+ 307              	.LBB32:
+  55:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 308              		.loc 1 55 0
+ 309 00f8 524B     		ldr	r3, .L69+8
+ 310              	.LBE32:
+ 311              	.LBE31:
+ 180:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	for(int i = 0; i < len; ++i){
+ 312              		.loc 1 180 0
+ 313 00fa 2200     		movs	r2, r4
+ 314              	.LBB36:
+ 315              	.LBB33:
+  54:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		proto.tail++;
+ 316              		.loc 1 54 0
+ 317 00fc 7F26     		movs	r6, #127
+  55:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 318              		.loc 1 55 0
+ 319 00fe 9C46     		mov	ip, r3
+  53:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(++proto.head == proto.tail){
+ 320              		.loc 1 53 0
+ 321 0100 0099     		ldr	r1, [sp]
+ 322 0102 8031     		adds	r1, r1, #128
+ 323              	.LVL16:
+ 324              	.L32:
+ 325              	.LBE33:
+ 326              	.LBE36:
+ 327              		.loc 1 180 0 discriminator 1
+ 328 0104 0198     		ldr	r0, [sp, #4]
+ 329 0106 131B     		subs	r3, r2, r4
+ 330 0108 9842     		cmp	r0, r3
+ 331 010a 18DD     		ble	.L67
+ 332              	.LBB37:
+ 333              	.LBB34:
+  53:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(++proto.head == proto.tail){
+ 334              		.loc 1 53 0 discriminator 3
+ 335 010c 0878     		ldrb	r0, [r1]
+ 336              	.LBE34:
+ 337              	.LBE37:
+ 181:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		_set_byte(data[i]);
+ 338              		.loc 1 181 0 discriminator 3
+ 339 010e 1578     		ldrb	r5, [r2]
+ 340              	.LVL17:
+ 341              	.LBB38:
+ 342              	.LBB35:
+  53:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(++proto.head == proto.tail){
+ 343              		.loc 1 53 0 discriminator 3
+ 344 0110 4306     		lsls	r3, r0, #25
+ 345 0112 4A4F     		ldr	r7, .L69
+ 346 0114 5B0E     		lsrs	r3, r3, #25
+ 347 0116 FD54     		strb	r5, [r7, r3]
+  54:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		proto.tail++;
+ 348              		.loc 1 54 0 discriminator 3
+ 349 0118 5D1C     		adds	r5, r3, #1
+ 350              	.LVL18:
+ 351 011a 3540     		ands	r5, r6
+ 352 011c B043     		bics	r0, r6
+ 353 011e 2843     		orrs	r0, r5
+ 354 0120 0870     		strb	r0, [r1]
+ 355 0122 0888     		ldrh	r0, [r1]
+ 356 0124 8704     		lsls	r7, r0, #18
+ 357              	.LVL19:
+ 358 0126 7F0E     		lsrs	r7, r7, #25
+ 359 0128 AF42     		cmp	r7, r5
+ 360 012a 06D1     		bne	.L33
+  55:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 361              		.loc 1 55 0
+ 362 012c 6546     		mov	r5, ip
+ 363 012e 0233     		adds	r3, r3, #2
+ 364              	.LVL20:
+ 365 0130 3340     		ands	r3, r6
+ 366              	.LVL21:
+ 367 0132 DB01     		lsls	r3, r3, #7
+ 368 0134 2840     		ands	r0, r5
+ 369 0136 1843     		orrs	r0, r3
+ 370 0138 0880     		strh	r0, [r1]
+ 371              	.L33:
+ 372              	.LVL22:
+ 373 013a 0132     		adds	r2, r2, #1
+ 374              	.LVL23:
+ 375 013c E2E7     		b	.L32
+ 376              	.L67:
+ 377              	.LBE35:
+ 378              	.LBE38:
+ 379              	.LBE30:
+ 182:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 183:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(_get_recved_len() < FRAME_MIN_SIZE){
+ 380              		.loc 1 183 0
+ 381 013e FFF75FFF 		bl	_get_recved_len
+ 382              	.LVL24:
+ 383 0142 0328     		cmp	r0, #3
+ 384 0144 78D9     		bls	.L29
+ 385              	.LBB39:
+ 386              	.LBB40:
+ 387              	.LBB41:
+ 388              	.LBB42:
+ 389              	.LBB43:
+ 390              	.LBB44:
+  66:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 391              		.loc 1 66 0
+ 392 0146 7F27     		movs	r7, #127
+ 393              	.LVL25:
+ 394              	.L58:
+ 395              	.LBE44:
+ 396              	.LBE43:
+ 397              	.LBE42:
+ 398              	.LBE41:
+  79:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 399              		.loc 1 79 0
+ 400 0148 FFF75AFF 		bl	_get_recved_len
+ 401              	.LVL26:
+ 402              	.LBB50:
+  86:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		for(int i = 0; i < sizeof(frmHead) && i+j<_rLen; ++i){
+ 403              		.loc 1 86 0
+ 404 014c 0028     		cmp	r0, #0
+ 405 014e 73D0     		beq	.L29
+ 406              	.LVL27:
+ 407              	.LBB49:
+ 408              	.LBB47:
+ 409              	.LBB45:
+  66:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 410              		.loc 1 66 0
+ 411 0150 3A4A     		ldr	r2, .L69
+ 412 0152 1300     		movs	r3, r2
+ 413 0154 8033     		adds	r3, r3, #128
+ 414 0156 1B88     		ldrh	r3, [r3]
+ 415 0158 9B04     		lsls	r3, r3, #18
+ 416 015a 5B0E     		lsrs	r3, r3, #25
+ 417              	.LVL28:
+ 418              	.LBE45:
+ 419              	.LBE47:
+  87:../../../drivers/ProtocolResolution/ProtocolRln.c **** 			if(frmHead[i] != _show_byte(i)){
+ 420              		.loc 1 87 0
+ 421 015c 0128     		cmp	r0, #1
+ 422 015e 04D0     		beq	.L36
+ 423              	.LBB48:
+ 424              	.LBB46:
+  66:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 425              		.loc 1 66 0
+ 426 0160 591C     		adds	r1, r3, #1
+ 427 0162 3940     		ands	r1, r7
+ 428              	.LBE46:
+ 429              	.LBE48:
+  88:../../../drivers/ProtocolResolution/ProtocolRln.c **** 				_found = false;
+ 430              		.loc 1 88 0
+ 431 0164 515C     		ldrb	r1, [r2, r1]
+ 432 0166 FF29     		cmp	r1, #255
+ 433 0168 66D1     		bne	.L29
+ 434              	.L36:
+ 435              	.LBE49:
+ 436              	.LBE50:
+  99:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		return;
+ 437              		.loc 1 99 0
+ 438 016a D35C     		ldrb	r3, [r2, r3]
+ 439              	.LVL29:
+ 440 016c 3A2B     		cmp	r3, #58
+ 441 016e 63D1     		bne	.L29
+ 442              	.LVL30:
+ 103:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 443              		.loc 1 103 0
+ 444 0170 0328     		cmp	r0, #3
+ 445 0172 61D9     		bls	.L29
+ 446              	.LVL31:
+ 447              	.LBB51:
+ 448              	.LBB52:
+  66:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 449              		.loc 1 66 0
+ 450 0174 314B     		ldr	r3, .L69
+ 451 0176 8033     		adds	r3, r3, #128
+ 452 0178 1E88     		ldrh	r6, [r3]
+ 453 017a B604     		lsls	r6, r6, #18
+ 454 017c 760E     		lsrs	r6, r6, #25
+ 455 017e B31C     		adds	r3, r6, #2
+ 456 0180 3B40     		ands	r3, r7
+ 457 0182 D45C     		ldrb	r4, [r2, r3]
+ 458              	.LVL32:
+ 459              	.LBE52:
+ 460              	.LBE51:
+ 110:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 461              		.loc 1 110 0
+ 462 0184 E31C     		adds	r3, r4, #3
+ 463 0186 9842     		cmp	r0, r3
+ 464 0188 56DD     		ble	.L29
+ 465              	.LVL33:
+ 118:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		_data = malloc(_len);
+ 466              		.loc 1 118 0
+ 467 018a 002C     		cmp	r4, #0
+ 468 018c 05D0     		beq	.L43
+ 119:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		if(!_data){
+ 469              		.loc 1 119 0
+ 470 018e 2000     		movs	r0, r4
+ 471              	.LVL34:
+ 472 0190 FFF7FEFF 		bl	malloc
+ 473              	.LVL35:
+ 474 0194 051E     		subs	r5, r0, #0
+ 475              	.LVL36:
+ 120:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 476              		.loc 1 120 0
+ 477 0196 01D1     		bne	.L37
+ 478 0198 4EE0     		b	.L29
+ 479              	.LVL37:
+ 480              	.L43:
+ 117:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(_len){
+ 481              		.loc 1 117 0
+ 482 019a 2500     		movs	r5, r4
+ 483              	.LVL38:
+ 484              	.L37:
+ 485              	.LBB53:
+ 486              	.LBB54:
+  61:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 487              		.loc 1 61 0
+ 488 019c 2748     		ldr	r0, .L69
+ 489 019e 294B     		ldr	r3, .L69+8
+ 490 01a0 8030     		adds	r0, r0, #128
+ 491 01a2 0288     		ldrh	r2, [r0]
+ 492 01a4 0336     		adds	r6, r6, #3
+ 493 01a6 3E40     		ands	r6, r7
+ 494 01a8 F101     		lsls	r1, r6, #7
+ 495 01aa 1A40     		ands	r2, r3
+ 496 01ac 0A43     		orrs	r2, r1
+ 497 01ae 0280     		strh	r2, [r0]
+ 498              	.LVL39:
+ 499 01b0 B446     		mov	ip, r6
+ 500 01b2 3000     		movs	r0, r6
+ 501 01b4 2A00     		movs	r2, r5
+ 502 01b6 0026     		movs	r6, #0
+ 503 01b8 0193     		str	r3, [sp, #4]
+ 504              	.LVL40:
+ 505              	.L38:
+ 506              	.LBE54:
+ 507              	.LBE53:
+ 508              	.LBB55:
+ 128:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		_data[i] = _get_byte();
+ 509              		.loc 1 128 0
+ 510 01ba 511B     		subs	r1, r2, r5
+ 511              	.LVL41:
+ 512 01bc 7F23     		movs	r3, #127
+ 513 01be 8C42     		cmp	r4, r1
+ 514 01c0 08DD     		ble	.L68
+ 129:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 515              		.loc 1 129 0
+ 516 01c2 1E49     		ldr	r1, .L69
+ 517              	.LVL42:
+ 518              	.LBB56:
+ 519              	.LBB57:
+  49:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 520              		.loc 1 49 0
+ 521 01c4 431C     		adds	r3, r0, #1
+ 522              	.LBE57:
+ 523              	.LBE56:
+ 129:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 524              		.loc 1 129 0
+ 525 01c6 095C     		ldrb	r1, [r1, r0]
+ 526              	.LBB60:
+ 527              	.LBB58:
+  49:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 528              		.loc 1 49 0
+ 529 01c8 3B40     		ands	r3, r7
+ 530              	.LBE58:
+ 531              	.LBE60:
+ 129:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 532              		.loc 1 129 0
+ 533 01ca 1170     		strb	r1, [r2]
+ 534              	.LVL43:
+ 535 01cc 0126     		movs	r6, #1
+ 536 01ce 0132     		adds	r2, r2, #1
+ 537              	.LVL44:
+ 538              	.LBB61:
+ 539              	.LBB59:
+  49:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 540              		.loc 1 49 0
+ 541 01d0 1800     		movs	r0, r3
+ 542 01d2 F2E7     		b	.L38
+ 543              	.LVL45:
+ 544              	.L68:
+ 545 01d4 2200     		movs	r2, r4
+ 546 01d6 1A40     		ands	r2, r3
+ 547 01d8 6244     		add	r2, r2, ip
+ 548 01da 1340     		ands	r3, r2
+ 549 01dc 002E     		cmp	r6, #0
+ 550 01de 07D0     		beq	.L40
+ 551 01e0 164A     		ldr	r2, .L69
+ 552 01e2 DE01     		lsls	r6, r3, #7
+ 553 01e4 8032     		adds	r2, r2, #128
+ 554 01e6 1388     		ldrh	r3, [r2]
+ 555 01e8 0199     		ldr	r1, [sp, #4]
+ 556              	.LVL46:
+ 557 01ea 0B40     		ands	r3, r1
+ 558 01ec 3343     		orrs	r3, r6
+ 559 01ee 1380     		strh	r3, [r2]
+ 560              	.L40:
+ 561              	.LBE59:
+ 562              	.LBE61:
+ 563              	.LBE55:
+ 564              	.LBB62:
+ 565              	.LBB63:
+ 566 01f0 0099     		ldr	r1, [sp]
+ 567 01f2 8031     		adds	r1, r1, #128
+ 568 01f4 0E88     		ldrh	r6, [r1]
+ 569 01f6 B204     		lsls	r2, r6, #18
+ 570 01f8 520E     		lsrs	r2, r2, #25
+ 571 01fa 531C     		adds	r3, r2, #1
+ 572 01fc 3B40     		ands	r3, r7
+ 573 01fe D801     		lsls	r0, r3, #7
+ 574 0200 019B     		ldr	r3, [sp, #4]
+ 575 0202 3340     		ands	r3, r6
+ 576 0204 0343     		orrs	r3, r0
+ 577 0206 0B80     		strh	r3, [r1]
+ 578              	.LBE63:
+ 579              	.LBE62:
+ 132:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 580              		.loc 1 132 0
+ 581 0208 009B     		ldr	r3, [sp]
+ 582 020a 2100     		movs	r1, r4
+ 583 020c 2800     		movs	r0, r5
+ 584 020e 9E5C     		ldrb	r6, [r3, r2]
+ 585 0210 FFF7FEFF 		bl	bc_sys_check_sum
+ 586              	.LVL47:
+ 587 0214 0019     		adds	r0, r0, r4
+ 588 0216 8642     		cmp	r6, r0
+ 589 0218 0ED1     		bne	.L29
+ 138:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	if(_data){
+ 590              		.loc 1 138 0
+ 591 021a 009B     		ldr	r3, [sp]
+ 592 021c 2100     		movs	r1, r4
+ 593 021e 0833     		adds	r3, r3, #8
+ 594 0220 DB6F     		ldr	r3, [r3, #124]
+ 595 0222 2800     		movs	r0, r5
+ 596 0224 9847     		blx	r3
+ 597              	.LVL48:
+ 139:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		free(_data);
+ 598              		.loc 1 139 0
+ 599 0226 002D     		cmp	r5, #0
+ 600 0228 02D0     		beq	.L41
+ 140:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 601              		.loc 1 140 0
+ 602 022a 2800     		movs	r0, r5
+ 603 022c FFF7FEFF 		bl	free
+ 604              	.LVL49:
+ 605              	.L41:
+ 142:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 606              		.loc 1 142 0
+ 607 0230 FFF7E6FE 		bl	_get_recved_len
+ 608              	.LVL50:
+ 609 0234 0328     		cmp	r0, #3
+ 610 0236 87D8     		bhi	.L58
+ 611              	.LVL51:
+ 612              	.L29:
+ 613              	.LBE40:
+ 614              	.LBE39:
+ 184:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 185:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		printf("start timer\r\n");
+ 186:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+ 187:../../../drivers/ProtocolResolution/ProtocolRln.c **** 		return;
+ 188:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	}
+ 189:../../../drivers/ProtocolResolution/ProtocolRln.c **** #ifndef RELEASE
+ 190:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	printf("recv and do\r\n");
+ 191:../../../drivers/ProtocolResolution/ProtocolRln.c **** #endif
+ 192:../../../drivers/ProtocolResolution/ProtocolRln.c **** 	protocol_do();
+ 193:../../../drivers/ProtocolResolution/ProtocolRln.c **** }
+ 615              		.loc 1 193 0
+ 616              		@ sp needed
+ 617 0238 F7BD     		pop	{r0, r1, r2, r4, r5, r6, r7, pc}
+ 618              	.L70:
+ 619 023a C046     		.align	2
+ 620              	.L69:
+ 621 023c 00000000 		.word	.LANCHOR0
+ 622 0240 00000000 		.word	_delay_timer_cb
+ 623 0244 7FC0FFFF 		.word	-16257
+ 624              		.cfi_endproc
+ 625              	.LFE51:
+ 627              		.section	.rodata
+ 628              		.set	.LANCHOR1,. + 0
+ 631              	frmHead:
+ 632 0000 3A       		.byte	58
+ 633 0001 FF       		.byte	-1
+ 634              		.bss
+ 635              		.align	2
+ 636              		.set	.LANCHOR0,. + 0
+ 639              	proto:
+ 640 0000 00000000 		.space	164
+ 640      00000000 
+ 640      00000000 
+ 640      00000000 
+ 640      00000000 
+ 641              		.text
+ 642              	.Letext0:
+ 643              		.file 2 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 644              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 645              		.file 4 "../../../drivers/ProtocolResolution/inc/ProtocolRln.h"
+ 646              		.file 5 "../../../drivers/hal/inc/bc62xx_timer.h"
+ 647              		.file 6 "../../../device/inc/bc_sys.h"
+ 648              		.file 7 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none

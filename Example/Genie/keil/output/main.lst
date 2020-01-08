@@ -1,0 +1,1088 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"main.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.comm	GPIO_FUNC,1,1
+  20              		.comm	L_LEV,4,4
+  21              		.align	1
+  22              		.global	Bt_BleCallBack
+  23              		.code	16
+  24              		.thumb_func
+  26              	Bt_BleCallBack:
+  27              	.LFB85:
+  28              		.file 1 "../src/main.c"
+   1:../src/main.c **** /*************************************************************************
+   2:../src/main.c **** *
+   3:../src/main.c **** * Yichip  
+   4:../src/main.c **** *
+   5:../src/main.c **** *************************************************************************/
+   6:../src/main.c **** 
+   7:../src/main.c **** #include <common.h>
+   8:../src/main.c **** 
+   9:../src/main.c **** #include "bc62xx_uart.h"
+  10:../src/main.c **** #include "bc62xx_ble.h" 
+  11:../src/main.c **** //#include "bc62xx_wdt.h"
+  12:../src/main.c **** #include "gatt_ota.h"
+  13:../src/main.c **** #include "portBle.h"
+  14:../src/main.c **** 
+  15:../src/main.c **** #include "co_com.h"
+  16:../src/main.c **** #include "ali_config.h"
+  17:../src/main.c **** #include "m_api.h"
+  18:../src/main.c **** #include "app_mesh.h"
+  19:../src/main.c **** 
+  20:../src/main.c **** #include "ProtocolRln.h"
+  21:../src/main.c **** 
+  22:../src/main.c **** 
+  23:../src/main.c **** void Bt_BleCallBack(uint8_t *buf, uint16_t len)
+  24:../src/main.c **** {
+  29              		.loc 1 24 0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 16
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              	.LVL0:
+  34 0000 7FB5     		push	{r0, r1, r2, r3, r4, r5, r6, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 32
+  37              		.cfi_offset 0, -32
+  38              		.cfi_offset 1, -28
+  39              		.cfi_offset 2, -24
+  40              		.cfi_offset 3, -20
+  41              		.cfi_offset 4, -16
+  42              		.cfi_offset 5, -12
+  43              		.cfi_offset 6, -8
+  44              		.cfi_offset 14, -4
+  25:../src/main.c **** 	uint16_t att_hdl = (uint16_t)*buf;
+  45              		.loc 1 25 0
+  46 0002 0378     		ldrb	r3, [r0]
+  24:../src/main.c **** 	uint16_t att_hdl = (uint16_t)*buf;
+  47              		.loc 1 24 0
+  48 0004 0400     		movs	r4, r0
+  49 0006 0D00     		movs	r5, r1
+  50              		.loc 1 25 0
+  51 0008 9EB2     		uxth	r6, r3
+  52              	.LVL1:
+  26:../src/main.c **** 	switch(att_hdl){
+  53              		.loc 1 26 0
+  54 000a 1D2B     		cmp	r3, #29
+  55 000c 19D0     		beq	.L3
+  56 000e 09D8     		bhi	.L4
+  57 0010 092B     		cmp	r3, #9
+  58 0012 0ED0     		beq	.L5
+  59 0014 152B     		cmp	r3, #21
+  60 0016 2DD1     		bne	.L1
+  27:../src/main.c **** 		case 0x0009:{
+  28:../src/main.c **** 			uint8_t val = (uint16_t)*(buf+2);
+  29:../src/main.c **** 			if(val){
+  30:../src/main.c **** 				printf("NOTIFY:\r\n");
+  31:../src/main.c **** 			}
+  32:../src/main.c **** 		}break;
+  33:../src/main.c **** 		#if (BLE_MESH)
+  34:../src/main.c **** 		case GATT_PROV_START_HANDLE+2:
+  35:../src/main.c **** 		case GATT_PROXY_START_HANDLE+2:{
+  36:../src/main.c **** 			m_printf_hex(L_APP, "DATA_IN RECV DATA", buf, len);
+  37:../src/main.c **** 			struct mesh_write_req_param para;
+  38:../src/main.c **** 			para.con = 0;
+  39:../src/main.c **** 			para.handle = att_hdl;
+  40:../src/main.c **** 			para.offset = 0;
+  41:../src/main.c **** 			para.length = len-2;
+  42:../src/main.c **** 			para.value = buf+2;
+  43:../src/main.c **** 			mesh_ble_event_set(MESH_BLE_CON_WRITE_REQ,&para);
+  44:../src/main.c **** 		}break;
+  45:../src/main.c **** 		case GATT_PROV_START_HANDLE+5:
+  46:../src/main.c **** 		case GATT_PROXY_START_HANDLE+5:{
+  47:../src/main.c **** 			m_printf_hex(L_APP, "DATA_OUT_CCC RECV DATA", buf, len);
+  48:../src/main.c **** 			struct mesh_write_req_param para;
+  49:../src/main.c **** 			para.con = 0;
+  50:../src/main.c **** 			para.handle = att_hdl;
+  51:../src/main.c **** 			para.offset = 0;
+  52:../src/main.c **** 			para.length = len-2;
+  53:../src/main.c **** 			para.value = buf+2;
+  54:../src/main.c **** 			mesh_ble_event_set(MESH_BLE_CON_WRITE_REQ,&para);
+  55:../src/main.c **** 			//uint8_t ucT[40];
+  56:../src/main.c **** 			///*for test*/mesh_con_notify(GATT_PROV_START_HANDLE+4,ucT, sizeof(ucT));
+  57:../src/main.c **** 		}break;
+  58:../src/main.c **** 		#endif
+  59:../src/main.c **** 		case OTA_WRITE_HANDLE:{
+  60:../src/main.c **** 			gatt_ota_data_deal(buf+2, len - 2);
+  61              		.loc 1 60 0
+  62 0018 023D     		subs	r5, r5, #2
+  63 001a E9B2     		uxtb	r1, r5
+  64              	.LVL2:
+  65 001c 0230     		adds	r0, r0, #2
+  66              	.LVL3:
+  67 001e FFF7FEFF 		bl	gatt_ota_data_deal
+  68              	.LVL4:
+  61:../src/main.c **** 		}break;
+  62:../src/main.c **** 		default:{
+  63:../src/main.c **** 			
+  64:../src/main.c **** 		}break;
+  65:../src/main.c **** 	}
+  66:../src/main.c **** }
+  69              		.loc 1 66 0
+  70 0022 27E0     		b	.L1
+  71              	.LVL5:
+  72              	.L4:
+  26:../src/main.c **** 		case 0x0009:{
+  73              		.loc 1 26 0
+  74 0024 232B     		cmp	r3, #35
+  75 0026 0CD0     		beq	.L3
+  76 0028 262B     		cmp	r3, #38
+  77 002a 0FD0     		beq	.L7
+  78 002c 202B     		cmp	r3, #32
+  79 002e 21D1     		bne	.L1
+  80 0030 0CE0     		b	.L7
+  81              	.L5:
+  82              	.LVL6:
+  83              	.LBB4:
+  29:../src/main.c **** 				printf("NOTIFY:\r\n");
+  84              		.loc 1 29 0
+  85 0032 8378     		ldrb	r3, [r0, #2]
+  86 0034 002B     		cmp	r3, #0
+  87 0036 1DD0     		beq	.L1
+  30:../src/main.c **** 			}
+  88              		.loc 1 30 0
+  89 0038 0F48     		ldr	r0, .L25
+  90              	.LVL7:
+  91 003a 0930     		adds	r0, r0, #9
+  92 003c FFF7FEFF 		bl	puts
+  93              	.LVL8:
+  94 0040 18E0     		b	.L1
+  95              	.LVL9:
+  96              	.L3:
+  97              	.LBE4:
+  98              	.LBB5:
+  36:../src/main.c **** 			struct mesh_write_req_param para;
+  99              		.loc 1 36 0
+ 100 0042 0D49     		ldr	r1, .L25
+ 101              	.LVL10:
+ 102 0044 2B00     		movs	r3, r5
+ 103 0046 2200     		movs	r2, r4
+ 104 0048 1231     		adds	r1, r1, #18
+ 105 004a 03E0     		b	.L23
+ 106              	.LVL11:
+ 107              	.L7:
+ 108              	.LBE5:
+ 109              	.LBB6:
+  47:../src/main.c **** 			struct mesh_write_req_param para;
+ 110              		.loc 1 47 0
+ 111 004c 2B00     		movs	r3, r5
+ 112 004e 2200     		movs	r2, r4
+ 113 0050 0949     		ldr	r1, .L25
+ 114              	.LVL12:
+ 115 0052 2431     		adds	r1, r1, #36
+ 116              	.L23:
+ 117 0054 8020     		movs	r0, #128
+ 118              	.LVL13:
+ 119 0056 8001     		lsls	r0, r0, #6
+ 120 0058 FFF7FEFF 		bl	m_printf_hex
+ 121              	.LVL14:
+  49:../src/main.c **** 			para.handle = att_hdl;
+ 122              		.loc 1 49 0
+ 123 005c 0023     		movs	r3, #0
+ 124 005e 01A9     		add	r1, sp, #4
+  52:../src/main.c **** 			para.value = buf+2;
+ 125              		.loc 1 52 0
+ 126 0060 023D     		subs	r5, r5, #2
+  53:../src/main.c **** 			mesh_ble_event_set(MESH_BLE_CON_WRITE_REQ,&para);
+ 127              		.loc 1 53 0
+ 128 0062 0234     		adds	r4, r4, #2
+ 129              	.LVL15:
+  49:../src/main.c **** 			para.handle = att_hdl;
+ 130              		.loc 1 49 0
+ 131 0064 0B80     		strh	r3, [r1]
+  50:../src/main.c **** 			para.offset = 0;
+ 132              		.loc 1 50 0
+ 133 0066 4E80     		strh	r6, [r1, #2]
+  51:../src/main.c **** 			para.length = len-2;
+ 134              		.loc 1 51 0
+ 135 0068 8B80     		strh	r3, [r1, #4]
+  52:../src/main.c **** 			para.value = buf+2;
+ 136              		.loc 1 52 0
+ 137 006a CD80     		strh	r5, [r1, #6]
+  53:../src/main.c **** 			mesh_ble_event_set(MESH_BLE_CON_WRITE_REQ,&para);
+ 138              		.loc 1 53 0
+ 139 006c 8C60     		str	r4, [r1, #8]
+  54:../src/main.c **** 			//uint8_t ucT[40];
+ 140              		.loc 1 54 0
+ 141 006e 0820     		movs	r0, #8
+ 142 0070 FFF7FEFF 		bl	mesh_ble_event_set
+ 143              	.LVL16:
+ 144              	.L1:
+ 145              	.LBE6:
+ 146              		.loc 1 66 0
+ 147              		@ sp needed
+ 148              	.LVL17:
+ 149 0074 7FBD     		pop	{r0, r1, r2, r3, r4, r5, r6, pc}
+ 150              	.L26:
+ 151 0076 C046     		.align	2
+ 152              	.L25:
+ 153 0078 00000000 		.word	.LANCHOR0
+ 154              		.cfi_endproc
+ 155              	.LFE85:
+ 157              		.align	1
+ 158              		.global	Event_call_back
+ 159              		.code	16
+ 160              		.thumb_func
+ 162              	Event_call_back:
+ 163              	.LFB86:
+  67:../src/main.c **** 
+  68:../src/main.c **** void Event_call_back(uint8_t da)
+  69:../src/main.c **** {
+ 164              		.loc 1 69 0
+ 165              		.cfi_startproc
+ 166              		@ args = 0, pretend = 0, frame = 8
+ 167              		@ frame_needed = 0, uses_anonymous_args = 0
+ 168              	.LVL18:
+ 169 007c 07B5     		push	{r0, r1, r2, lr}
+ 170              	.LCFI1:
+ 171              		.cfi_def_cfa_offset 16
+ 172              		.cfi_offset 0, -16
+ 173              		.cfi_offset 1, -12
+ 174              		.cfi_offset 2, -8
+ 175              		.cfi_offset 14, -4
+ 176              		.loc 1 69 0
+ 177 007e 0100     		movs	r1, r0
+ 178 0080 1448     		ldr	r0, .L34
+ 179              	.LVL19:
+  70:../src/main.c **** 	switch(da){
+ 180              		.loc 1 70 0
+ 181 0082 1529     		cmp	r1, #21
+ 182 0084 13D0     		beq	.L29
+ 183 0086 6529     		cmp	r1, #101
+ 184 0088 0DD0     		beq	.L30
+ 185 008a 1429     		cmp	r1, #20
+ 186 008c 1ED1     		bne	.L33
+ 187              	.LBB12:
+  71:../src/main.c **** 		case 0x65:
+  72:../src/main.c **** 			printf("BLE 0x65\r\n");
+  73:../src/main.c **** 			break;
+  74:../src/main.c **** 		case IPC_EVT_LE_CONNECTED:{
+  75:../src/main.c **** 			printf("BLE connect\r\n");
+ 188              		.loc 1 75 0
+ 189 008e 4530     		adds	r0, r0, #69
+ 190 0090 FFF7FEFF 		bl	puts
+ 191              	.LVL20:
+  76:../src/main.c **** 			//close scan & adv
+  77:../src/main.c **** 			mesh_connect_do();
+ 192              		.loc 1 77 0
+ 193 0094 FFF7FEFF 		bl	mesh_connect_do
+ 194              	.LVL21:
+  78:../src/main.c **** 			#if (BLE_MESH)
+  79:../src/main.c **** 			struct mesh_connected_param para;
+  80:../src/main.c **** 			para.con = 0;
+ 195              		.loc 1 80 0
+ 196 0098 0023     		movs	r3, #0
+ 197 009a 01A9     		add	r1, sp, #4
+  81:../src/main.c **** 			mesh_ble_event_set(MESH_BLE_CON_CONNECTED,&para);
+ 198              		.loc 1 81 0
+ 199 009c 0520     		movs	r0, #5
+  80:../src/main.c **** 			mesh_ble_event_set(MESH_BLE_CON_CONNECTED,&para);
+ 200              		.loc 1 80 0
+ 201 009e 0B80     		strh	r3, [r1]
+ 202              		.loc 1 81 0
+ 203 00a0 FFF7FEFF 		bl	mesh_ble_event_set
+ 204              	.LVL22:
+ 205              	.LBE12:
+  82:../src/main.c **** 			#endif
+  83:../src/main.c **** 		}break;
+ 206              		.loc 1 83 0
+ 207 00a4 15E0     		b	.L27
+ 208              	.L30:
+  72:../src/main.c **** 			break;
+ 209              		.loc 1 72 0
+ 210 00a6 3B30     		adds	r0, r0, #59
+ 211 00a8 FFF7FEFF 		bl	puts
+ 212              	.LVL23:
+  73:../src/main.c **** 		case IPC_EVT_LE_CONNECTED:{
+ 213              		.loc 1 73 0
+ 214 00ac 11E0     		b	.L27
+ 215              	.L29:
+ 216              	.LVL24:
+ 217              	.LBB13:
+ 218              	.LBB14:
+ 219              	.LBB15:
+  84:../src/main.c **** 			
+  85:../src/main.c **** 		case IPC_EVT_LE_DISCONNECTED:{
+  86:../src/main.c **** 			printf("BLE disconnect\r\n");
+ 220              		.loc 1 86 0
+ 221 00ae 5230     		adds	r0, r0, #82
+ 222 00b0 FFF7FEFF 		bl	puts
+ 223              	.LVL25:
+  87:../src/main.c **** 			//restore scan&adv
+  88:../src/main.c **** 			mesh_disconnect_do();
+ 224              		.loc 1 88 0
+ 225 00b4 FFF7FEFF 		bl	mesh_disconnect_do
+ 226              	.LVL26:
+  89:../src/main.c **** 			gatt_ota_stop();
+ 227              		.loc 1 89 0
+ 228 00b8 FFF7FEFF 		bl	gatt_ota_stop
+ 229              	.LVL27:
+  90:../src/main.c **** 			#if (BLE_MESH)	
+  91:../src/main.c **** 			struct mesh_disconnected_param para;
+  92:../src/main.c **** 			para.con = 0;
+ 230              		.loc 1 92 0
+ 231 00bc 0023     		movs	r3, #0
+ 232 00be 01A9     		add	r1, sp, #4
+  93:../src/main.c **** 			para.reason = 0;
+  94:../src/main.c **** 			mesh_ble_event_set(MESH_BLE_CON_DISCONNECTED,&para);
+ 233              		.loc 1 94 0
+ 234 00c0 0620     		movs	r0, #6
+  92:../src/main.c **** 			para.reason = 0;
+ 235              		.loc 1 92 0
+ 236 00c2 0B80     		strh	r3, [r1]
+  93:../src/main.c **** 			para.reason = 0;
+ 237              		.loc 1 93 0
+ 238 00c4 8B70     		strb	r3, [r1, #2]
+ 239              		.loc 1 94 0
+ 240 00c6 FFF7FEFF 		bl	mesh_ble_event_set
+ 241              	.LVL28:
+ 242 00ca 02E0     		b	.L27
+ 243              	.LVL29:
+ 244              	.L33:
+ 245              	.LBE15:
+ 246              	.LBE14:
+ 247              	.LBE13:
+  95:../src/main.c **** 			#endif
+  96:../src/main.c **** 		}break;
+  97:../src/main.c **** 		default:
+  98:../src/main.c **** 			printf("enter event [%d]\r\n", da);
+ 248              		.loc 1 98 0
+ 249 00cc 6230     		adds	r0, r0, #98
+ 250 00ce FFF7FEFF 		bl	printf
+ 251              	.LVL30:
+ 252              	.L27:
+  99:../src/main.c **** 			break;
+ 100:../src/main.c **** 	}
+ 101:../src/main.c **** }
+ 253              		.loc 1 101 0
+ 254              		@ sp needed
+ 255 00d2 07BD     		pop	{r0, r1, r2, pc}
+ 256              	.L35:
+ 257              		.align	2
+ 258              	.L34:
+ 259 00d4 00000000 		.word	.LANCHOR0
+ 260              		.cfi_endproc
+ 261              	.LFE86:
+ 263              		.align	1
+ 264              		.global	Mesh_Adv_Cb
+ 265              		.code	16
+ 266              		.thumb_func
+ 268              	Mesh_Adv_Cb:
+ 269              	.LFB87:
+ 102:../src/main.c **** void Mesh_Adv_Cb(uint8_t* sour, uint16_t len)
+ 103:../src/main.c **** {
+ 270              		.loc 1 103 0
+ 271              		.cfi_startproc
+ 272              		@ args = 0, pretend = 0, frame = 8
+ 273              		@ frame_needed = 0, uses_anonymous_args = 0
+ 274              	.LVL31:
+ 275 00d8 37B5     		push	{r0, r1, r2, r4, r5, lr}
+ 276              	.LCFI2:
+ 277              		.cfi_def_cfa_offset 24
+ 278              		.cfi_offset 0, -24
+ 279              		.cfi_offset 1, -20
+ 280              		.cfi_offset 2, -16
+ 281              		.cfi_offset 4, -12
+ 282              		.cfi_offset 5, -8
+ 283              		.cfi_offset 14, -4
+ 284              		.loc 1 103 0
+ 285 00da 0400     		movs	r4, r0
+ 286 00dc 0D00     		movs	r5, r1
+ 104:../src/main.c **** #ifdef CONFIG_FACTORY_TEST
+ 105:../src/main.c **** 		//for test
+ 106:../src/main.c **** 		app_mesh_hal_rx(HAL_TST, &sour[8], len-8);
+ 107:../src/main.c **** #endif
+ 108:../src/main.c **** 
+ 109:../src/main.c **** #if (BLE_MESH)	
+ 110:../src/main.c **** 	if(OTANONE != gatt_ota_state_get())
+ 287              		.loc 1 110 0
+ 288 00de FFF7FEFF 		bl	gatt_ota_state_get
+ 289              	.LVL32:
+ 290 00e2 0028     		cmp	r0, #0
+ 291 00e4 0CD1     		bne	.L36
+ 292              	.LVL33:
+ 293              	.LBB18:
+ 294              	.LBB19:
+ 111:../src/main.c **** 		return;
+ 112:../src/main.c **** 
+ 113:../src/main.c **** 	struct mesh_adv_report_param para;
+ 114:../src/main.c **** 	para.info = sour[0];
+ 295              		.loc 1 114 0
+ 296 00e6 6A46     		mov	r2, sp
+ 297 00e8 2378     		ldrb	r3, [r4]
+ 115:../src/main.c **** 	para.rssi = sour[1];
+ 116:../src/main.c **** 	para.length = len-8;
+ 298              		.loc 1 116 0
+ 299 00ea 083D     		subs	r5, r5, #8
+ 300              	.LVL34:
+ 114:../src/main.c **** 	para.rssi = sour[1];
+ 301              		.loc 1 114 0
+ 302 00ec 1370     		strb	r3, [r2]
+ 115:../src/main.c **** 	para.rssi = sour[1];
+ 303              		.loc 1 115 0
+ 304 00ee 6378     		ldrb	r3, [r4, #1]
+ 117:../src/main.c **** 	para.data = &sour[8];
+ 118:../src/main.c **** 	mesh_ble_event_set(MESH_BLE_SCAN_RX_CB,&para);
+ 305              		.loc 1 118 0
+ 306 00f0 6946     		mov	r1, sp
+ 117:../src/main.c **** 	para.data = &sour[8];
+ 307              		.loc 1 117 0
+ 308 00f2 0834     		adds	r4, r4, #8
+ 309              	.LVL35:
+ 310              		.loc 1 118 0
+ 311 00f4 0330     		adds	r0, r0, #3
+ 115:../src/main.c **** 	para.length = len-8;
+ 312              		.loc 1 115 0
+ 313 00f6 5370     		strb	r3, [r2, #1]
+ 116:../src/main.c **** 	para.data = &sour[8];
+ 314              		.loc 1 116 0
+ 315 00f8 5580     		strh	r5, [r2, #2]
+ 117:../src/main.c **** 	para.data = &sour[8];
+ 316              		.loc 1 117 0
+ 317 00fa 0194     		str	r4, [sp, #4]
+ 318              		.loc 1 118 0
+ 319 00fc FFF7FEFF 		bl	mesh_ble_event_set
+ 320              	.LVL36:
+ 321              	.L36:
+ 322              	.LBE19:
+ 323              	.LBE18:
+ 119:../src/main.c **** #endif
+ 120:../src/main.c **** }
+ 324              		.loc 1 120 0
+ 325              		@ sp needed
+ 326 0100 37BD     		pop	{r0, r1, r2, r4, r5, pc}
+ 327              		.cfi_endproc
+ 328              	.LFE87:
+ 330              		.align	1
+ 331              		.global	ble_read_req_cb
+ 332              		.code	16
+ 333              		.thumb_func
+ 335              	ble_read_req_cb:
+ 336              	.LFB88:
+ 121:../src/main.c **** 
+ 122:../src/main.c **** void ble_read_req_cb(uint8_t* buf, uint16_t len)
+ 123:../src/main.c **** {
+ 337              		.loc 1 123 0
+ 338              		.cfi_startproc
+ 339              		@ args = 0, pretend = 0, frame = 0
+ 340              		@ frame_needed = 0, uses_anonymous_args = 0
+ 341              	.LVL37:
+ 342 0102 70B5     		push	{r4, r5, r6, lr}
+ 343              	.LCFI3:
+ 344              		.cfi_def_cfa_offset 16
+ 345              		.cfi_offset 4, -16
+ 346              		.cfi_offset 5, -12
+ 347              		.cfi_offset 6, -8
+ 348              		.cfi_offset 14, -4
+ 124:../src/main.c **** 	printf("%s:", __FUNCTION__);
+ 349              		.loc 1 124 0
+ 350 0104 0649     		ldr	r1, .L39
+ 351              	.LVL38:
+ 352 0106 074C     		ldr	r4, .L39+4
+ 123:../src/main.c **** 	printf("%s:", __FUNCTION__);
+ 353              		.loc 1 123 0
+ 354 0108 0500     		movs	r5, r0
+ 355              		.loc 1 124 0
+ 356 010a 7531     		adds	r1, r1, #117
+ 357 010c 601D     		adds	r0, r4, #5
+ 358              	.LVL39:
+ 359 010e FFF7FEFF 		bl	printf
+ 360              	.LVL40:
+ 125:../src/main.c **** 	printf("hadler[%x]\r\n", (uint16_t)*buf);
+ 361              		.loc 1 125 0
+ 362 0112 2000     		movs	r0, r4
+ 363 0114 2978     		ldrb	r1, [r5]
+ 364 0116 0930     		adds	r0, r0, #9
+ 365 0118 FFF7FEFF 		bl	printf
+ 366              	.LVL41:
+ 126:../src/main.c **** }
+ 367              		.loc 1 126 0
+ 368              		@ sp needed
+ 369              	.LVL42:
+ 370 011c 70BD     		pop	{r4, r5, r6, pc}
+ 371              	.L40:
+ 372 011e C046     		.align	2
+ 373              	.L39:
+ 374 0120 00000000 		.word	.LANCHOR0
+ 375 0124 80000000 		.word	.LANCHOR1
+ 376              		.cfi_endproc
+ 377              	.LFE88:
+ 379              		.align	1
+ 380              		.global	ble_read_conn_param
+ 381              		.code	16
+ 382              		.thumb_func
+ 384              	ble_read_conn_param:
+ 385              	.LFB89:
+ 127:../src/main.c **** 
+ 128:../src/main.c **** void ble_read_conn_param(uint8_t* buf, uint16_t len)
+ 129:../src/main.c **** {
+ 386              		.loc 1 129 0
+ 387              		.cfi_startproc
+ 388              		@ args = 0, pretend = 0, frame = 0
+ 389              		@ frame_needed = 0, uses_anonymous_args = 0
+ 390              	.LVL43:
+ 391 0128 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 392              	.LCFI4:
+ 393              		.cfi_def_cfa_offset 24
+ 394              		.cfi_offset 3, -24
+ 395              		.cfi_offset 4, -20
+ 396              		.cfi_offset 5, -16
+ 397              		.cfi_offset 6, -12
+ 398              		.cfi_offset 7, -8
+ 399              		.cfi_offset 14, -4
+ 130:../src/main.c **** 	printf("%s:", __FUNCTION__);
+ 400              		.loc 1 130 0
+ 401 012a 0C4C     		ldr	r4, .L45
+ 129:../src/main.c **** 	printf("%s:", __FUNCTION__);
+ 402              		.loc 1 129 0
+ 403 012c 0F00     		movs	r7, r1
+ 404              		.loc 1 130 0
+ 405 012e 2100     		movs	r1, r4
+ 406              	.LVL44:
+ 129:../src/main.c **** 	printf("%s:", __FUNCTION__);
+ 407              		.loc 1 129 0
+ 408 0130 0600     		movs	r6, r0
+ 409              		.loc 1 130 0
+ 410 0132 1631     		adds	r1, r1, #22
+ 411 0134 601D     		adds	r0, r4, #5
+ 412              	.LVL45:
+ 413 0136 FFF7FEFF 		bl	printf
+ 414              	.LVL46:
+ 415              	.LBB20:
+ 131:../src/main.c **** 	for(int i = 0; i < len; ++i){
+ 416              		.loc 1 131 0
+ 417 013a 3500     		movs	r5, r6
+ 418              	.LVL47:
+ 419              	.L42:
+ 420              		.loc 1 131 0 is_stmt 0 discriminator 1
+ 421 013c AB1B     		subs	r3, r5, r6
+ 422 013e 9F42     		cmp	r7, r3
+ 423 0140 06DD     		ble	.L44
+ 132:../src/main.c **** 		printf("%02x ", buf[i]);
+ 424              		.loc 1 132 0 is_stmt 1 discriminator 3
+ 425 0142 2000     		movs	r0, r4
+ 426 0144 2978     		ldrb	r1, [r5]
+ 427 0146 2A30     		adds	r0, r0, #42
+ 428 0148 FFF7FEFF 		bl	printf
+ 429              	.LVL48:
+ 430 014c 0135     		adds	r5, r5, #1
+ 431              	.LVL49:
+ 432 014e F5E7     		b	.L42
+ 433              	.L44:
+ 434              	.LBE20:
+ 133:../src/main.c **** 	}
+ 134:../src/main.c **** 	printf("\r\n");
+ 435              		.loc 1 134 0
+ 436 0150 2000     		movs	r0, r4
+ 437 0152 3030     		adds	r0, r0, #48
+ 438 0154 FFF7FEFF 		bl	puts
+ 439              	.LVL50:
+ 135:../src/main.c **** }
+ 440              		.loc 1 135 0
+ 441              		@ sp needed
+ 442              	.LVL51:
+ 443              	.LVL52:
+ 444 0158 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 445              	.L46:
+ 446 015a C046     		.align	2
+ 447              	.L45:
+ 448 015c 80000000 		.word	.LANCHOR1
+ 449              		.cfi_endproc
+ 450              	.LFE89:
+ 452              		.align	1
+ 453              		.code	16
+ 454              		.thumb_func
+ 456              	_rln_cb:
+ 457              	.LFB90:
+ 136:../src/main.c **** 
+ 137:../src/main.c **** static void _rln_cb(const uint8_t* data, uint8_t len)
+ 138:../src/main.c **** {
+ 458              		.loc 1 138 0
+ 459              		.cfi_startproc
+ 460              		@ args = 0, pretend = 0, frame = 0
+ 461              		@ frame_needed = 0, uses_anonymous_args = 0
+ 462              	.LVL53:
+ 463 0160 10B5     		push	{r4, lr}
+ 464              	.LCFI5:
+ 465              		.cfi_def_cfa_offset 8
+ 466              		.cfi_offset 4, -8
+ 467              		.cfi_offset 14, -4
+ 468              		.loc 1 138 0
+ 469 0162 0A00     		movs	r2, r1
+ 139:../src/main.c **** 	app_mesh_hal_rx(HAL_UART, data, len);
+ 470              		.loc 1 139 0
+ 471 0164 0100     		movs	r1, r0
+ 472              	.LVL54:
+ 473 0166 0120     		movs	r0, #1
+ 474              	.LVL55:
+ 475 0168 FFF7FEFF 		bl	app_mesh_hal_rx
+ 476              	.LVL56:
+ 140:../src/main.c **** }
+ 477              		.loc 1 140 0
+ 478              		@ sp needed
+ 479 016c 10BD     		pop	{r4, pc}
+ 480              		.cfi_endproc
+ 481              	.LFE90:
+ 483              		.align	1
+ 484              		.code	16
+ 485              		.thumb_func
+ 487              	_send_cb:
+ 488              	.LFB91:
+ 141:../src/main.c **** 
+ 142:../src/main.c **** static void _send_cb(const uint8_t* data, uint8_t len)
+ 143:../src/main.c **** {
+ 489              		.loc 1 143 0
+ 490              		.cfi_startproc
+ 491              		@ args = 0, pretend = 0, frame = 0
+ 492              		@ frame_needed = 0, uses_anonymous_args = 0
+ 493              	.LVL57:
+ 494 016e 70B5     		push	{r4, r5, r6, lr}
+ 495              	.LCFI6:
+ 496              		.cfi_def_cfa_offset 16
+ 497              		.cfi_offset 4, -16
+ 498              		.cfi_offset 5, -12
+ 499              		.cfi_offset 6, -8
+ 500              		.cfi_offset 14, -4
+ 501              		.loc 1 143 0
+ 502 0170 0500     		movs	r5, r0
+ 503 0172 0E00     		movs	r6, r1
+ 504              	.LBB21:
+ 144:../src/main.c **** 	for(int i = 0; i < len; ++i)
+ 505              		.loc 1 144 0
+ 506 0174 0400     		movs	r4, r0
+ 507              	.LVL58:
+ 508              	.L49:
+ 509              		.loc 1 144 0 is_stmt 0 discriminator 1
+ 510 0176 631B     		subs	r3, r4, r5
+ 511 0178 9E42     		cmp	r6, r3
+ 512 017a 05DD     		ble	.L51
+ 145:../src/main.c **** 		USART_SendData(UARTB, (uint16_t)data[i]);
+ 513              		.loc 1 145 0 is_stmt 1 discriminator 3
+ 514 017c 2178     		ldrb	r1, [r4]
+ 515 017e 0120     		movs	r0, #1
+ 516 0180 FFF7FEFF 		bl	USART_SendData
+ 517              	.LVL59:
+ 518 0184 0134     		adds	r4, r4, #1
+ 519              	.LVL60:
+ 520 0186 F6E7     		b	.L49
+ 521              	.L51:
+ 522              	.LBE21:
+ 146:../src/main.c **** }
+ 523              		.loc 1 146 0
+ 524              		@ sp needed
+ 525              	.LVL61:
+ 526              	.LVL62:
+ 527 0188 70BD     		pop	{r4, r5, r6, pc}
+ 528              		.cfi_endproc
+ 529              	.LFE91:
+ 531              		.section	.text.startup,"ax",%progbits
+ 532              		.align	1
+ 533              		.global	main
+ 534              		.code	16
+ 535              		.thumb_func
+ 537              	main:
+ 538              	.LFB92:
+ 147:../src/main.c **** #ifdef RELEASE
+ 148:../src/main.c **** static void _uartb_init(void)
+ 149:../src/main.c **** {
+ 150:../src/main.c **** 	/*init gpio*/	
+ 151:../src/main.c **** 	GPIO_CFG cfgTx ={FUNC_UARTB_TXD, GFG_PULLUP};
+ 152:../src/main.c **** 	bc_gpio_init(GPIO_UART_TX, &cfgTx);
+ 153:../src/main.c **** 	
+ 154:../src/main.c **** 	GPIO_CFG cfgRx ={FUNC_UARTB_RXD, GFG_PULLUP};
+ 155:../src/main.c **** 	bc_gpio_init(GPIO_UART_RX, &cfgRx);
+ 156:../src/main.c **** 
+ 157:../src/main.c **** 	/*cofig uart parameter*/	
+ 158:../src/main.c **** 	USART_InitTypeDef Uart = {BAUD9600, DATA_BITS_8b, STOP_BITS_1, PARITY_EVEN,
+ 159:../src/main.c **** 								MODE_DUPLEX, FLOW_CTRL_NONE, 128, 128};
+ 160:../src/main.c **** 	USART_Init(UARTB, &Uart);
+ 161:../src/main.c **** }
+ 162:../src/main.c **** #endif
+ 163:../src/main.c **** int main()
+ 164:../src/main.c **** {
+ 539              		.loc 1 164 0
+ 540              		.cfi_startproc
+ 541              		@ args = 0, pretend = 0, frame = 56
+ 542              		@ frame_needed = 0, uses_anonymous_args = 0
+ 543 0000 70B5     		push	{r4, r5, r6, lr}
+ 544              	.LCFI7:
+ 545              		.cfi_def_cfa_offset 16
+ 546              		.cfi_offset 4, -16
+ 547              		.cfi_offset 5, -12
+ 548              		.cfi_offset 6, -8
+ 549              		.cfi_offset 14, -4
+ 165:../src/main.c **** #ifdef RELEASE
+ 166:../src/main.c **** 	_uartb_init();
+ 167:../src/main.c **** #else
+ 168:../src/main.c **** 	UART_RemapToPrintf(UARTB, GPIO_UART_TX, GPIO_UART_RX);
+ 550              		.loc 1 168 0
+ 551 0002 1C22     		movs	r2, #28
+ 164:../src/main.c **** #ifdef RELEASE
+ 552              		.loc 1 164 0
+ 553 0004 90B0     		sub	sp, sp, #64
+ 554              	.LCFI8:
+ 555              		.cfi_def_cfa_offset 80
+ 556              		.loc 1 168 0
+ 557 0006 1B21     		movs	r1, #27
+ 558 0008 0120     		movs	r0, #1
+ 559 000a FFF7FEFF 		bl	UART_RemapToPrintf
+ 560              	.LVL63:
+ 169:../src/main.c **** #endif
+ 170:../src/main.c **** 	m_print("-----------%s[%s]-----------\r\n", MESH_VER, MESH_LVER);
+ 561              		.loc 1 170 0
+ 562 000e 374C     		ldr	r4, .L64
+ 563 0010 2200     		movs	r2, r4
+ 564 0012 2100     		movs	r1, r4
+ 565 0014 2000     		movs	r0, r4
+ 566 0016 3232     		adds	r2, r2, #50
+ 567 0018 3431     		adds	r1, r1, #52
+ 568 001a 3A30     		adds	r0, r0, #58
+ 569 001c FFF7FEFF 		bl	m_print
+ 570              	.LVL64:
+ 171:../src/main.c **** 	M_PRINTF(L_APP,"mesh stack init start");
+ 571              		.loc 1 171 0
+ 572 0020 334B     		ldr	r3, .L64+4
+ 573 0022 1A68     		ldr	r2, [r3]
+ 574 0024 1E00     		movs	r6, r3
+ 575 0026 9304     		lsls	r3, r2, #18
+ 576 0028 14D5     		bpl	.L53
+ 577              		.loc 1 171 0 is_stmt 0 discriminator 5
+ 578 002a 2300     		movs	r3, r4
+ 579 002c 2200     		movs	r2, r4
+ 580 002e 2000     		movs	r0, r4
+ 581 0030 304D     		ldr	r5, .L64+8
+ 582 0032 7633     		adds	r3, r3, #118
+ 583 0034 2900     		movs	r1, r5
+ 584 0036 6032     		adds	r2, r2, #96
+ 585 0038 0093     		str	r3, [sp]
+ 586 003a 6730     		adds	r0, r0, #103
+ 587 003c AB23     		movs	r3, #171
+ 588 003e FFF7FEFF 		bl	m_print
+ 589              	.LVL65:
+ 590 0042 2000     		movs	r0, r4
+ 591 0044 7B30     		adds	r0, r0, #123
+ 592 0046 FFF7FEFF 		bl	m_print
+ 593              	.LVL66:
+ 594 004a 2B48     		ldr	r0, .L64+12
+ 595 004c A91D     		adds	r1, r5, #6
+ 596 004e 1130     		adds	r0, r0, #17
+ 597 0050 FFF7FEFF 		bl	m_print
+ 598              	.LVL67:
+ 599              	.L53:
+ 172:../src/main.c **** 
+ 173:../src/main.c **** 	bool aliStatus = ali_config_data_init();
+ 600              		.loc 1 173 0 is_stmt 1
+ 601 0054 FFF7FEFF 		bl	ali_config_data_init
+ 602              	.LVL68:
+ 174:../src/main.c **** 	if(!aliStatus){
+ 603              		.loc 1 174 0
+ 604 0058 0028     		cmp	r0, #0
+ 605 005a 18D1     		bne	.L54
+ 175:../src/main.c **** 		M_PRINTF(L_APP,"ali parameter error!");
+ 606              		.loc 1 175 0
+ 607 005c 3368     		ldr	r3, [r6]
+ 608 005e 9B04     		lsls	r3, r3, #18
+ 609 0060 14D5     		bpl	.L55
+ 610              		.loc 1 175 0 is_stmt 0 discriminator 5
+ 611 0062 2200     		movs	r2, r4
+ 612 0064 2000     		movs	r0, r4
+ 613              	.LVL69:
+ 614 0066 234D     		ldr	r5, .L64+8
+ 615 0068 7634     		adds	r4, r4, #118
+ 616 006a 2900     		movs	r1, r5
+ 617 006c 6032     		adds	r2, r2, #96
+ 618 006e 0094     		str	r4, [sp]
+ 619 0070 AF23     		movs	r3, #175
+ 620 0072 6730     		adds	r0, r0, #103
+ 621 0074 FFF7FEFF 		bl	m_print
+ 622              	.LVL70:
+ 623 0078 1F4C     		ldr	r4, .L64+12
+ 624 007a 2000     		movs	r0, r4
+ 625 007c 1430     		adds	r0, r0, #20
+ 626 007e FFF7FEFF 		bl	m_print
+ 627              	.LVL71:
+ 628 0082 2000     		movs	r0, r4
+ 629 0084 A91D     		adds	r1, r5, #6
+ 630 0086 1130     		adds	r0, r0, #17
+ 631 0088 FFF7FEFF 		bl	m_print
+ 632              	.LVL72:
+ 633              	.L55:
+ 634              	.L63:
+ 635 008c FEE7     		b	.L63
+ 636              	.LVL73:
+ 637              	.L54:
+ 176:../src/main.c **** 		while(1);
+ 177:../src/main.c **** 	}
+ 178:../src/main.c **** 		
+ 179:../src/main.c **** 	uint8_t bt_addr[6];
+ 180:../src/main.c **** 	ali_config_mac_read(bt_addr, 0);
+ 638              		.loc 1 180 0 is_stmt 1
+ 639 008e 0021     		movs	r1, #0
+ 640 0090 03A8     		add	r0, sp, #12
+ 641              	.LVL74:
+ 642 0092 FFF7FEFF 		bl	ali_config_mac_read
+ 643              	.LVL75:
+ 181:../src/main.c **** 	mesh_mac_set(true, bt_addr);
+ 644              		.loc 1 181 0
+ 645 0096 03A9     		add	r1, sp, #12
+ 646 0098 0120     		movs	r0, #1
+ 647 009a FFF7FEFF 		bl	mesh_mac_set
+ 648              	.LVL76:
+ 182:../src/main.c **** 	HWRITE(mem_tx_power,0x02);
+ 649              		.loc 1 182 0
+ 650 009e 0222     		movs	r2, #2
+ 651 00a0 164B     		ldr	r3, .L64+16
+ 183:../src/main.c **** 	
+ 184:../src/main.c **** 	tIPCControlBlock cb;
+ 185:../src/main.c **** 	memset(&cb, 0, sizeof(tIPCControlBlock));
+ 652              		.loc 1 185 0
+ 653 00a2 0021     		movs	r1, #0
+ 182:../src/main.c **** 	HWRITE(mem_tx_power,0x02);
+ 654              		.loc 1 182 0
+ 655 00a4 1A70     		strb	r2, [r3]
+ 656              		.loc 1 185 0
+ 657 00a6 05A8     		add	r0, sp, #20
+ 658 00a8 2A32     		adds	r2, r2, #42
+ 659 00aa FFF7FEFF 		bl	memset
+ 660              	.LVL77:
+ 186:../src/main.c **** 	cb.blecb = Bt_BleCallBack;
+ 661              		.loc 1 186 0
+ 662 00ae 144B     		ldr	r3, .L64+20
+ 187:../src/main.c **** 	cb.evtcb = Event_call_back;
+ 188:../src/main.c **** 	cb.advcb = Mesh_Adv_Cb;
+ 189:../src/main.c **** 	//cb.readreqcb = ble_read_req_cb;
+ 190:../src/main.c **** 	cb.readconnparamcb = ble_read_conn_param;
+ 191:../src/main.c **** 	
+ 192:../src/main.c **** 	IPC_Initialize(&cb);	//Register callback function.
+ 663              		.loc 1 192 0
+ 664 00b0 05A8     		add	r0, sp, #20
+ 186:../src/main.c **** 	cb.blecb = Bt_BleCallBack;
+ 665              		.loc 1 186 0
+ 666 00b2 0993     		str	r3, [sp, #36]
+ 187:../src/main.c **** 	cb.evtcb = Event_call_back;
+ 667              		.loc 1 187 0
+ 668 00b4 134B     		ldr	r3, .L64+24
+ 669 00b6 0593     		str	r3, [sp, #20]
+ 188:../src/main.c **** 	//cb.readreqcb = ble_read_req_cb;
+ 670              		.loc 1 188 0
+ 671 00b8 134B     		ldr	r3, .L64+28
+ 672 00ba 0A93     		str	r3, [sp, #40]
+ 190:../src/main.c **** 	
+ 673              		.loc 1 190 0
+ 674 00bc 134B     		ldr	r3, .L64+32
+ 675 00be 0E93     		str	r3, [sp, #56]
+ 676              		.loc 1 192 0
+ 677 00c0 FFF7FEFF 		bl	IPC_Initialize
+ 678              	.LVL78:
+ 193:../src/main.c **** 
+ 194:../src/main.c **** #if (BLE_MESH)	
+ 195:../src/main.c **** 	if(aliStatus){
+ 196:../src/main.c **** 		app_mesh_init();
+ 679              		.loc 1 196 0
+ 680 00c4 FFF7FEFF 		bl	app_mesh_init
+ 681              	.LVL79:
+ 197:../src/main.c **** 		app_mesh_start();
+ 682              		.loc 1 197 0
+ 683 00c8 FFF7FEFF 		bl	app_mesh_start
+ 684              	.LVL80:
+ 198:../src/main.c **** 	}
+ 199:../src/main.c **** #endif/*BLE_MESH*/
+ 200:../src/main.c **** 	//WDT_Enable();
+ 201:../src/main.c **** 
+ 202:../src/main.c **** 	gatt_ota_init();
+ 685              		.loc 1 202 0
+ 686 00cc FFF7FEFF 		bl	gatt_ota_init
+ 687              	.LVL81:
+ 203:../src/main.c **** 
+ 204:../src/main.c **** 	protocol_init(_rln_cb, _send_cb);
+ 688              		.loc 1 204 0
+ 689 00d0 0F49     		ldr	r1, .L64+36
+ 690 00d2 1048     		ldr	r0, .L64+40
+ 691 00d4 FFF7FEFF 		bl	protocol_init
+ 692              	.LVL82:
+ 693              	.L57:
+ 205:../src/main.c **** 
+ 206:../src/main.c **** 	while(1){
+ 207:../src/main.c **** 		#if (BLE_MESH)
+ 208:../src/main.c **** 		if(OTANONE == gatt_ota_state_get())
+ 694              		.loc 1 208 0
+ 695 00d8 FFF7FEFF 		bl	gatt_ota_state_get
+ 696              	.LVL83:
+ 697 00dc 0028     		cmp	r0, #0
+ 698 00de 01D1     		bne	.L56
+ 209:../src/main.c **** 			bc_m_mesh_loop();
+ 699              		.loc 1 209 0
+ 700 00e0 FFF7FEFF 		bl	bc_m_mesh_loop
+ 701              	.LVL84:
+ 702              	.L56:
+ 210:../src/main.c **** 		#endif/*BLE_MESH*/
+ 211:../src/main.c **** 		//WDT_Kick();
+ 212:../src/main.c **** 
+ 213:../src/main.c **** 		//ble process
+ 214:../src/main.c **** 		mesh_ble_process();
+ 703              		.loc 1 214 0
+ 704 00e4 FFF7FEFF 		bl	mesh_ble_process
+ 705              	.LVL85:
+ 215:../src/main.c **** #ifdef RELEASE
+ 216:../src/main.c **** 		if(USART_GetRxCount(UARTB) > 0){
+ 217:../src/main.c **** 			uint8_t buff[50];
+ 218:../src/main.c **** 			int len = USART_ReadDatatoBuff(UARTB, buff, 0);
+ 219:../src/main.c **** 			protocol_recv(buff, len);
+ 220:../src/main.c **** 		}
+ 221:../src/main.c **** #endif
+ 222:../src/main.c **** 	}
+ 706              		.loc 1 222 0
+ 707 00e8 F6E7     		b	.L57
+ 708              	.L65:
+ 709 00ea C046     		.align	2
+ 710              	.L64:
+ 711 00ec 80000000 		.word	.LANCHOR1
+ 712 00f0 00000000 		.word	L_LEV
+ 713 00f4 00000000 		.word	.LANCHOR0
+ 714 00f8 00010000 		.word	.LANCHOR2
+ 715 00fc 91420010 		.word	268452497
+ 716 0100 00000000 		.word	Bt_BleCallBack
+ 717 0104 00000000 		.word	Event_call_back
+ 718 0108 00000000 		.word	Mesh_Adv_Cb
+ 719 010c 00000000 		.word	ble_read_conn_param
+ 720 0110 00000000 		.word	_send_cb
+ 721 0114 00000000 		.word	_rln_cb
+ 722              		.cfi_endproc
+ 723              	.LFE92:
+ 725              		.section	.rodata
+ 726              		.set	.LANCHOR0,. + 0
+ 727              		.set	.LANCHOR1,. + 128
+ 728              		.set	.LANCHOR2,. + 256
+ 731              	lgs:
+ 732 0000 5B4D4C47 		.ascii	"[MLG]\000"
+ 732      5D00
+ 735              	lge:
+ 736 0006 0D0A00   		.ascii	"\015\012\000"
+ 737              	.LC0:
+ 738 0009 4E4F5449 		.ascii	"NOTIFY:\015\000"
+ 738      46593A0D 
+ 738      00
+ 739              	.LC2:
+ 740 0012 44415441 		.ascii	"DATA_IN RECV DATA\000"
+ 740      5F494E20 
+ 740      52454356 
+ 740      20444154 
+ 740      4100
+ 741              	.LC3:
+ 742 0024 44415441 		.ascii	"DATA_OUT_CCC RECV DATA\000"
+ 742      5F4F5554 
+ 742      5F434343 
+ 742      20524543 
+ 742      56204441 
+ 743              	.LC4:
+ 744 003b 424C4520 		.ascii	"BLE 0x65\015\000"
+ 744      30783635 
+ 744      0D00
+ 745              	.LC6:
+ 746 0045 424C4520 		.ascii	"BLE connect\015\000"
+ 746      636F6E6E 
+ 746      6563740D 
+ 746      00
+ 747              	.LC7:
+ 748 0052 424C4520 		.ascii	"BLE disconnect\015\000"
+ 748      64697363 
+ 748      6F6E6E65 
+ 748      63740D00 
+ 749              	.LC8:
+ 750 0062 656E7465 		.ascii	"enter event [%d]\015\012\000"
+ 750      72206576 
+ 750      656E7420 
+ 750      5B25645D 
+ 750      0D0A00
+ 753              	__FUNCTION__.9769:
+ 754 0075 626C655F 		.ascii	"ble_read_req_cb\000"
+ 754      72656164 
+ 754      5F726571 
+ 754      5F636200 
+ 755              	.LC14:
+ 756 0085 25733A00 		.ascii	"%s:\000"
+ 757              	.LC16:
+ 758 0089 6861646C 		.ascii	"hadler[%x]\015\012\000"
+ 758      65725B25 
+ 758      785D0D0A 
+ 758      00
+ 761              	__FUNCTION__.9774:
+ 762 0096 626C655F 		.ascii	"ble_read_conn_param\000"
+ 762      72656164 
+ 762      5F636F6E 
+ 762      6E5F7061 
+ 762      72616D00 
+ 763              	.LC22:
+ 764 00aa 25303278 		.ascii	"%02x \000"
+ 764      2000
+ 765              	.LC23:
+ 766 00b0 0D00     		.ascii	"\015\000"
+ 767              	.LC28:
+ 768 00b2 6100     		.ascii	"a\000"
+ 769              	.LC30:
+ 770 00b4 312E302E 		.ascii	"1.0.3\000"
+ 770      3300
+ 771              	.LC31:
+ 772 00ba 2D2D2D2D 		.ascii	"-----------%s[%s]-----------\015\012\000"
+ 772      2D2D2D2D 
+ 772      2D2D2D25 
+ 772      735B2573 
+ 772      5D2D2D2D 
+ 773              	.LC33:
+ 774 00d9 2E2E2F73 		.ascii	"../src/main.c\000"
+ 774      72632F6D 
+ 774      61696E2E 
+ 774      6300
+ 775              	.LC35:
+ 776 00e7 25735B25 		.ascii	"%s[%10s:%d]%s:\000"
+ 776      3130733A 
+ 776      25645D25 
+ 776      733A00
+ 779              	__FUNCTION__.9794:
+ 780 00f6 6D61696E 		.ascii	"main\000"
+ 780      00
+ 781              	.LC36:
+ 782 00fb 6D657368 		.ascii	"mesh stack init start\000"
+ 782      20737461 
+ 782      636B2069 
+ 782      6E697420 
+ 782      73746172 
+ 783              	.LC37:
+ 784 0111 257300   		.ascii	"%s\000"
+ 785              	.LC39:
+ 786 0114 616C6920 		.ascii	"ali parameter error!\000"
+ 786      70617261 
+ 786      6D657465 
+ 786      72206572 
+ 786      726F7221 
+ 787              		.text
+ 788              	.Letext0:
+ 789              		.file 2 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 790              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 791              		.file 4 "../../../device/inc/bc62xx.h"
+ 792              		.file 5 "../../../drivers/hal/inc/bc62xx_gpio.h"
+ 793              		.file 6 "../../../drivers/hal/inc/bc62xx_uart.h"
+ 794              		.file 7 "../../../drivers/hal/inc/bc62xx_ble.h"
+ 795              		.file 8 "../../../mesh/port/portBle.h"
+ 796              		.file 9 "../../../mesh/app/app_mesh.h"
+ 797              		.file 10 "../../../mesh/common/api/co_log.h"
+ 798              		.file 11 "../inc/gatt_ota.h"
+ 799              		.file 12 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-non
+ 800              		.file 13 "../../../mesh/app/ali_config.h"
+ 801              		.file 14 "../../../drivers/ProtocolResolution/inc/ProtocolRln.h"
+ 802              		.file 15 "../../../mesh/api/m_api.h"
+ 803              		.file 16 "<built-in>"
