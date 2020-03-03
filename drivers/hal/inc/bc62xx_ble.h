@@ -228,6 +228,8 @@ typedef enum
 #define	IPC_A2DP_DATA		 0x0a
 #define	IPC_HFP_DATA		0x0b
 #define IPC_READ_CONN_PARA	0x0c
+#define IPC_BT_INQUIRY_RSP	0x0d
+
 
 
 /**
@@ -324,6 +326,13 @@ typedef void (*tIPCReadConnParam)(uint8_t*, uint16_t);
   */
 typedef void (*tIPC24gCb)(uint8_t*, uint8_t);
 
+/**
+  *@brief IPC Hid callback function type.
+  */
+typedef void (*tIPCInquiryCb)(uint8_t*, uint16_t);
+
+
+
 
 /**
   *@brief IPC control block type.
@@ -340,6 +349,7 @@ typedef struct IPCContolBlock {
 	tIPCa2dpCb a2dpcb;		/*< ipc audio call back */
 	tIPCReadConnParam readconnparamcb;	/*< ipc read connparam call back */
 	tIPC24gCb g24cb;
+	tIPCInquiryCb inquirycb;
 }tIPCControlBlock;
 
 /**

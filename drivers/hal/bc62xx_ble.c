@@ -257,6 +257,11 @@ void IPC_DealSingleStep()
 		ipcRx(ipcReadBuff+IPC_FRAME_HEAD_SIZE,*pbuff-1);
 		if(ipcCb.readconnparamcb) ipcCb.readconnparamcb(pbuff+1,*pbuff);//
 	}
+	else if(*pbuff == IPC_BT_INQUIRY_RSP){
+		pbuff++;
+		ipcRx(ipcReadBuff+IPC_FRAME_HEAD_SIZE,*pbuff -1);
+		if(ipcCb.inquirycb) ipcCb.inquirycb(pbuff+1,*pbuff);
+	}
 //	while(1);
 }
 

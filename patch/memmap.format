@@ -1273,3 +1273,6 @@
 0x4e4d mem_long_uuid
 0x4e7d mem_read_req_data
 0x4e81 mem_flash_start_addr
+0x4e84 mem_le_adv_chanel
+0x4e85 mem_le_scan_chanel
+0x4e86 mem_le_data_tmp_buff
