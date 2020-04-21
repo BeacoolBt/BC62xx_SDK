@@ -64,6 +64,7 @@ typedef struct
 {
 	breath_t* breath;//for brearh lamp
 	uint16_t freq;//pwm frequency
+	/*For CW light control*/
 	uint8_t cPin;
 	uint8_t wPin;
 	uint8_t on;//on/off	
@@ -72,36 +73,21 @@ typedef struct
 	uint16_t lnTarget;
 	uint16_t tp;
 	uint16_t tpTarget;
+	/*For RGB light control*/
 #if (LIGHT_CW_WITH_RGB)
+	uint8_t onRgb;//on/off	
+	uint8_t onRgbTarget;//on/off	
+	uint16_t lnRgb;
+	uint16_t lnRgbTarget;
 	uint16_t rVal;
 	uint16_t rValTarg;
 	uint16_t gVal;
 	uint16_t gValTarg;
 	uint16_t bVal;
 	uint16_t bValTarg;
+	uint8_t lmode;//0 for cw; 1 for rgb
 #endif
 }light_cw_t;
-
-typedef struct
-{
-	breath_t* breath;//for brearh lamp
-	uint8_t Pin;
-	uint16_t ln;
-}light_ltn_t;
-
-typedef struct
-{
-	breath_t* breath;//for brearh lamp
-	uint16_t freq;//pwm frequency
-	uint8_t rPin;
-	uint8_t gPin;
-	uint8_t bPin;
-	uint8_t on;
-	uint16_t ln;
-	uint16_t rVal;
-	uint16_t gVal;
-	uint16_t bVal;
-}light_rgb_t;
 
 /*
  *FOR WARM/COLD
@@ -235,155 +221,6 @@ void led_cw_set_breath(breath_t* t);
  ****************************************************************************************
  */
 uint8_t  led_cw_do_breath(void);
-
-/*
- *FOR LIGHTNESS
- */
-/**
- ****************************************************************************************
- * @brief Set lightness for lightness light
- *
- * @param[in] lightness val, range in [0x28f,0x28f00]
- *
- * @return None
- ****************************************************************************************
- */
-void led_ltn_set_lightness(uint16_t ln);
-
-/**
- ****************************************************************************************
- * @brief get lightness from lightness light
- *
- * @param None
- *
- * @return lightness val
- ****************************************************************************************
- */
-uint16_t led_ltn_get_lightness(void);
-
-/**
- ****************************************************************************************
- * @brief trun on/off the lightness light
- *
- * @param[in] on on/off val, 0 off, 1 on
- *
- * @return None
- ****************************************************************************************
- */
-void led_ltn_set_on_off(uint8_t on);
-
-/**
- ****************************************************************************************
- * @brief get on/off status from lightness light
- *
- * @param None
- *
- * @return on/off val
- ****************************************************************************************
- */
-uint8_t led_ltn_get_on_off(void);
-
-/**
- ****************************************************************************************
- * @brief init lightness light
- *
- * Default Pin -> ALI_PWM5_W
- *
- * @param[in] light_ltn_t
- *
- * @return None
- ****************************************************************************************
- */
-void led_ltn_init(light_ltn_t* t);
-
-
-/*
- * FOR RGB
- */
-/**
- ****************************************************************************************
- * @brief Set color for rgb light
- *
- * @param[i] r val, range in [0,0xffff]
- * @param[i] g val, range in [0,0xffff]
- * @param[i] b val, range in [0,0xffff]
- *
- * @return None
- ****************************************************************************************
- */
-int led_rgb_set_color(uint16_t r, uint16_t g, uint16_t b);
-
-/**
- ****************************************************************************************
- * @brief get color from rgb light
- *
- * @param[o] r val, range in [0,0xffff]
- * @param[o] g val, range in [0,0xffff]
- * @param[o] b val, range in [0,0xffff]
- *
- * @return None
- ****************************************************************************************
- */
-int led_rgb_get_color(uint16_t* r, uint16_t* g, uint16_t* b);
-
-/**
- ****************************************************************************************
- * @brief Set lightness for rgb light
- *
- * @param[in] lightness val, range in [0x28f,0x28f00]
- *
- * @return None
- ****************************************************************************************
- */
-void led_rgb_set_lightness(uint16_t ln);
-
-/**
- ****************************************************************************************
- * @brief get lightness from rgb light
- *
- * @param None
- *
- * @return lightness val
- ****************************************************************************************
- */
-uint16_t led_rgb_get_lightness(void);
-
-/**
- ****************************************************************************************
- * @brief trun on/off the rgb light
- *
- * @param[in] on on/off val, 0 off, 1 on
- *
- * @return None
- ****************************************************************************************
- */
-void led_rgb_set_on_off(uint8_t on);
-
-/**
- ****************************************************************************************
- * @brief get on/off status from lightness light
- *
- * @param None
- *
- * @return on/off val
- ****************************************************************************************
- */
-uint8_t led_rgb_get_on_off(void);
-
-/**
- ****************************************************************************************
- * @brief init lightness light
- *
- * Default R Pin -> ALI_PWM1_R
- * Default G Pin -> ALI_PWM2_G
- * Default B Pin -> ALI_PWM3_B
- *
- * @param[in] light_ltn_t
- *
- * @return None
- ****************************************************************************************
- */
-void led_rgb_init(light_rgb_t* t);
 
 #endif/*__LED_H__*/
 

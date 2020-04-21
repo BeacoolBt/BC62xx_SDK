@@ -1,4 +1,5 @@
 #include "m_api.h"
+#include "systick.h"
 
 #include "app_mesh.h"
 #include "co_com.h"
@@ -6,7 +7,7 @@
 #include "meshTimer.h"
 #include "bc62xx_gpio.h"
 
-#include "mm_ali.h"
+#include "mm_alis.h"
 #include "ali_light.h"
 #include "ali_socket.h"
 #include "ali_heatingTable.h"
@@ -34,6 +35,7 @@ const app_t ali_app_array[] =
 		.app_init = ali_light_init,
 		.app_deinit = ali_light_deinit,
 		.hal_rx = ali_light_hal_rx,
+		.tick_handler = NULL,
 	},
 	{	
 		.factory_reset = ali_light_factory_reset,
@@ -42,6 +44,7 @@ const app_t ali_app_array[] =
 		.app_init = ali_light_init,
 		.app_deinit = ali_light_deinit,
 		.hal_rx = NULL,
+		.tick_handler = NULL,
 	},
 	//ali_socket = 
 	{	
@@ -51,6 +54,7 @@ const app_t ali_app_array[] =
 		.app_init = ali_socket_init,
 		.app_deinit = ali_socket_deinit,
 		.hal_rx = NULL,
+		.tick_handler = ali_socket_tick_handler,
 	},
 	//ali_HeatingTable = 
 	{	
@@ -60,6 +64,7 @@ const app_t ali_app_array[] =
 		.app_init = ali_heating_table_init,
 		.app_deinit = ali_heating_table_deinit,
 		.hal_rx = ali_heating_table_hal_rx,
+		.tick_handler = NULL,
 	},
 };
 __STATIC void app_mesh_enabled_cb(uint16_t status)
@@ -70,7 +75,6 @@ __STATIC void app_mesh_enabled_cb(uint16_t status)
 __STATIC void app_mesh_disabled_cb(uint16_t status)
 {
 	M_PRINTF(L_APP, "");
-	ali_app->app_t->factory_reset();
 }
 static void app_mesh_prov_timeout_timer_cb(void* param)
 {
@@ -82,10 +86,15 @@ __STATIC void app_mesh_prov_state_cb(uint8_t state, uint16_t status)
 	
 	M_PRINTF(L_APP, "state[%s]", app_mesh_prov_state_str[state]);
 	if(state == M_PROV_STARTED){
-			SYS_SetTimer(&ali_app->provTimeoutTimer, (int)ALI_PROV_TIMEOUT_TIME/10, 
-						TIMER_SINGLE, (Timer_Expire_CB)app_mesh_prov_timeout_timer_cb);
+		/*Start 10 mins prov timeout timer*/
+		SYS_SetTimer(&ali_app->provTimeoutTimer, (int)ALI_PROV_TIMEOUT_TIME/10, 
+					TIMER_SINGLE, (Timer_Expire_CB)app_mesh_prov_timeout_timer_cb);
+
+		/*Clear saved provisioned parameters*/
+		//bc_m_clear_config();
 	}
 	if(state == M_PROV_SUCCEED_APP){
+		bc_m_proxy_ctrl(false);
 		SYS_ReleaseTimer(&ali_app->provTimeoutTimer);
 	}
 
@@ -139,6 +148,7 @@ __STATIC void app_mesh_api_update_ind_cb(uint8_t type, uint16_t len, uint8_t *da
 __STATIC void app_mesh_reset_ind_cb(void)
 {
 	M_PRINTF(L_APP, "");
+	ali_app->app_t->factory_reset();
 	bc_m_disable();
 }
 
@@ -175,14 +185,25 @@ __STATIC const m_api_cb_t app_mesh_cb = {
 };
 uint8_t app_mesh_init(void)
 {
+	/*Init mesh stack*/
 	bc_m_mesh_init();
-	
+
+	/*Malloc memory for Genie product*/
 	ali_app = ke_malloc(sizeof(ali_app_t), 0);
+	/*Clear memroy*/
 	memset(ali_app, 0, sizeof(ali_app_t));
-	uint8_t dType = ali_config_device_type_get();
+	
+	/*Get Genie device type*/
+	uint8_t dType = ali_config_device_type_get();	
 	M_PRINTF(L_APP, "device type[%d]", dType);
+	/*Get device structer*/
 	ali_app->app_t = &ali_app_array[dType];
+
+	/*Init device*/
 	ali_app->app_t->app_init(&ali_app->model, &ali_app->model_cnt);
+
+	/*Set systick callback function with 1ms interval*/
+	systick_set_tick_irq_handler(ali_app->app_t->tick_handler);
 
 	return 0;
 }
@@ -190,7 +211,9 @@ uint8_t app_mesh_init(void)
 void app_mesh_deinit(void)
 {
 	ASSERT_ERR(ali_app && ali_app->model);
+	/*Release device*/
 	ali_app->app_t->app_deinit(&ali_app->model);
+	/*Free memory*/
 	ke_free(ali_app);
 }
 void app_mesh_start(void)

@@ -2,7 +2,7 @@
 #include "mm_defines.h"
 #include "meshTimer.h"
 
-#include "mm_ali.h"
+#include "mm_alis.h"
 #include "bc_flash.h"
 #include "bc_sys.h"
 #include "led.h"
@@ -169,9 +169,7 @@ static uint8_t _quick_restore_init(void)
 		M_PRINTF(L_APP, "led status = %d", i%2);
 	}while(i-->1);
 	//restore flash parameter
-	bc_m_clear_config();
-	//clear quick count
-	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);	
+	ali_heating_table_factory_reset();
 	return 1;
 }
 
@@ -221,7 +219,7 @@ uint8_t ali_heating_table_prov_state_get(void)
 void ali_heating_table_factory_reset()
 {
 	bc_m_clear_config();
-	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
+	bc_flash_erase(FLASH_ALI_START_ADDRRESS, FLASH_ALI_USED_PAGE_SIZE);
 	bc_sys_reset();
 }
 static void _ali_heating_table_vendor_rx_cb(const m_lid_t model_lid, const uint8_t opcode, const uint8_t* data, const uint16_t len)
@@ -277,7 +275,7 @@ uint8_t ali_heating_table_init(mesh_model_t** mdl, uint8_t* mcnt)
 
 	tmModel = &pstHeatTable->model[pstHeatTable->model_cnt++];
 	tmModel->offset = 0;//element num
-	bc_mm_alis_vendor_init(tmModel, _ali_heating_table_vendor_rx_cb);
+	bc_mm_alis_vendor_init(tmModel, _ali_heating_table_vendor_rx_cb, NULL);
 	
 	*mdl = pstHeatTable->model;
 	*mcnt = pstHeatTable->model_cnt;

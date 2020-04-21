@@ -770,8 +770,8 @@
  627 0000 00000000 		.space	4
  628              		.text
  629              	.Letext0:
- 630              		.file 2 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 631              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 630              		.file 2 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 631              		.file 3 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
  632              		.file 4 "../../../mesh/app/ali_config.h"
  633              		.file 5 "../../../mesh/common/api/co_log.h"
  634              		.file 6 "../../../mesh/port/port.h"

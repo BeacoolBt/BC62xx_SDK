@@ -105,6 +105,8 @@
 /// Default relay to use for relay feature
 #define M_RLY_DEFAULT						 (0x66)
 
+/// Number of advertising transmission for Beacon
+#define M_ADV_BCN_NB_TX                          (2)
 /// Number of advertising transmission to perform
 #define M_ADV_NB_TX                          (7)//[0,7]
 /// Advertising interval - 20ms - 32 slots

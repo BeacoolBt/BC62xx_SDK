@@ -792,6 +792,6 @@
  294              		.cfi_endproc
  295              	.LFE44:
  297              	.Letext0:
- 298              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 299              		.file 4 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 298              		.file 3 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 299              		.file 4 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
  300              		.file 5 "../../../drivers/hal/inc/bc62xx_gpio.h"

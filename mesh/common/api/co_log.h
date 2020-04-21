@@ -21,6 +21,8 @@ uint32_t L_LEV;
 #define L_FND		(0x01<<11)
 #define L_MODEL		(0x01<<12)
 #define L_APP 		(0x01<<13)
+#define L_PROXY		(0x01<<14)
+#define L_ALI		(0x01<<15)
 
 static const unsigned char lgs[] = "[MLG]";
 static const unsigned char lge[] = "\r\n";

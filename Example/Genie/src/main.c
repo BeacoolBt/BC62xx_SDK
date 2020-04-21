@@ -33,7 +33,7 @@ void Bt_BleCallBack(uint8_t *buf, uint16_t len)
 		#if (BLE_MESH)
 		case GATT_PROV_START_HANDLE+2:
 		case GATT_PROXY_START_HANDLE+2:{
-			m_printf_hex(L_APP, "DATA_IN RECV DATA", buf, len);
+			//m_printf_hex(L_APP, "DATA_IN RECV DATA", buf, len);
 			struct mesh_write_req_param para;
 			para.con = 0;
 			para.handle = att_hdl;
@@ -44,7 +44,7 @@ void Bt_BleCallBack(uint8_t *buf, uint16_t len)
 		}break;
 		case GATT_PROV_START_HANDLE+5:
 		case GATT_PROXY_START_HANDLE+5:{
-			m_printf_hex(L_APP, "DATA_OUT_CCC RECV DATA", buf, len);
+			//m_printf_hex(L_APP, "DATA_OUT_CCC RECV DATA", buf, len);
 			struct mesh_write_req_param para;
 			para.con = 0;
 			para.handle = att_hdl;
@@ -68,8 +68,8 @@ void Bt_BleCallBack(uint8_t *buf, uint16_t len)
 void Event_call_back(uint8_t da)
 {
 	switch(da){
-		case 0x65:
-			printf("BLE 0x65\r\n");
+		case BT_EVT_RESET:
+			printf("Ble reset\r\n");
 			break;
 		case IPC_EVT_LE_CONNECTED:{
 			printf("BLE connect\r\n");
@@ -102,14 +102,15 @@ void Event_call_back(uint8_t da)
 void Mesh_Adv_Cb(uint8_t* sour, uint16_t len)
 {
 #ifdef CONFIG_FACTORY_TEST
-		//for test
-		app_mesh_hal_rx(HAL_TST, &sour[8], len-8);
+	//for test
+	app_mesh_hal_rx(HAL_TST, &sour[8], len-8);
 #endif
 
 #if (BLE_MESH)	
 	if(OTANONE != gatt_ota_state_get())
 		return;
-
+	if(sour[0] != ADV_NONCONN_IND)
+		return;
 	struct mesh_adv_report_param para;
 	para.info = sour[0];
 	para.rssi = sour[1];
@@ -163,22 +164,26 @@ static void _uartb_init(void)
 int main()
 {
 #ifdef RELEASE
+	/*Uart init*/
 	_uartb_init();
 #else
+	/*Printf function remap to UARTB*/
 	UART_RemapToPrintf(UARTB, GPIO_UART_TX, GPIO_UART_RX);
 #endif
-	m_print("-----------%s[%s]-----------\r\n", MESH_VER, MESH_LVER);
-	M_PRINTF(L_APP,"mesh stack init start");
+	M_PRINTF(L_APP,"---Application start version[%s][%s]---\r\n", MESH_VER, MESH_LVER);
 
+	/*Ali trituple parameter init*/
 	bool aliStatus = ali_config_data_init();
 	if(!aliStatus){
 		M_PRINTF(L_APP,"ali parameter error!");
 		while(1);
 	}
-		
+	/*Set mac addr*/	
 	uint8_t bt_addr[6];
 	ali_config_mac_read(bt_addr, 0);
 	mesh_mac_set(true, bt_addr);
+
+	/*Set tx power*/
 	HWRITE(mem_tx_power,0x02);
 	
 	tIPCControlBlock cb;
@@ -188,29 +193,33 @@ int main()
 	cb.advcb = Mesh_Adv_Cb;
 	//cb.readreqcb = ble_read_req_cb;
 	cb.readconnparamcb = ble_read_conn_param;
-	
+	/*Set ble callback*/
 	IPC_Initialize(&cb);	//Register callback function.
 
 #if (BLE_MESH)	
 	if(aliStatus){
+		/*init mesh*/
 		app_mesh_init();
+		/*Start mesh init*/
 		app_mesh_start();
 	}
 #endif/*BLE_MESH*/
 	//WDT_Enable();
-
+	/*Init gatt ota*/
 	gatt_ota_init();
-
+	/*Uart protocol init*/
 	protocol_init(_rln_cb, _send_cb);
 
 	while(1){
 		#if (BLE_MESH)
-		if(OTANONE == gatt_ota_state_get())
+		if(OTANONE == gatt_ota_state_get()){
+			/*Do mesh loop*/
 			bc_m_mesh_loop();
+		}
 		#endif/*BLE_MESH*/
 		//WDT_Kick();
 
-		//ble process
+		/*ble process*/
 		mesh_ble_process();
 #ifdef RELEASE
 		if(USART_GetRxCount(UARTB) > 0){

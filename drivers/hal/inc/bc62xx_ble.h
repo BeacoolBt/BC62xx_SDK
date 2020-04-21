@@ -199,6 +199,7 @@ enum scanType{
 #define IPC_EVT_HFP_INDICATORS_UPDATE 0x62
 #define IPC_EVT_HFP_UP_TO_MAX_VLM 0x63
 #define IPC_EVT_HFP_DOWN_TO_MIN_VLM 0x64
+#define BT_EVT_RESET					(0x65)
 
 /**
   *@brief IPC event type enum.

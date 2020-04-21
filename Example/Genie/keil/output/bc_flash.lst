@@ -321,6 +321,6 @@
  247              		.cfi_endproc
  248              	.LFE43:
  250              	.Letext0:
- 251              		.file 2 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 252              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 251              		.file 2 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 252              		.file 3 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
  253              		.file 4 "../../../drivers/hal/inc/bc62xx_flash.h"

@@ -13,11 +13,18 @@
 
 //for gpio control:GPIO_SetOut(6, (bool)val);
 static light_cw_t lcw;
-static light_ltn_t ltn;
 
 static uint16_t ucPeriodCnt;
 static uint16_t deltaLn;
 static uint16_t deltaTp;
+
+#if (LIGHT_CW_WITH_RGB)
+static float krgb;
+static uint16_t deltaR;
+static uint16_t deltaG;
+static uint16_t deltaB;
+static uint16_t deltaLnRgb;
+#endif
 
 static float kScale;
 
@@ -42,6 +49,44 @@ static void _breath_timer_start(void)
 
 void led_cw_set_temperature(uint16_t tp, breath_t* breath)
 {
+#if (LIGHT_CW_WITH_RGB)
+	//when mode changed from rgb to cw, do status change
+	if(lcw.lmode != 0){
+		lcw.lmode = 0;
+		//do temperature change
+		lcw.tp = tp;
+		lcw.tpTarget = lcw.tp;
+		if(breath){
+			//switch on CW, lightness to RGB
+			lcw.lnTarget = lcw.lnRgb;
+			lcw.ln = 0;
+			lcw.on = 0;
+			lcw.onTarget = 1;
+			deltaLn = lcw.lnTarget>=lcw.ln?lcw.lnTarget-lcw.ln:0;
+			deltaLn = deltaLn/breath->pCnt;
+
+			//switch off RGB, 
+			lcw.lnRgbTarget = 0;
+			//lcw.lnRgb = lcw.lnRgb;
+			lcw.onRgbTarget = 0;
+			lcw.onRgb = 1;
+			deltaLnRgb = lcw.lnRgb>lcw.lnRgbTarget?lcw.lnRgb-lcw.lnRgbTarget:0;
+			deltaLnRgb = deltaLnRgb/breath->pCnt;
+
+			if(deltaLn || deltaLnRgb){
+				lcw.breath = breath;
+				_breath_timer_start();
+				return;
+			}
+		}
+		lcw.on = 1;
+		lcw.onTarget = 1;
+		lcw.onRgbTarget = 0;
+		lcw.onRgb = 0;
+		_cw_ctrl(&lcw);
+		return;
+	}
+#endif
 	if(breath){
 		deltaTp = (tp > lcw.tp)?(tp - lcw.tp):(lcw.tp - tp);
 		deltaTp= deltaTp/breath->pCnt;
@@ -52,6 +97,7 @@ void led_cw_set_temperature(uint16_t tp, breath_t* breath)
 			return;
 		}
 	}
+	
 	lcw.tp = tp;
 	lcw.tpTarget = lcw.tp;
 	_cw_ctrl(&lcw);
@@ -64,68 +110,163 @@ uint16_t led_cw_get_temperature(void)
 
 void led_cw_set_lightness(uint16_t ln, breath_t* breath)
 {
-	if(breath){
-		deltaLn = (ln > lcw.ln)?(ln - lcw.ln):(lcw.ln - ln);
-		deltaLn = deltaLn/breath->pCnt;
-		if(deltaLn){
-			lcw.breath = breath;
-			lcw.lnTarget = ln;
-			_breath_timer_start();
-			return;
+#if (LIGHT_CW_WITH_RGB)
+	if(lcw.lmode == 1){
+		if(breath){
+			deltaLnRgb = (ln > lcw.lnRgb)?(ln - lcw.lnRgb):(lcw.lnRgb - ln);
+			deltaLnRgb = deltaLnRgb/breath->pCnt;
+			if(deltaLnRgb){
+				lcw.breath = breath;
+				lcw.lnRgbTarget = ln;
+				_breath_timer_start();
+				return;
+			}
 		}
+		lcw.lnRgb = ln;
+		lcw.lnRgbTarget = lcw.lnRgb;
 	}
-	lcw.ln = ln;
-	lcw.lnTarget = lcw.ln;
+	else
+#endif
+	{
+		if(breath){
+			deltaLn = (ln > lcw.ln)?(ln - lcw.ln):(lcw.ln - ln);
+			deltaLn = deltaLn/breath->pCnt;
+			if(deltaLn){
+				lcw.breath = breath;
+				lcw.lnTarget = ln;
+				_breath_timer_start();
+				return;
+			}
+		}
+		lcw.ln = ln;
+		lcw.lnTarget = lcw.ln;
+	}
 	_cw_ctrl(&lcw);
 }
 uint16_t led_cw_get_lightness(void)
 {
+#if (LIGHT_CW_WITH_RGB)
+	if(lcw.lmode == 1)
+		return lcw.lnRgbTarget;
+#endif
 	return lcw.lnTarget;
 }
 
 void led_cw_set_on_off(uint8_t on, breath_t* breath)
 {
-	if(breath && (on != lcw.on)){//the target lightness need to be restore
-		deltaLn = lcw.ln>=ALI_MIN_LN_VAL?lcw.ln-ALI_MIN_LN_VAL:0;
-		deltaLn = deltaLn/breath->pCnt;
-		if(deltaLn){
-			lcw.lnTarget = lcw.ln;
-			if(on){
-				lcw.ln = ALI_MIN_LN_VAL;
+#if (LIGHT_CW_WITH_RGB)
+	if(lcw.lmode == 1){
+		if(breath && (on != lcw.onRgb)){//the target lightness need to be restore
+			deltaLnRgb = lcw.lnRgb>=ALI_MIN_LN_VAL?lcw.lnRgb-ALI_MIN_LN_VAL:0;
+			deltaLnRgb = deltaLnRgb/breath->pCnt;
+			if(deltaLnRgb){
+				lcw.lnRgbTarget = lcw.lnRgb;
+				if(on){
+					lcw.lnRgb = ALI_MIN_LN_VAL;
+				}
+				lcw.breath = breath;
+				lcw.onRgbTarget = on;
+				_breath_timer_start();
+				return;
 			}
-			lcw.breath = breath;
-			lcw.onTarget = on;
-			_breath_timer_start();
-			return;
-			}
+		}
+		lcw.onRgb = on;
+		lcw.onRgbTarget = lcw.onRgb;
 	}
-	lcw.on = on;
-	lcw.onTarget = lcw.on;
+	else
+#endif
+	{
+		if(breath && (on != lcw.on)){//the target lightness need to be restore
+			deltaLn = lcw.ln>=ALI_MIN_LN_VAL?lcw.ln-ALI_MIN_LN_VAL:0;
+			deltaLn = deltaLn/breath->pCnt;
+			if(deltaLn){
+				lcw.lnTarget = lcw.ln;
+				if(on){
+					lcw.ln = ALI_MIN_LN_VAL;
+				}
+				lcw.breath = breath;
+				lcw.onTarget = on;
+				_breath_timer_start();
+				return;
+				}
+		}
+		lcw.on = on;
+		lcw.onTarget = lcw.on;
+	}
+
 	_cw_ctrl(&lcw);
 }
 uint8_t led_cw_get_on_off(void)
 {
+#if (LIGHT_CW_WITH_RGB)
+	if(lcw.lmode == 1)
+		return lcw.onRgbTarget;
+#endif
 	return lcw.onTarget;
 }
 #if (LIGHT_CW_WITH_RGB)
 int led_cwrgb_set_color(uint16_t r, uint16_t g, uint16_t b, breath_t* breath)
 {
-#if 0
-	if(breath && (on != lcw.on)){//the target lightness need to be restore
-		deltaLn = lcw.ln>=ALI_MIN_LN_VAL?lcw.ln-ALI_MIN_LN_VAL:0;
-		deltaLn = deltaLn/breath->pCnt;
-		if(deltaLn){
-			lcw.lnTarget = lcw.ln;
-			if(on){
-				lcw.ln = ALI_MIN_LN_VAL;
-			}
-			lcw.breath = breath;
-			lcw.onTarget = on;
-			_breath_timer_start();
-			return;
-			}
+	//when mode changed from cw to rgb, quickly changed status
+#if (LIGHT_CW_WITH_RGB)
+	//when mode changed from rgb to cw, do status change
+	if(lcw.lmode != 1){
+		lcw.lmode = 1;
+		//color changed
+		lcw.rVal = r;
+		lcw.gVal = g;
+		lcw.bVal = b;
+		lcw.rValTarg = lcw.rVal;
+		lcw.gValTarg = lcw.gVal;
+		lcw.bValTarg = lcw.bVal;
+		if(breath){
+			//switch on RGB, lightness to CW
+			lcw.lnRgbTarget = lcw.ln;
+			lcw.lnRgb = 0;
+			lcw.onRgbTarget = 1;
+			//lcw.onRgb = 0;
+			deltaLnRgb = lcw.lnRgbTarget>lcw.lnRgb?lcw.lnRgbTarget-lcw.lnRgb:0;
+			deltaLnRgb = deltaLnRgb/breath->pCnt;
+			//switch off CW
+			lcw.lnTarget = 0;
+			//lcw.ln = ALI_MIN_LN_VAL;
+			lcw.on = 1;
+			lcw.onTarget = 0;
+			deltaLn = lcw.ln>=lcw.lnTarget?lcw.ln-lcw.lnTarget:0;
+			deltaLn = deltaLn/breath->pCnt;
+			
+			if(deltaLnRgb || deltaLn){
+				lcw.breath = breath;
+				_breath_timer_start();
+				return 0;
+			}			
+		}
+		lcw.on = 0;
+		lcw.onTarget = 0;
+		lcw.onRgbTarget = 1;
+		lcw.onRgb = 1;
+		_cw_ctrl(&lcw);
+		return 0;
 	}
 #endif
+	if(breath){//the target lightness need to be restore
+		uint32_t temp;
+		temp = r>lcw.rVal?r-lcw.rVal:lcw.rVal-r;
+		deltaR = temp/breath->pCnt;
+		temp = g>lcw.gVal?g-lcw.gVal:lcw.gVal-g;
+		deltaG = temp/breath->pCnt;
+		temp = b>lcw.bVal?b-lcw.bVal:lcw.bVal-b;
+		deltaB = temp/breath->pCnt;
+		if(deltaR || deltaG || deltaB){
+			lcw.rValTarg = r;
+			lcw.gValTarg = g;
+			lcw.bValTarg = b;
+			lcw.breath = breath;
+			_breath_timer_start();
+			return 0;
+		}
+	}
+
 	lcw.rVal = r;
 	lcw.rValTarg = lcw.rVal;
 	lcw.gVal = g;
@@ -178,9 +319,12 @@ void led_cw_init(light_cw_t* t)
 		lcw.on = ALI_DEFAULT_ON_VAL;
 		lcw.freq = ALI_FREQUENCY_16K;
 #if (LIGHT_CW_WITH_RGB)
+		lcw.onRgb = ALI_CW_OFF;
+		lcw.lnRgb = ALI_DEFAULT_LN_VAL;
 		lcw.rVal = ALI_DEFAULT_R_VAL;
 		lcw.gVal = ALI_DEFAULT_G_VAL;
 		lcw.bVal = ALI_DEFAULT_B_VAL;
+		lcw.lmode = 0;
 #endif
 	}
 	else{
@@ -190,9 +334,15 @@ void led_cw_init(light_cw_t* t)
 	lcw.tpTarget = lcw.tp;
 	lcw.onTarget = lcw.on;
 #if (LIGHT_CW_WITH_RGB)
+	lcw.lnRgbTarget = lcw.lnRgb;
+	lcw.onRgbTarget = lcw.onRgb;
 	lcw.rValTarg = lcw.rVal;
 	lcw.gValTarg = lcw.gVal;
 	lcw.bValTarg = lcw.bVal;
+	krgb = (float)lcw.freq/65536/4096;
+#ifndef RELEASE
+	printf("krgb[%f]\r\n", krgb);
+#endif
 #endif
 	kScale = (float)lcw.freq/65536/1920;
 #ifndef RELEASE
@@ -203,9 +353,7 @@ void led_cw_init(light_cw_t* t)
 
 static void _cw_ctrl(light_cw_t* t)
 {
-	if(lcw.tp<800 || lcw.tp>20000){
-		return;
-	}
+	//control CW light
 	if(t->on || t->onTarget){
 		uint16_t c,w;
 		c = kScale*(lcw.tp-800)*lcw.ln/10;
@@ -218,7 +366,6 @@ static void _cw_ctrl(light_cw_t* t)
 			PWM_Start(PWM_CH4);
 		}
 		else{
-			PWM_SetPnCnt(PWM_CH4, 0, 0);
 			PWM_DeInit(PWM_CH4);
 		}
 		if(w){
@@ -226,59 +373,51 @@ static void _cw_ctrl(light_cw_t* t)
 			PWM_Start(PWM_CH5);
 		}
 		else{
-			PWM_SetPnCnt(PWM_CH5, 0, 0);
 			PWM_DeInit(PWM_CH5);
 		}
+	}
+	else{
+		PWM_DeInit(PWM_CH4);
+		PWM_DeInit(PWM_CH5);
+	}
+
+	//control RGB light
 #if (LIGHT_CW_WITH_RGB)
+	if(t->onRgb || t->onRgbTarget){
 #ifndef RELEASE
-		printf("r[%x] g[%x] b[%x]\r\n", t->rVal, t->gVal, t->bVal);
+		printf("on[%x] r[%x] g[%x] b[%x]\r\n",t->onRgb||t->onRgbTarget, t->rVal, t->gVal, t->bVal);
 #endif
 		if(t->rVal){
-			uint16_t r = t->rVal*t->ln*kScale/10;
-#ifndef RELEASE
-			printf(" r[%x]\r\n", r);
-#endif
+			uint16_t r = (t->rVal>>4)*t->lnRgb*krgb;
 			PWM_SetPnCnt(PWM_CH1, r, t->freq-r);//cold
 			PWM_Start(PWM_CH1);
 		}
 		else{
-			PWM_SetPnCnt(PWM_CH1, 0, 0);
 			PWM_DeInit(PWM_CH1);
 		}
 		if(t->gVal){
-			uint16_t g = t->gVal*t->ln*kScale/10;
+			uint16_t g = (t->gVal>>4)*t->lnRgb*krgb;
 			PWM_SetPnCnt(PWM_CH2, g, t->freq-g);//warm
 			PWM_Start(PWM_CH2);
 		}
 		else{
-			PWM_SetPnCnt(PWM_CH2, 0, 0);
 			PWM_DeInit(PWM_CH2);
 		}
 		if(t->bVal){
-			uint16_t b = t->bVal*t->ln*kScale/10;
+			uint16_t b = (t->bVal>>4)*t->lnRgb*krgb;
 			PWM_SetPnCnt(PWM_CH3, b, t->freq-b);//warm
 			PWM_Start(PWM_CH3);
 		}
 		else{
-			PWM_SetPnCnt(PWM_CH3, 0, 0);
 			PWM_DeInit(PWM_CH3);
 		}
-#endif
-		return;
 	}
-	
-	PWM_SetPnCnt(PWM_CH4, 0, 0);
-	PWM_SetPnCnt(PWM_CH5, 0, 0);
-#if (LIGHT_CW_WITH_RGB)
-	PWM_SetPnCnt(PWM_CH1, 0, 0);
-	PWM_SetPnCnt(PWM_CH2, 0, 0);
-	PWM_SetPnCnt(PWM_CH3, 0, 0);
-	PWM_DeInit(PWM_CH1);
-	PWM_DeInit(PWM_CH2);
-	PWM_DeInit(PWM_CH3);
+	else{//CW mode, close RGB
+		PWM_DeInit(PWM_CH1);
+		PWM_DeInit(PWM_CH2);
+		PWM_DeInit(PWM_CH3);
+	}
 #endif
-	PWM_DeInit(PWM_CH4);
-	PWM_DeInit(PWM_CH5);
 }
 
 void led_cw_set_breath(breath_t* t)
@@ -287,11 +426,23 @@ void led_cw_set_breath(breath_t* t)
 		case BREATH_MODE_FLOW:{
 		}break;
 		case BREATH_MODE_H2L2H:{
-			lcw.onTarget = 1;
-			lcw.lnTarget = lcw.ln;
-			deltaLn = lcw.lnTarget/t->pCnt;
-			if(deltaLn == 0)
-				return;
+			#if (LIGHT_CW_WITH_RGB)
+			if(lcw.lmode == 1){
+				lcw.onRgbTarget = 1;
+				lcw.lnRgbTarget = lcw.lnRgb;
+				deltaLnRgb = lcw.lnRgbTarget/t->pCnt;
+				if(deltaLnRgb == 0)
+					return;
+			}
+			else
+			#endif
+			{
+				lcw.onTarget = 1;
+				lcw.lnTarget = lcw.ln;
+				deltaLn = lcw.lnTarget/t->pCnt;
+				if(deltaLn == 0)
+					return;
+			}
 		}break;
 		default:{
 			return;
@@ -316,7 +467,11 @@ void led_cw_set_breath(breath_t* t)
  */
 uint8_t  led_cw_do_breath(void)
 {
-	if(lcw.breath == NULL || (deltaLn == 0 && deltaTp == 0)){
+	if(lcw.breath == NULL || (deltaLn == 0 && deltaTp == 0
+#if (LIGHT_CW_WITH_RGB)
+		&& deltaLnRgb == 0 && deltaB == 0 && deltaG == 0 && deltaR == 0
+#endif
+		)){
 		//use target ctl
 		return 2;
 	}
@@ -334,11 +489,21 @@ uint8_t  led_cw_do_breath(void)
 					lcw.ln += deltaLn;
 				else 
 					lcw.ln -= deltaLn;
-				
-				if(lcw.tpTarget > lcw.tp)
-					lcw.tp += deltaTp;
-				else
-					lcw.tp -= deltaTp;
+#if (LIGHT_CW_WITH_RGB)
+				if(lcw.onRgbTarget > lcw.onRgb 
+					|| ((lcw.onRgbTarget == lcw.onRgb) 
+					&& lcw.lnRgbTarget > lcw.lnRgb))
+					lcw.lnRgb += deltaLnRgb;
+				else 
+					lcw.lnRgb -= deltaLnRgb;
+#endif
+
+				lcw.tp = lcw.tpTarget > lcw.tp?lcw.tp + deltaTp:lcw.tp - deltaTp;
+#if (LIGHT_CW_WITH_RGB)
+				lcw.rVal = lcw.rValTarg > lcw.rVal?lcw.rVal + deltaR:lcw.rVal - deltaR;
+				lcw.gVal = lcw.gValTarg > lcw.gVal?lcw.gVal + deltaG:lcw.gVal - deltaG;
+				lcw.bVal = lcw.bValTarg > lcw.bVal?lcw.bVal + deltaB:lcw.bVal - deltaB;
+#endif
 			}
 			else{
 				if(--lcw.breath->rCnt == 0){
@@ -348,6 +513,12 @@ uint8_t  led_cw_do_breath(void)
 					ucPeriodCnt = 0;
 					lcw.ln = lcw.lnTarget;
 					lcw.tp = lcw.tpTarget;
+#if (LIGHT_CW_WITH_RGB)
+					lcw.lnRgb = lcw.lnRgbTarget;
+					lcw.rVal = lcw.rValTarg;
+					lcw.gVal = lcw.gValTarg;
+					lcw.bVal = lcw.bValTarg;
+#endif
 				}
 			}
 		}break;
@@ -355,11 +526,23 @@ uint8_t  led_cw_do_breath(void)
 			if(ucPeriodCnt < lcw.breath->pCnt){
 				lcw.ln -= deltaLn;
 				lcw.tp -= deltaTp;
+#if (LIGHT_CW_WITH_RGB)
+				lcw.lnRgb -= deltaLnRgb;
+				lcw.rVal -= deltaR;
+				lcw.gVal -= deltaG;
+				lcw.bVal -= deltaB;
+#endif
 			}
 			else if(ucPeriodCnt < (lcw.breath->pCnt<<1)){
 				
 				lcw.ln += deltaLn;
 				lcw.tp += deltaTp;
+#if (LIGHT_CW_WITH_RGB)
+				lcw.lnRgb += deltaLnRgb;
+				lcw.rVal += deltaR;
+				lcw.gVal += deltaG;
+				lcw.bVal += deltaB;
+#endif
 			}
 			else{
 				if(--lcw.breath->rCnt == 0){
@@ -369,6 +552,12 @@ uint8_t  led_cw_do_breath(void)
 					ucPeriodCnt = 0;
 					lcw.ln -= deltaLn;
 					lcw.tp -= deltaTp;
+#if (LIGHT_CW_WITH_RGB)
+					lcw.lnRgb -= deltaLnRgb;
+					lcw.rVal -= deltaR;
+					lcw.gVal -= deltaG;
+					lcw.bVal -= deltaB;
+#endif
 				}
 			}
 		}break;
@@ -380,10 +569,23 @@ uint8_t  led_cw_do_breath(void)
 	if(_sts == 0){
 		lcw.on = lcw.onTarget;
 		lcw.ln = lcw.lnTarget;
-		lcw.ln = lcw.lnTarget;
+		lcw.tp = lcw.tpTarget;
+#if (LIGHT_CW_WITH_RGB)
+		lcw.onRgb = lcw.onRgbTarget;
+		lcw.lnRgb = lcw.lnRgbTarget;
+		lcw.rVal = lcw.rValTarg;
+		lcw.gVal = lcw.gValTarg;
+		lcw.bVal = lcw.bValTarg;
+#endif
 		lcw.breath = NULL;
 		deltaTp = 0;
 		deltaLn = 0;
+#if (LIGHT_CW_WITH_RGB)
+		deltaR = 0;
+		deltaG = 0;
+		deltaB = 0;
+		deltaLnRgb = 0;
+#endif
 	}
 	else{
 		ucPeriodCnt++;
@@ -391,193 +593,4 @@ uint8_t  led_cw_do_breath(void)
 	_cw_ctrl(&lcw);
 	return _sts;
 }
-
-void led_ltn_ctrl(light_ltn_t* t)
-{
-#ifndef RELEASE
-	printf("------ln[%x]",ltn.ln);
-#endif
-	uint16_t ln = ltn.ln/0x28f * (ALI_FREQUENCY_16K/100);//[1,100]
-	if(ln){
-		PWM_SetPnCnt(PWM_CH5, ln, ALI_FREQUENCY_16K-ln);
-		PWM_Start(PWM_CH5);
-		return;
-	}
-	PWM_SetPnCnt(PWM_CH5, 0, 0);
-	PWM_DeInit(PWM_CH5);
-}
-
-
-void led_ltn_set_lightness(uint16_t ln)
-{
-	ltn.ln = ln;
-	led_ltn_ctrl(&ltn);
-}
-
-uint16_t led_ltn_get_lightness(void)
-{
-	return ltn.ln;
-}
-
-void led_ltn_set_on_off(uint8_t on)
-{
-	ltn.ln = on?65535:0;  
-	led_ltn_ctrl(&ltn);
-}
-
-uint8_t led_ltn_get_on_off(void)
-{
-	return ltn.ln?1:0;
-}
-
-void led_ltn_init(light_ltn_t* t)
-{
-	GPIO_CFG cfg4 ={FUNC_PWM_OUT5, GFG_PULLUP};
-	bc_gpio_init(ALI_PWM5_W, &cfg4);
-
-	struct PWM_CTRL_BITS bits = {0};
-	//bits.ENABLE = PWM_DISABLE;
-	//bits.HIGHF = 0;
-	//bits.SYNC = 0;
-	//bits.VAL = 0;
-	PWM_Init(PWM_CH5, &bits);
-	if(t==NULL){
-		ltn.ln = ALI_DEFAULT_LN_VAL;
-	}
-	else{
-		ltn = *t;
-	}
-	led_ltn_ctrl(&ltn);
-}
-
-static light_rgb_t lrgb;
-float lrgbRate;
-
-/*
- * FOR RGB
- */
-static void _rgb_ctrl(light_rgb_t* t);
-
-int led_rgb_set_color(uint16_t r, uint16_t g, uint16_t b)
-{
-	lrgb.rVal = r;
-	lrgb.gVal = g;
-	lrgb.bVal = b;
-	_rgb_ctrl(&lrgb);
-	return 0;
-}
-
-int led_rgb_get_color(uint16_t* r, uint16_t* g, uint16_t* b)
-{
-	*r = lrgb.rVal;
-	*g = lrgb.gVal;
-	*b = lrgb.bVal;
-	return 0;
-}
-
-void led_rgb_set_lightness(uint16_t ln)
-{
-	lrgb.ln = ln;
-	_rgb_ctrl(&lrgb);
-}
-
-uint16_t led_rgb_get_lightness(void)
-{
-	return lrgb.ln;
-}
-
-void led_rgb_set_on_off(uint8_t on)
-{
-	lrgb.on = on;
-	_rgb_ctrl(&lrgb);
-}
-
-uint8_t led_rgb_get_on_off(void)
-{
-	return lrgb.on;
-}
-
-void led_rgb_init(light_rgb_t* t)
-{
-	/*init gpio*/	
-	GPIO_CFG cfg3 ={FUNC_PWM_OUT3, GFG_PULLUP};
-	bc_gpio_init(ALI_PWM3_B, &cfg3);
-	
-	GPIO_CFG cfg2 ={FUNC_PWM_OUT2, GFG_PULLUP};
-	bc_gpio_init(ALI_PWM2_G, &cfg2);
-
-	GPIO_CFG cfg1 ={FUNC_PWM_OUT1, GFG_PULLUP};
-	bc_gpio_init(ALI_PWM1_R, &cfg1);
-	
-	struct PWM_CTRL_BITS bits = {0};
-	PWM_Init(PWM_CH3, &bits);
-	PWM_Init(PWM_CH2, &bits);
-	PWM_Init(PWM_CH1, &bits);
-	
-	if(t==NULL){
-		lrgb.freq = ALI_FREQUENCY_2K;
-		lrgb.on = ALI_CW_ON;
-		lrgb.ln = ALI_DEFAULT_LN_VAL;
-		lrgb.rVal = ALI_DEFAULT_R_VAL;
-		lrgb.gVal = ALI_DEFAULT_G_VAL;
-		lrgb.bVal = ALI_DEFAULT_B_VAL;
-	}
-	else{
-		lrgb = *t;
-	}
-	lrgbRate = (float)lrgb.freq/4096/4096;
-#ifndef RELEASE
-	printf("lrgbRate[%f]\r\n", lrgbRate);
-#endif
-
-	_rgb_ctrl(&lrgb);
-}
-
-static void _rgb_ctrl(light_rgb_t* t)
-{
-	if(t->on){
-#ifndef RELEASE
-		printf("on[%x] ln[%x] r[%x] g[%x] b[%x]\r\n", t->on, t->ln, t->rVal, t->gVal, t->bVal);
-#endif
-		if(t->rVal){
-			uint16_t r = (t->rVal>>4)*(t->ln>>4)*lrgbRate;
-			#ifndef RELEASE
-				printf(" r[%x]\r\n", r);
-			#endif
-			PWM_SetPnCnt(PWM_CH1, r, t->freq-r);//cold
-			PWM_Start(PWM_CH1);
-		}
-		else{
-			PWM_SetPnCnt(PWM_CH1, 0, 0);
-			PWM_DeInit(PWM_CH1);
-		}
-		if(t->gVal){
-			uint16_t g = (t->gVal>>4)*(t->ln>>4)*lrgbRate;
-			PWM_SetPnCnt(PWM_CH2, g, t->freq-g);//warm
-			PWM_Start(PWM_CH2);
-		}
-		else{
-			PWM_SetPnCnt(PWM_CH2, 0, 0);
-			PWM_DeInit(PWM_CH2);
-		}
-		if(t->bVal){
-			uint16_t b = (t->bVal>>4)*(t->ln>>4)*lrgbRate;
-			PWM_SetPnCnt(PWM_CH3, b, t->freq-b);//warm
-			PWM_Start(PWM_CH3);
-		}
-		else{
-			PWM_SetPnCnt(PWM_CH3, 0, 0);
-			PWM_DeInit(PWM_CH3);
-		}
-		return;
-	}
-
-	PWM_SetPnCnt(PWM_CH1, 0, 0);
-	PWM_SetPnCnt(PWM_CH2, 0, 0);
-	PWM_SetPnCnt(PWM_CH3, 0, 0);
-	PWM_DeInit(PWM_CH1);
-	PWM_DeInit(PWM_CH2);
-	PWM_DeInit(PWM_CH3);
-}
-
 

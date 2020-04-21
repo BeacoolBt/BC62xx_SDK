@@ -1,7 +1,7 @@
 mem_patch00:     
-04   #mem_patch00
-00   #mem_patch01
-00   #mem_patch02
+14   #mem_patch00
+B0   #mem_patch01
+01   #mem_patch02
 00   #mem_patch03
 00   #mem_patch04
 00   #mem_patch05
@@ -37,13 +37,13 @@ a8   #mem_patch1E
 00   #mem_patch23
 00   #mem_patch24
 00   #mem_patch25
-00   #mem_patch26
+04   #mem_patch26
 00   #mem_patch27
 00   #mem_patch28
 04   #mem_patch29
-08   #mem_patch2A
-00   #mem_patch2B
-00   #mem_patch2C
+25   #mem_patch2A
+05   #mem_patch2B
+40   #mem_patch2C
 00   #mem_patch2D
 20   #mem_patch2E
 00   #mem_patch2F
@@ -59,7 +59,7 @@ a8   #mem_patch1E
 00   #mem_patch39
 00   #mem_patch3A
 00   #mem_patch3B
-04   #mem_patch3C
+00   #mem_patch3C
 00   #mem_patch3D
 00   #mem_patch3E
 00   #mem_patch3F

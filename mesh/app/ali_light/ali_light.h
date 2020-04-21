@@ -12,6 +12,7 @@
 
 #include "led.h"
 #include "app_mesh.h"
+#include "mm_alis.h"
 
 
 typedef struct
@@ -27,6 +28,7 @@ typedef struct
 	uint16_t r;
 	uint16_t g;
 	uint16_t b;
+	uint8_t lmode;//0 for cw; 1 for rgb
 #endif
 	uint8_t saveCfgCrc;
 	
@@ -47,6 +49,8 @@ typedef struct
 	onff_ctrl_t oo_ctrl;
 	light_ln_ctrl_t light_ln_ctrl;
 	light_ctl_ctrl_t light_ctl_ctrl;
+	/*mesh timer callback*/
+	ali_timer_ctrl_t timer_ctrl;
 }ali_light_t;
 #define ALI_LIGHT_SAVE_LEN ((uint32_t)&((ali_light_t*)0)->saveCfgCrc+1)
 

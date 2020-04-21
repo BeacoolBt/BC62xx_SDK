@@ -2045,8 +2045,8 @@
  1252 0000 02       		.byte	2
  1253              		.text
  1254              	.Letext0:
- 1255              		.file 4 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 1256              		.file 5 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1255              		.file 4 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 1256              		.file 5 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
  1257              		.file 6 "../../../drivers/hal/inc/bc62xx_gpio.h"
  1258              		.file 7 "../../../drivers/hal/inc/bc62xx_uart.h"
- 1259              		.file 8 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1259              		.file 8 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\

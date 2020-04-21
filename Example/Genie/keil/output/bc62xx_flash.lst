@@ -2583,7 +2583,7 @@
  1905              		.cfi_endproc
  1906              	.LFE64:
  1908              	.Letext0:
- 1909              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 1910              		.file 4 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1909              		.file 3 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 1910              		.file 4 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
  1911              		.file 5 "../../../device/inc/bc62xx.h"
- 1912              		.file 6 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
+ 1912              		.file 6 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\

@@ -1,4 +1,5 @@
 #include "bc62xx_timer.h"
+#include "systick.h"
 
 SYS_TIMER_TYPE *pheader;
 SYS_TIMER_TYPE header_Timer;
@@ -6,6 +7,9 @@ uint32_t sys_tick_count;
 uint8_t  sys_Timer_Check_Flag;
 
 static uint32_t tmpCnt;
+
+static void SYStick_handle(void);
+
 
 void SYS_TimerExpireDefaultHandle(int params)
 {
@@ -23,6 +27,8 @@ void SYS_TimerInit()
 	pheader->mTimerValue = 0;
 
 	SysTick_Config(SYSTEM_CLOCK/1000); //each  systick interrupt is 1ms
+
+	systick_set_timer_irq_handler(SYStick_handle);
 }
 
 
@@ -198,7 +204,7 @@ void SYS_ReleaseAllTimer()
 	pheader = &header_Timer;
 }
 
-void SYStick_handle()
+static void SYStick_handle(void)
 {
 	if(++tmpCnt%10 == 0){//each	systick interrupt is 10ms
 		sys_tick_count++; //10

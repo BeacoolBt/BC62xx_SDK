@@ -2,15 +2,14 @@
 #define __MM_ALI_H_
 #include "stdio.h"
 #include "co_com.h"
-//#include "m_al.h"
-//#include "m_tb.h"
 #include "mm_com.h"
+
 
 #define M_ALIS_ATTR_MAX_LEN  16  
 
 #define M_ALIS_ATTR_MAX_NUM  16
 
-#define M_ALIS_TIMER_NUM	(2)
+#define M_ALIS_TIMER_NUM	(20)
 
 #define ALI_COMPANY_ID		(0x01A8)
 
@@ -21,7 +20,7 @@
 
 #define M_ALIS_REPLAY_MS               (6000)
 
-#define M_ALIS_INDICATION_PERIOD		(180000)//3min
+#define M_ALIS_INDICATION_PERIOD		(360000)//6mins
 
 
 #define M_ALI_VENDER_ADDR		(0xF000)
@@ -46,30 +45,92 @@ enum m_alis_3b_opcodes
     // Vendor message confirmation
     MM_MSG_ALIS_ATTR_CONFIRMATION	= 0xD5,
 	// Vendor message update time
-	MM_MSG_ALIS_ATTR_UPDATE_TIME = 0xDE,
+	MM_MSG_ALIS_ATTR_REQ_TIME_TX = 0xDE,
+	// Vendor message update time
+	MM_MSG_ALIS_ATTR_REQ_TIME_RX = 0xDF,
     // Vendor message Transparent
     MM_MSG_ALIS_ATTR_TRANSPARENT = 0xCF,
 };
 
 enum m_alis_attr
 {
+	/*System attribute*/
+	/*Error code*/
+	M_SATTR_ECODE  = 0x0000,
+	
 	M_ATTR_COLOR = 0x0123,
 	M_ATTR_ONOFF = 0x0100,
 	M_ATTR_LTN	 = 0x0121,
 	M_ATTR_TEMP	 = 0x0122,
 	M_ATTR_MLOO	 = 0x0534,
 	M_ATTR_BKLOO = 0x0533,
-	M_ATTR_MNUM	 = 0xF004,
-	M_ATTR_EVENT = 0xF009,
+	
+	/*Version information*/
+	M_SATTR_VER   = 0xFF01,
+	/*Device Feature*/
+	M_SATTR_FEATURE = 0xFF02,
+	/*Flash size*/
+	M_SATTR_FLASH_SIZE = 0xFF03,
+	/*Used Flash size*/
+	M_SATTR_FLASH_USED = 0xFF04,
+	/*Remain FLASH*/
+	M_SATTR_FLASH_REMAIN = 0xFF05,
+	/*Engineer_Mode*/
+	M_SATTR_ENGINEER_MODE = 0xFF06,
 
-	M_ATTR_SET_GET_TIME = 0xF01F,
-	M_ATTR_SET_GET_TIME_ZONE = 0xF01E,
-	M_ATTR_SET_GET_TIME_PARAM = 0xF01D,
-
-	M_ATTR_SET_GET_TIMER = 0xF010,
-	M_ATTR_SET_TIMER_PERIOD = 0xF011,
-	M_ATTR_SET_DELETE_TIMER = 0xF012,
+	/*Generate attribute*/
+	/*Work status*/
+	M_ATTR_WORK_STATUS = 0xF001,
+	/*User ID*/
+	M_ATTR_USER_ID = 0xF002,
+	/*Device name*/
+	M_ATTR_DEV_NAME = 0xF003,
+	/*Scene mode*/
+	M_ATTR_SCENE_MODE = 0xF004,
+	/*On/Off plan*/
+	M_ATTR_ON_OFF_PLAN = 0xF008,
+	/*Event trigger*/
+	M_ATTR_EVENT_TRIG = 0xF009,
+	/*Signal enhance*/
+	M_ATTR_SIGNAL_ENHANCE = 0xF00A,
+	/*Turn up/down attr*/
+	M_ATTR_TURN_UP_DOWN = 0xF00B,
+	/*Element number*/
+	M_ATTR_ELEMENT_NUM = 0xF00C,
+	/*Attribute switch*/		
+	M_ATTR_ATTR_SWITCH = 0xF00D,
+	/*Remote address*/
+	M_ATTR_REMOTE_ADDR = 0xF00E,
+	/*Device rssi*/
+	M_ATTR_DEV_RSSI = 0xF00F,
+	/*Timer*/
+	M_ATTR_TIMER = 0xF010,
+	/*Period timer*/
+	M_ATTR_PTIMER = 0xF011,
+	/*Delete timer*/
+	M_ATTR_DTIMER = 0xF012,
+	/*Request update timer*/
+	M_ATTR_REQ_UPD_TMR = 0xF013,
+	
+	/*Event clear*/
+	M_ATTR_EVENT_CLEAR = 0xF019,
+	/*unix time parameter*/
+	M_ATTR_TIME_PARAM = 0xF01D,
+	/*unix time zone*/
+	M_ATTR_TIME_ZONE = 0xF01E,
+	/*unix time*/
+	M_ATTR_TIME = 0xF01F,
+	
+	/*Power of memory*/
+	M_ATTR_PWR_OFFMEM = 0xF021,
 };
+
+enum m_alis_event
+{
+	/*Timer completed event*/
+	M_EVT_TIMER_CMP = 0x11,
+};
+
 
 typedef struct attr_type_len
 {   
@@ -85,114 +146,14 @@ typedef struct alis_attr
     uint8_t  tgt_attr_param[M_ALIS_ATTR_MAX_LEN];
 }alis_attr_t;
 
-#pragma pack(1)
-
-/*unix time model start*/
-typedef struct
-{
-	uint8_t tid;
-	uint16_t attrType;
-}alis_msf_head_t;
-
-/*unix time model start*/
-typedef struct
-{
-	uint32_t time;
-}alis_time_t;
-
-typedef struct
-{
-	uint16_t period_time;
-	uint8_t retry_delay;
-	uint8_t retry_times;
-}alis_time_para_t;
-
-typedef struct{
-	char timezone;
-}alis_time_zone_t;
-/*unix time model end*/
-
-/*timer and period timer model start*/
-typedef struct
-{
-	uint8_t index;
-	uint32_t time;
-	uint16_t attr_type;
-	uint8_t attr_para;
-}alis_timer_t;
-
-typedef struct
-{
-	uint8_t index;
-	uint16_t time;
-	uint8_t schedule;
-	uint16_t attr_type;
-	uint8_t attr_para;
-}alis_period_timer_t;
-
-typedef union{
-	alis_period_timer_t period_timer;
-	alis_timer_t timer;
-}alis_utimer_t;
-/*timer and period timer model end*/
-#pragma pack()
-
 /**
- *@brief ali vendor received data callback function. 
- *param: model_lid	model indentifier id
- *param: opcode		@ref enum m_alis_3b_opcodes
- *param: data		received data buff start address
- *param: len		received data length
- *return: 0 success; 1 failed
+ *@brief ali vendor get total length of attribute type and attribute value.
+ 	att[0 1] saved attribute type. 
+ *param: att	The value attribute structer.
+ *return: The Length of attribute structer.
  */
-typedef void  (*bc_mm_ali_vendor_rx_cb)(const m_lid_t model_lid, const uint8_t opcode, const uint8_t* data, const uint16_t len);
+uint8_t bc_mm_alis_get_att_len(uint8_t* att);
 
-uint8_t bc_mm_alis_set_onoff_status(uint8_t* data, bool on);
 
-uint8_t bc_mm_alis_set_ltn_status(uint8_t* data, uint16_t ltn);
-
-uint8_t bc_mm_alis_set_tmp_status(uint8_t* data, uint16_t tmp);
-
-/**
- *@brief ali vendor data indicate. 
- *param: model_lid	model indentifier id
- *param: data		indicate data pointer
- *param: len		indicate data lenth
- *return: 0 success; 1 failed
- */
-int  bc_mm_alis_send_indication(m_lid_t model_lid, uint8_t* data, int len);
-
-/**
- *@brief ali vendor data send. 
- *param: model_lid	model indentifier id
- *param: opcode		@ref enum m_alis_3b_opcodes
- *param: data		indicate data pointer
- *param: len		indicate data lenth
- *return: 0 success; 1 failed
- */
-int  bc_mm_ali_vendor_send(m_lid_t model_lid, uint8_t opcode, uint8_t* data, uint16_t len);
-
-/**
- *@brief ali vendor get random time. 
- *param: none
- *return: random time value
- */
-uint16_t bc_mm_alis_get_random_time(void);
-
-/**
- *@brief ali vendor model init. 
- *param: mdl		mesh mode struct pointer
- *param[in]:rx_cb	vendor model recv data callback
- *return: 0 success; 1 failed
- */
-int bc_mm_alis_vendor_init(mesh_model_t* mdl, bc_mm_ali_vendor_rx_cb rx_cb);
-
-/**
- *@brief ali vendor model deinit. 
- *param: mdl     mesh mode struct pointer
- *return: 0 success; 1 failed
- */
-int bc_mm_alis_vendor_deinit(mesh_model_t* mdl);
-
-#endif
+#endif/*__MM_ALI_H_*/
 

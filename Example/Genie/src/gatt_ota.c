@@ -425,6 +425,7 @@ void gatt_ota_data_deal(uint8_t* dat, uint8_t length)
 					m_printf(L_APP, "code crc status[%d]", status);
 					if(!status){
 						ota_cmd_to_app(CMD_OTA_END,PacketId,0x55);
+						StartOtaFlag = OTA_DOWNLOAD;
 						uint32_t count = 100000;
 						while(count--)
 							IPC_DealSingleStep();
@@ -441,7 +442,7 @@ void gatt_ota_data_deal(uint8_t* dat, uint8_t length)
 		
 				break;
 			case CMD_OTA_RESET:
-				if(StartOtaFlag != OTAPROCESSING)
+				if(StartOtaFlag != OTA_DOWNLOAD)
 					return;
 				ota_prog_switch();
 				StartOtaFlag = NOSTART;

@@ -4,7 +4,7 @@
 #include "co_log.h"
 #include "co_list.h"
 
-#define MESH_VER "1.0.3"
+#define MESH_VER "1.0.4"
 #define MESH_LVER "a"
 
 

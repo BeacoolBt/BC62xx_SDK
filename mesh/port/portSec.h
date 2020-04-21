@@ -114,8 +114,8 @@ __INLINE_S__ void mesh_sec_aes_encrypt(const uint8_t* key, const uint8_t *val,
 	uint8_t aes_res[16];
 	uint8_t tk[16];
 	uint8_t tv[16];
-	m_printf_hex(L_AL, "aes key", key, 16);
-	m_printf_hex(L_AL, "aes val", val, 16);
+	//m_printf_hex(L_AL, "aes key", key, 16);
+	//m_printf_hex(L_AL, "aes val", val, 16);
 	
 	for(int i = 0; i < 16; ++i){
 		tk[i] = key[15-i];
@@ -131,7 +131,7 @@ __INLINE_S__ void mesh_sec_aes_encrypt(const uint8_t* key, const uint8_t *val,
 		aes_res[15-i] ^= aes_res[i];
 		aes_res[i] ^= aes_res[15-i];
 	}
-	m_printf_hex(L_AL, "aes res", aes_res, 16);
+	//m_printf_hex(L_AL, "aes res", aes_res, 16);
 
 	if(res_cb)	
 		res_cb(0, aes_res, src_info);
@@ -150,7 +150,7 @@ __INLINE_S__ void mesh_sec_aes_rand(mesh_aes_func_result_cb res_cb, uint32_t src
 	uint8_t aes_res[16];//M_KEY_LEN
 	extern void mesh_aes_rand(uint8_t* randbuf,uint8_t randlen);
 	mesh_aes_rand(aes_res, sizeof(aes_res));
-	m_printf_hex(L_AL, "aes rand res", aes_res, sizeof(aes_res));
+	//m_printf_hex(L_AL, "aes rand res", aes_res, sizeof(aes_res));
 	if(res_cb)
 		res_cb(0, aes_res, src_info);
 }
@@ -175,8 +175,8 @@ __INLINE_S__ void mesh_sec_aes_cmac(const uint8_t* key, const uint8_t* message, 
 	uint8_t tk[16];
 	uint8_t* tm = ke_malloc(message_len, 0);
 	
-    m_printf_hex(L_AL, "cmac key val", key, 16);   
-	m_printf_hex(L_AL, "cmac message val", message, message_len);  
+    //m_printf_hex(L_AL, "cmac key val", key, 16);   
+	//m_printf_hex(L_AL, "cmac message val", message, message_len);  
 
 	for(int i = 0; i < 16; ++i){
 		tk[i] = key[15-i];
@@ -205,7 +205,7 @@ __INLINE_S__ void mesh_sec_aes_s1(const uint8_t* message, uint8_t message_len,
 {
 	uint8_t aes_res[16] = {0};
 	uint8_t* tm = ke_malloc(message_len, 0);
-	m_printf_hex(L_AL, "s1 message", message, message_len);
+	//m_printf_hex(L_AL, "s1 message", message, message_len);
 	
 	for(int i = 0; i < message_len; ++i){
 		tm[i] = message[message_len-1-i];
@@ -219,7 +219,7 @@ __INLINE_S__ void mesh_sec_aes_s1(const uint8_t* message, uint8_t message_len,
 		aes_res[15-i] ^= aes_res[i];
 		aes_res[i] ^= aes_res[15-i];
 	}
-	m_printf_hex(L_AL, "s1 res", aes_res, 16);
+	//m_printf_hex(L_AL, "s1 res", aes_res, 16);
 	if(res_cb)
 		res_cb(0, aes_res, src_info);
 	
@@ -248,9 +248,9 @@ __INLINE_S__ void mesh_sec_aes_k1(const uint8_t* salt,  const uint8_t* n, uint8_
 	uint8_t ts[16];
 	uint8_t* tn = ke_malloc(n_len,0);
 	uint8_t* tp = ke_malloc(p_len,0);
-	m_printf_hex(L_AL, "k1 salt", salt, 16);
-	m_printf_hex(L_AL, "k1 n", n, n_len);
-	m_printf_hex(L_AL, "k1 p", p, p_len);
+	//m_printf_hex(L_AL, "k1 salt", salt, 16);
+	//m_printf_hex(L_AL, "k1 n", n, n_len);
+	//m_printf_hex(L_AL, "k1 p", p, p_len);
 	for(int i = 0; i < 16; ++i){
 		ts[i] = salt[15-i];
 	}
@@ -271,7 +271,7 @@ __INLINE_S__ void mesh_sec_aes_k1(const uint8_t* salt,  const uint8_t* n, uint8_
 		aes_res[15-i] ^= aes_res[i];
 		aes_res[i] ^= aes_res[15-i];
 	}
-	m_printf_hex(L_AL, "k1 res", aes_res, 16);
+	//m_printf_hex(L_AL, "k1 res", aes_res, 16);
 	if(res_cb)
 		res_cb(0, aes_res, src_info);
 	
@@ -298,8 +298,8 @@ __INLINE_S__ void mesh_sec_aes_k2(const uint8_t* n, const uint8_t* p, uint8_t p_
 	uint8_t aes_res[33] = {0};
 	uint8_t tn[16];
 	uint8_t* tp = ke_malloc(p_len,0);
-	m_printf_hex(L_AL, "k2 n", n, 16);
-	m_printf_hex(L_AL, "k2 p", p, p_len);
+	//m_printf_hex(L_AL, "k2 n", n, 16);
+	//m_printf_hex(L_AL, "k2 p", p, p_len);
 	for(int i = 0; i < 16; ++i){
 		tn[i] = n[15-i];
 	}
@@ -317,7 +317,7 @@ __INLINE_S__ void mesh_sec_aes_k2(const uint8_t* n, const uint8_t* p, uint8_t p_
 		aes_res[i] ^= aes_res[32-i];
 	}
 	
-	m_printf_hex(L_AL, "k2 res", aes_res, 33);
+	//m_printf_hex(L_AL, "k2 res", aes_res, 33);
 	if(res_cb)
 		res_cb(0, aes_res, src_info);
 }
@@ -337,7 +337,7 @@ __INLINE_S__ void mesh_sec_aes_k3(const uint8_t* n, mesh_aes_func_result_cb res_
 {
 	uint8_t aes_res[8] = {0};
 	uint8_t tn[16];
-	m_printf_hex(L_AL, "k3 n", n, 16);
+	//m_printf_hex(L_AL, "k3 n", n, 16);
 	
 	for(int i = 0; i < 16; ++i){
 		tn[i] = n[15-i];
@@ -351,7 +351,7 @@ __INLINE_S__ void mesh_sec_aes_k3(const uint8_t* n, mesh_aes_func_result_cb res_
 		aes_res[i] ^= aes_res[7-i];
 	}
 	
-	m_printf_hex(L_AL, "k3 res", aes_res, sizeof(aes_res));
+	//m_printf_hex(L_AL, "k3 res", aes_res, sizeof(aes_res));
 	if(res_cb)
 		res_cb(0, aes_res, src_info);
 }
@@ -370,14 +370,14 @@ __INLINE_S__ void mesh_sec_aes_k4(const uint8_t* n, mesh_aes_func_result_cb res_
 {
 	uint8_t aes_res[1] = {0};
 	uint8_t tn[16];
-	m_printf_hex(L_AL, "k4 n", n, 16);
+	//m_printf_hex(L_AL, "k4 n", n, 16);
 	
 	for(int i = 0; i < 16; ++i){
 		tn[i] = n[15-i];
 	}
 	
 	mesh_aes_k4((const uint8_t*)tn, aes_res);
-	m_printf_hex(L_AL, "k4 res", aes_res, sizeof(aes_res));
+	//m_printf_hex(L_AL, "k4 res", aes_res, sizeof(aes_res));
 
 	if(res_cb)
 		res_cb(0, aes_res, src_info);
@@ -410,13 +410,13 @@ __INLINE_S__ void mesh_sec_aes_ccm(const uint8_t* key, const uint8_t* nonce, con
 		   const uint8_t* add_auth_data, uint8_t add_auth_data_len, mesh_aes_ccm_func_result_cb res_cb, uint32_t src_info)
 {
 	uint8_t tk[16];
-	m_printf_hex(L_AL, "ccm key", key, 16);
-	m_printf_hex(L_AL, "ccm nonce",nonce, 13);
-	m_printf_hex(L_AL, "ccm in message",in_message, message_len);
-	M_PRINTF(L_AL, "ccm mic_len = %d", mic_len);
-	M_PRINTF(L_AL, "ccm cipher = %d", cipher);
-	if(add_auth_data)
-		m_printf_hex(L_AL, "ccm auth data",add_auth_data, add_auth_data_len);
+	//m_printf_hex(L_AL, "ccm key", key, 16);
+	//m_printf_hex(L_AL, "ccm nonce",nonce, 13);
+	//m_printf_hex(L_AL, "ccm in message",in_message, message_len);
+	//M_PRINTF(L_AL, "ccm mic_len = %d", mic_len);
+	//M_PRINTF(L_AL, "ccm cipher = %d", cipher);
+	//if(add_auth_data)
+	//	m_printf_hex(L_AL, "ccm auth data",add_auth_data, add_auth_data_len);
 	for(int i = 0; i < 16; ++i){
 		tk[i] = key[15-i];
 	}

@@ -16,32 +16,30 @@
   16              		.text
   17              	.Ltext0:
   18              		.cfi_sections	.debug_frame
-  19              		.global	tick_count
-  20              		.align	1
-  21              		.global	systick_init
-  22              		.code	16
-  23              		.thumb_func
-  25              	systick_init:
-  26              	.LFB41:
-  27              		.file 1 "../../../device/systick.c"
+  19              		.align	1
+  20              		.global	systick_init
+  21              		.code	16
+  22              		.thumb_func
+  24              	systick_init:
+  25              	.LFB41:
+  26              		.file 1 "../../../device/systick.c"
    1:../../../device/systick.c **** #include "systick.h" 
-   2:../../../device/systick.c **** #include "bc62xx_timer.h"
-   3:../../../device/systick.c **** 
-   4:../../../device/systick.c **** uint32_t tick_count = 0;
-   5:../../../device/systick.c **** 
-   6:../../../device/systick.c **** void systick_init(void)
-   7:../../../device/systick.c **** {
-  28              		.loc 1 7 0
-  29              		.cfi_startproc
-  30              		@ args = 0, pretend = 0, frame = 0
-  31              		@ frame_needed = 0, uses_anonymous_args = 0
-  32              		@ link register save eliminated.
-  33              	.LVL0:
-  34              	.LBB6:
-  35              	.LBB7:
-  36              	.LBB8:
-  37              	.LBB9:
-  38              		.file 2 "../../../cmsis/core_cm0.h"
+   2:../../../device/systick.c **** 
+   3:../../../device/systick.c **** static volatile uint32_t tick_count = 0;
+   4:../../../device/systick.c **** 
+   5:../../../device/systick.c **** void systick_init(void)
+   6:../../../device/systick.c **** {
+  27              		.loc 1 6 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32              	.LVL0:
+  33              	.LBB6:
+  34              	.LBB7:
+  35              	.LBB8:
+  36              	.LBB9:
+  37              		.file 2 "../../../cmsis/core_cm0.h"
    1:../../../cmsis/core_cm0.h **** /**************************************************************************//**
    2:../../../cmsis/core_cm0.h ****  * @file     core_cm0.h
    3:../../../cmsis/core_cm0.h ****  * @brief    CMSIS Cortex-M0 Core Peripheral Access Layer Header File
@@ -734,10 +732,10 @@
  690:../../../cmsis/core_cm0.h ****   if ((int32_t)(IRQn) < 0)
  691:../../../cmsis/core_cm0.h ****   {
  692:../../../cmsis/core_cm0.h ****     SCB->SHP[_SHP_IDX(IRQn)] = ((uint32_t)(SCB->SHP[_SHP_IDX(IRQn)] & ~(0xFFUL << _BIT_SHIFT(IRQn))
-  39              		.loc 2 692 0
-  40 0000 C020     		movs	r0, #192
-  41              	.LBE9:
-  42              	.LBE8:
+  38              		.loc 2 692 0
+  39 0000 C020     		movs	r0, #192
+  40              	.LBE9:
+  41              	.LBE8:
  693:../../../cmsis/core_cm0.h ****        (((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL) << _BIT_SHIFT(IRQn)));
  694:../../../cmsis/core_cm0.h ****   }
  695:../../../cmsis/core_cm0.h ****   else
@@ -822,274 +820,387 @@
  774:../../../cmsis/core_cm0.h ****   }
  775:../../../cmsis/core_cm0.h **** 
  776:../../../cmsis/core_cm0.h ****   SysTick->LOAD  = (uint32_t)(ticks - 1UL);                         /* set reload register */
-  43              		.loc 2 776 0
-  44 0002 074A     		ldr	r2, .L2
-  45 0004 074B     		ldr	r3, .L2+4
-  46              	.LBB12:
-  47              	.LBB10:
+  42              		.loc 2 776 0
+  43 0002 074A     		ldr	r2, .L2
+  44 0004 074B     		ldr	r3, .L2+4
+  45              	.LBB12:
+  46              	.LBB10:
  692:../../../cmsis/core_cm0.h ****        (((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL) << _BIT_SHIFT(IRQn)));
-  48              		.loc 2 692 0
-  49 0006 0849     		ldr	r1, .L2+8
-  50              	.LBE10:
-  51              	.LBE12:
-  52              		.loc 2 776 0
-  53 0008 5360     		str	r3, [r2, #4]
-  54              	.LVL1:
-  55              	.LBB13:
-  56              	.LBB11:
+  47              		.loc 2 692 0
+  48 0006 0849     		ldr	r1, .L2+8
+  49              	.LBE10:
+  50              	.LBE12:
+  51              		.loc 2 776 0
+  52 0008 5360     		str	r3, [r2, #4]
+  53              	.LVL1:
+  54              	.LBB13:
+  55              	.LBB11:
  692:../../../cmsis/core_cm0.h ****        (((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL) << _BIT_SHIFT(IRQn)));
-  57              		.loc 2 692 0
-  58 000a 0B6A     		ldr	r3, [r1, #32]
-  59 000c 0006     		lsls	r0, r0, #24
-  60 000e 1B02     		lsls	r3, r3, #8
-  61 0010 1B0A     		lsrs	r3, r3, #8
-  62 0012 0343     		orrs	r3, r0
-  63 0014 0B62     		str	r3, [r1, #32]
-  64              	.LVL2:
-  65              	.LBE11:
-  66              	.LBE13:
+  56              		.loc 2 692 0
+  57 000a 0B6A     		ldr	r3, [r1, #32]
+  58 000c 0006     		lsls	r0, r0, #24
+  59 000e 1B02     		lsls	r3, r3, #8
+  60 0010 1B0A     		lsrs	r3, r3, #8
+  61 0012 0343     		orrs	r3, r0
+  62 0014 0B62     		str	r3, [r1, #32]
+  63              	.LVL2:
+  64              	.LBE11:
+  65              	.LBE13:
  777:../../../cmsis/core_cm0.h ****   NVIC_SetPriority (SysTick_IRQn, (1UL << __NVIC_PRIO_BITS) - 1UL); /* set Priority for Systick Int
  778:../../../cmsis/core_cm0.h ****   SysTick->VAL   = 0UL;                                             /* Load the SysTick Counter Val
-  67              		.loc 2 778 0
-  68 0016 0023     		movs	r3, #0
-  69 0018 9360     		str	r3, [r2, #8]
+  66              		.loc 2 778 0
+  67 0016 0023     		movs	r3, #0
+  68 0018 9360     		str	r3, [r2, #8]
  779:../../../cmsis/core_cm0.h ****   SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
-  70              		.loc 2 779 0
-  71 001a 0733     		adds	r3, r3, #7
-  72 001c 1360     		str	r3, [r2]
-  73              	.LVL3:
-  74              	.LBE7:
-  75              	.LBE6:
-   8:../../../device/systick.c ****    SysTick_Config(SystemCoreClock/TICK_PER_SECOND);
-   9:../../../device/systick.c **** }
-  76              		.loc 1 9 0
-  77              		@ sp needed
-  78 001e 7047     		bx	lr
-  79              	.L3:
-  80              		.align	2
-  81              	.L2:
-  82 0020 10E000E0 		.word	-536813552
-  83 0024 BF5D0000 		.word	23999
-  84 0028 00ED00E0 		.word	-536810240
-  85              		.cfi_endproc
-  86              	.LFE41:
-  88              		.global	__aeabi_uidiv
-  89              		.align	1
-  90              		.global	systick_get_us
-  91              		.code	16
-  92              		.thumb_func
-  94              	systick_get_us:
-  95              	.LFB42:
+  69              		.loc 2 779 0
+  70 001a 0733     		adds	r3, r3, #7
+  71 001c 1360     		str	r3, [r2]
+  72              	.LVL3:
+  73              	.LBE7:
+  74              	.LBE6:
+   7:../../../device/systick.c **** 	SysTick_Config(SystemCoreClock/TICK_PER_SECOND);
+   8:../../../device/systick.c **** }
+  75              		.loc 1 8 0
+  76              		@ sp needed
+  77 001e 7047     		bx	lr
+  78              	.L3:
+  79              		.align	2
+  80              	.L2:
+  81 0020 10E000E0 		.word	-536813552
+  82 0024 BF5D0000 		.word	23999
+  83 0028 00ED00E0 		.word	-536810240
+  84              		.cfi_endproc
+  85              	.LFE41:
+  87              		.global	__aeabi_uidiv
+  88              		.align	1
+  89              		.global	systick_get_us
+  90              		.code	16
+  91              		.thumb_func
+  93              	systick_get_us:
+  94              	.LFB42:
+   9:../../../device/systick.c **** 
   10:../../../device/systick.c **** // Return system uptime in microseconds (rollover in 70minutes)
   11:../../../device/systick.c **** uint32_t systick_get_us(void) 
   12:../../../device/systick.c **** {
-  96              		.loc 1 12 0
-  97              		.cfi_startproc
-  98              		@ args = 0, pretend = 0, frame = 0
-  99              		@ frame_needed = 0, uses_anonymous_args = 0
- 100              	.LVL4:
- 101 002c 10B5     		push	{r4, lr}
- 102              	.LCFI0:
- 103              		.cfi_def_cfa_offset 8
- 104              		.cfi_offset 4, -8
+  95              		.loc 1 12 0
+  96              		.cfi_startproc
+  97              		@ args = 0, pretend = 0, frame = 0
+  98              		@ frame_needed = 0, uses_anonymous_args = 0
+  99 002c 70B5     		push	{r4, r5, r6, lr}
+ 100              	.LCFI0:
+ 101              		.cfi_def_cfa_offset 16
+ 102              		.cfi_offset 4, -16
+ 103              		.cfi_offset 5, -12
+ 104              		.cfi_offset 6, -8
  105              		.cfi_offset 14, -4
-  13:../../../device/systick.c **** 
-  14:../../../device/systick.c ****     register uint32_t ms, cycle_cnt;
-  15:../../../device/systick.c ****     do {
-  16:../../../device/systick.c ****         ms = tick_count;
-  17:../../../device/systick.c ****         cycle_cnt = SysTick->VAL;
-  18:../../../device/systick.c ****     } while (ms != tick_count);
-  19:../../../device/systick.c **** 	
-  20:../../../device/systick.c ****     return ms * TICK_US + (SysTick->LOAD - cycle_cnt) * TICK_US / SysTick->LOAD;
- 106              		.loc 1 20 0
- 107 002e FA24     		movs	r4, #250
-  17:../../../device/systick.c ****     } while (ms != tick_count);
- 108              		.loc 1 17 0
- 109 0030 064A     		ldr	r2, .L5
- 110              		.loc 1 20 0
- 111 0032 A400     		lsls	r4, r4, #2
-  17:../../../device/systick.c ****     } while (ms != tick_count);
- 112              		.loc 1 17 0
- 113 0034 9068     		ldr	r0, [r2, #8]
- 114              	.LVL5:
- 115              		.loc 1 20 0
- 116 0036 5368     		ldr	r3, [r2, #4]
- 117 0038 5168     		ldr	r1, [r2, #4]
- 118 003a 181A     		subs	r0, r3, r0
- 119              	.LVL6:
- 120 003c 6043     		muls	r0, r4
- 121 003e FFF7FEFF 		bl	__aeabi_uidiv
- 122              	.LVL7:
-  16:../../../device/systick.c ****         cycle_cnt = SysTick->VAL;
- 123              		.loc 1 16 0
- 124 0042 034B     		ldr	r3, .L5+4
-  21:../../../device/systick.c **** }
- 125              		.loc 1 21 0
- 126              		@ sp needed
+  13:../../../device/systick.c **** 	register uint32_t ms, cycle_cnt;
+  14:../../../device/systick.c **** 	do {
+  15:../../../device/systick.c **** 		ms = tick_count;
+ 106              		.loc 1 15 0
+ 107 002e 094B     		ldr	r3, .L8
+  16:../../../device/systick.c **** 		cycle_cnt = SysTick->VAL;
+ 108              		.loc 1 16 0
+ 109 0030 094C     		ldr	r4, .L8+4
+ 110              	.L5:
+  15:../../../device/systick.c **** 		cycle_cnt = SysTick->VAL;
+ 111              		.loc 1 15 0 discriminator 1
+ 112 0032 1D68     		ldr	r5, [r3]
+ 113              	.LVL4:
+ 114              		.loc 1 16 0 discriminator 1
+ 115 0034 A068     		ldr	r0, [r4, #8]
+ 116              	.LVL5:
+  17:../../../device/systick.c **** 	} while (ms != tick_count);
+ 117              		.loc 1 17 0 discriminator 1
+ 118 0036 1968     		ldr	r1, [r3]
+  16:../../../device/systick.c **** 		cycle_cnt = SysTick->VAL;
+ 119              		.loc 1 16 0 discriminator 1
+ 120 0038 074A     		ldr	r2, .L8+4
+ 121              		.loc 1 17 0 discriminator 1
+ 122 003a 8D42     		cmp	r5, r1
+ 123 003c F9D1     		bne	.L5
+  18:../../../device/systick.c **** 
+  19:../../../device/systick.c **** 	return ms * TICK_US + (SysTick->LOAD - cycle_cnt) * TICK_US / SysTick->LOAD;
+ 124              		.loc 1 19 0
+ 125 003e FA24     		movs	r4, #250
+ 126 0040 5368     		ldr	r3, [r2, #4]
+ 127 0042 A400     		lsls	r4, r4, #2
+ 128 0044 181A     		subs	r0, r3, r0
+ 129              	.LVL6:
+ 130 0046 5168     		ldr	r1, [r2, #4]
+ 131 0048 6043     		muls	r0, r4
+ 132 004a FFF7FEFF 		bl	__aeabi_uidiv
+ 133              	.LVL7:
+ 134 004e 6C43     		muls	r4, r5
   20:../../../device/systick.c **** }
- 127              		.loc 1 20 0
- 128 0044 1B68     		ldr	r3, [r3]
- 129              	.LVL8:
- 130 0046 5C43     		muls	r4, r3
- 131 0048 0019     		adds	r0, r0, r4
- 132              		.loc 1 21 0
- 133 004a 10BD     		pop	{r4, pc}
- 134              	.L6:
- 135              		.align	2
- 136              	.L5:
- 137 004c 10E000E0 		.word	-536813552
- 138 0050 00000000 		.word	.LANCHOR0
- 139              		.cfi_endproc
- 140              	.LFE42:
- 142              		.align	1
- 143              		.global	systick_get_ms
- 144              		.code	16
- 145              		.thumb_func
- 147              	systick_get_ms:
- 148              	.LFB43:
+ 135              		.loc 1 20 0
+ 136              		@ sp needed
+  19:../../../device/systick.c **** }
+ 137              		.loc 1 19 0
+ 138 0050 0019     		adds	r0, r0, r4
+ 139              	.LVL8:
+ 140              		.loc 1 20 0
+ 141 0052 70BD     		pop	{r4, r5, r6, pc}
+ 142              	.L9:
+ 143              		.align	2
+ 144              	.L8:
+ 145 0054 00000000 		.word	.LANCHOR0
+ 146 0058 10E000E0 		.word	-536813552
+ 147              		.cfi_endproc
+ 148              	.LFE42:
+ 150              		.align	1
+ 151              		.global	systick_get_ms
+ 152              		.code	16
+ 153              		.thumb_func
+ 155              	systick_get_ms:
+ 156              	.LFB43:
+  21:../../../device/systick.c **** 
   22:../../../device/systick.c **** uint32_t systick_get_ms(void)
   23:../../../device/systick.c **** {
- 149              		.loc 1 23 0
- 150              		.cfi_startproc
- 151              		@ args = 0, pretend = 0, frame = 0
- 152              		@ frame_needed = 0, uses_anonymous_args = 0
- 153              		@ link register save eliminated.
-  24:../../../device/systick.c ****  return tick_count;
- 154              		.loc 1 24 0
- 155 0054 014B     		ldr	r3, .L8
+ 157              		.loc 1 23 0
+ 158              		.cfi_startproc
+ 159              		@ args = 0, pretend = 0, frame = 0
+ 160              		@ frame_needed = 0, uses_anonymous_args = 0
+ 161              		@ link register save eliminated.
+  24:../../../device/systick.c **** 	return tick_count;
+ 162              		.loc 1 24 0
+ 163 005c 014B     		ldr	r3, .L11
   25:../../../device/systick.c **** }
- 156              		.loc 1 25 0
- 157              		@ sp needed
-  24:../../../device/systick.c ****  return tick_count;
- 158              		.loc 1 24 0
- 159 0056 1868     		ldr	r0, [r3]
- 160              		.loc 1 25 0
- 161 0058 7047     		bx	lr
- 162              	.L9:
- 163 005a C046     		.align	2
- 164              	.L8:
- 165 005c 00000000 		.word	.LANCHOR0
- 166              		.cfi_endproc
- 167              	.LFE43:
- 169              		.align	1
- 170              		.global	delay_us
- 171              		.code	16
- 172              		.thumb_func
- 174              	delay_us:
- 175              	.LFB44:
-  26:../../../device/systick.c **** void delay_us(uint32_t us)
-  27:../../../device/systick.c **** {
- 176              		.loc 1 27 0
- 177              		.cfi_startproc
- 178              		@ args = 0, pretend = 0, frame = 0
- 179              		@ frame_needed = 0, uses_anonymous_args = 0
- 180              	.LVL9:
- 181 0060 70B5     		push	{r4, r5, r6, lr}
- 182              	.LCFI1:
- 183              		.cfi_def_cfa_offset 16
- 184              		.cfi_offset 4, -16
- 185              		.cfi_offset 5, -12
- 186              		.cfi_offset 6, -8
- 187              		.cfi_offset 14, -4
- 188              		.loc 1 27 0
- 189 0062 0400     		movs	r4, r0
-  28:../../../device/systick.c ****     uint32_t now = systick_get_us();
- 190              		.loc 1 28 0
- 191 0064 FFF7FEFF 		bl	systick_get_us
- 192              	.LVL10:
- 193 0068 0500     		movs	r5, r0
- 194              	.LVL11:
- 195              	.L11:
-  29:../../../device/systick.c ****     while (systick_get_us() - now < us);
- 196              		.loc 1 29 0 discriminator 1
- 197 006a FFF7FEFF 		bl	systick_get_us
- 198              	.LVL12:
- 199 006e 401B     		subs	r0, r0, r5
- 200 0070 A042     		cmp	r0, r4
- 201 0072 FAD3     		bcc	.L11
-  30:../../../device/systick.c **** }
- 202              		.loc 1 30 0
- 203              		@ sp needed
- 204              	.LVL13:
- 205              	.LVL14:
- 206 0074 70BD     		pop	{r4, r5, r6, pc}
- 207              		.cfi_endproc
- 208              	.LFE44:
- 210              		.align	1
- 211              		.global	delay_ms
- 212              		.code	16
- 213              		.thumb_func
- 215              	delay_ms:
- 216              	.LFB45:
-  31:../../../device/systick.c **** void delay_ms(uint32_t ms)
-  32:../../../device/systick.c **** {
- 217              		.loc 1 32 0
- 218              		.cfi_startproc
- 219              		@ args = 0, pretend = 0, frame = 0
- 220              		@ frame_needed = 0, uses_anonymous_args = 0
- 221              		@ link register save eliminated.
- 222              	.LVL15:
- 223              	.L15:
-  33:../../../device/systick.c ****       uint32_t now = tick_count;
-  34:../../../device/systick.c ****     while (tick_count - now < ms);
- 224              		.loc 1 34 0 discriminator 1
- 225 0076 0028     		cmp	r0, #0
- 226 0078 FDD1     		bne	.L15
-  35:../../../device/systick.c **** }
- 227              		.loc 1 35 0
- 228              		@ sp needed
- 229 007a 7047     		bx	lr
- 230              		.cfi_endproc
- 231              	.LFE45:
- 233              		.align	1
- 234              		.global	SysTick_Handler
- 235              		.code	16
- 236              		.thumb_func
- 238              	SysTick_Handler:
- 239              	.LFB46:
-  36:../../../device/systick.c **** void SysTick_Handler(void) 
-  37:../../../device/systick.c **** {
- 240              		.loc 1 37 0
- 241              		.cfi_startproc
- 242              		@ args = 0, pretend = 0, frame = 0
- 243              		@ frame_needed = 0, uses_anonymous_args = 0
- 244 007c 10B5     		push	{r4, lr}
- 245              	.LCFI2:
- 246              		.cfi_def_cfa_offset 8
- 247              		.cfi_offset 4, -8
- 248              		.cfi_offset 14, -4
-  38:../../../device/systick.c **** 	tick_count++;
- 249              		.loc 1 38 0
- 250 007e 034A     		ldr	r2, .L18
-  39:../../../device/systick.c **** 	SYStick_handle();
-  40:../../../device/systick.c **** }...
- 251              		.loc 1 40 0
- 252              		@ sp needed
-  38:../../../device/systick.c **** 	tick_count++;
- 253              		.loc 1 38 0
- 254 0080 1368     		ldr	r3, [r2]
- 255 0082 0133     		adds	r3, r3, #1
- 256 0084 1360     		str	r3, [r2]
-  39:../../../device/systick.c **** 	SYStick_handle();
- 257              		.loc 1 39 0
- 258 0086 FFF7FEFF 		bl	SYStick_handle
- 259              	.LVL16:
- 260              		.loc 1 40 0
- 261 008a 10BD     		pop	{r4, pc}
- 262              	.L19:
- 263              		.align	2
- 264              	.L18:
- 265 008c 00000000 		.word	.LANCHOR0
- 266              		.cfi_endproc
- 267              	.LFE46:
- 269              		.bss
- 270              		.align	2
- 271              		.set	.LANCHOR0,. + 0
- 274              	tick_count:
- 275 0000 00000000 		.space	4
- 276              		.text
- 277              	.Letext0:
- 278              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 279              		.file 4 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 280              		.file 5 "../../../device/inc/bc62xx.h"
- 281              		.file 6 "../../../drivers/hal/inc/bc62xx_timer.h"
+ 164              		.loc 1 25 0
+ 165              		@ sp needed
+  24:../../../device/systick.c **** 	return tick_count;
+ 166              		.loc 1 24 0
+ 167 005e 1868     		ldr	r0, [r3]
+ 168              		.loc 1 25 0
+ 169 0060 7047     		bx	lr
+ 170              	.L12:
+ 171 0062 C046     		.align	2
+ 172              	.L11:
+ 173 0064 00000000 		.word	.LANCHOR0
+ 174              		.cfi_endproc
+ 175              	.LFE43:
+ 177              		.align	1
+ 178              		.global	delay_us
+ 179              		.code	16
+ 180              		.thumb_func
+ 182              	delay_us:
+ 183              	.LFB44:
+  26:../../../device/systick.c **** 
+  27:../../../device/systick.c **** void delay_us(uint32_t us)
+  28:../../../device/systick.c **** {
+ 184              		.loc 1 28 0
+ 185              		.cfi_startproc
+ 186              		@ args = 0, pretend = 0, frame = 0
+ 187              		@ frame_needed = 0, uses_anonymous_args = 0
+ 188              	.LVL9:
+ 189 0068 70B5     		push	{r4, r5, r6, lr}
+ 190              	.LCFI1:
+ 191              		.cfi_def_cfa_offset 16
+ 192              		.cfi_offset 4, -16
+ 193              		.cfi_offset 5, -12
+ 194              		.cfi_offset 6, -8
+ 195              		.cfi_offset 14, -4
+ 196              		.loc 1 28 0
+ 197 006a 0400     		movs	r4, r0
+  29:../../../device/systick.c ****     uint32_t now = systick_get_us();
+ 198              		.loc 1 29 0
+ 199 006c FFF7FEFF 		bl	systick_get_us
+ 200              	.LVL10:
+ 201 0070 0500     		movs	r5, r0
+ 202              	.LVL11:
+ 203              	.L14:
+  30:../../../device/systick.c ****     while (systick_get_us() - now < us);
+ 204              		.loc 1 30 0 discriminator 1
+ 205 0072 FFF7FEFF 		bl	systick_get_us
+ 206              	.LVL12:
+ 207 0076 401B     		subs	r0, r0, r5
+ 208 0078 A042     		cmp	r0, r4
+ 209 007a FAD3     		bcc	.L14
+  31:../../../device/systick.c **** }
+ 210              		.loc 1 31 0
+ 211              		@ sp needed
+ 212              	.LVL13:
+ 213              	.LVL14:
+ 214 007c 70BD     		pop	{r4, r5, r6, pc}
+ 215              		.cfi_endproc
+ 216              	.LFE44:
+ 218              		.align	1
+ 219              		.global	delay_ms
+ 220              		.code	16
+ 221              		.thumb_func
+ 223              	delay_ms:
+ 224              	.LFB45:
+  32:../../../device/systick.c **** 
+  33:../../../device/systick.c **** void delay_ms(uint32_t ms)
+  34:../../../device/systick.c **** {
+ 225              		.loc 1 34 0
+ 226              		.cfi_startproc
+ 227              		@ args = 0, pretend = 0, frame = 0
+ 228              		@ frame_needed = 0, uses_anonymous_args = 0
+ 229              		@ link register save eliminated.
+ 230              	.LVL15:
+  35:../../../device/systick.c **** 	uint32_t now = tick_count;
+ 231              		.loc 1 35 0
+ 232 007e 034B     		ldr	r3, .L19
+ 233 0080 1968     		ldr	r1, [r3]
+ 234              	.LVL16:
+ 235              	.L17:
+  36:../../../device/systick.c **** 	while (tick_count - now < ms);
+ 236              		.loc 1 36 0 discriminator 1
+ 237 0082 1A68     		ldr	r2, [r3]
+ 238 0084 521A     		subs	r2, r2, r1
+ 239 0086 8242     		cmp	r2, r0
+ 240 0088 FBD3     		bcc	.L17
+  37:../../../device/systick.c **** }
+ 241              		.loc 1 37 0
+ 242              		@ sp needed
+ 243 008a 7047     		bx	lr
+ 244              	.L20:
+ 245              		.align	2
+ 246              	.L19:
+ 247 008c 00000000 		.word	.LANCHOR0
+ 248              		.cfi_endproc
+ 249              	.LFE45:
+ 251              		.align	1
+ 252              		.global	systick_set_timer_irq_handler
+ 253              		.code	16
+ 254              		.thumb_func
+ 256              	systick_set_timer_irq_handler:
+ 257              	.LFB46:
+  38:../../../device/systick.c **** 
+  39:../../../device/systick.c **** /*timer irq callback function*/
+  40:../../../device/systick.c **** static systick_irq_handler timer_irq_handler;
+  41:../../../device/systick.c **** void systick_set_timer_irq_handler(systick_irq_handler func)
+  42:../../../device/systick.c **** {
+ 258              		.loc 1 42 0
+ 259              		.cfi_startproc
+ 260              		@ args = 0, pretend = 0, frame = 0
+ 261              		@ frame_needed = 0, uses_anonymous_args = 0
+ 262              		@ link register save eliminated.
+ 263              	.LVL17:
+  43:../../../device/systick.c **** 	timer_irq_handler = func;
+ 264              		.loc 1 43 0
+ 265 0090 014B     		ldr	r3, .L22
+  44:../../../device/systick.c **** }
+ 266              		.loc 1 44 0
+ 267              		@ sp needed
+  43:../../../device/systick.c **** 	timer_irq_handler = func;
+ 268              		.loc 1 43 0
+ 269 0092 5860     		str	r0, [r3, #4]
+ 270              		.loc 1 44 0
+ 271 0094 7047     		bx	lr
+ 272              	.L23:
+ 273 0096 C046     		.align	2
+ 274              	.L22:
+ 275 0098 00000000 		.word	.LANCHOR0
+ 276              		.cfi_endproc
+ 277              	.LFE46:
+ 279              		.align	1
+ 280              		.global	systick_set_tick_irq_handler
+ 281              		.code	16
+ 282              		.thumb_func
+ 284              	systick_set_tick_irq_handler:
+ 285              	.LFB47:
+  45:../../../device/systick.c **** /*systick irq callback function*/
+  46:../../../device/systick.c **** static systick_irq_handler tick_irq_handler;
+  47:../../../device/systick.c **** void systick_set_tick_irq_handler(systick_irq_handler func)
+  48:../../../device/systick.c **** {
+ 286              		.loc 1 48 0
+ 287              		.cfi_startproc
+ 288              		@ args = 0, pretend = 0, frame = 0
+ 289              		@ frame_needed = 0, uses_anonymous_args = 0
+ 290              		@ link register save eliminated.
+ 291              	.LVL18:
+  49:../../../device/systick.c **** 	tick_irq_handler = func;
+ 292              		.loc 1 49 0
+ 293 009c 014B     		ldr	r3, .L25
+  50:../../../device/systick.c **** }
+ 294              		.loc 1 50 0
+ 295              		@ sp needed
+  49:../../../device/systick.c **** 	tick_irq_handler = func;
+ 296              		.loc 1 49 0
+ 297 009e 9860     		str	r0, [r3, #8]
+ 298              		.loc 1 50 0
+ 299 00a0 7047     		bx	lr
+ 300              	.L26:
+ 301 00a2 C046     		.align	2
+ 302              	.L25:
+ 303 00a4 00000000 		.word	.LANCHOR0
+ 304              		.cfi_endproc
+ 305              	.LFE47:
+ 307              		.align	1
+ 308              		.global	SysTick_Handler
+ 309              		.code	16
+ 310              		.thumb_func
+ 312              	SysTick_Handler:
+ 313              	.LFB48:
+  51:../../../device/systick.c **** 
+  52:../../../device/systick.c **** void SysTick_Handler(void) 
+  53:../../../device/systick.c **** {
+ 314              		.loc 1 53 0
+ 315              		.cfi_startproc
+ 316              		@ args = 0, pretend = 0, frame = 0
+ 317              		@ frame_needed = 0, uses_anonymous_args = 0
+  54:../../../device/systick.c **** 	tick_count++;
+ 318              		.loc 1 54 0
+ 319 00a8 074B     		ldr	r3, .L36
+  53:../../../device/systick.c **** 	tick_count++;
+ 320              		.loc 1 53 0
+ 321 00aa 10B5     		push	{r4, lr}
+ 322              	.LCFI2:
+ 323              		.cfi_def_cfa_offset 8
+ 324              		.cfi_offset 4, -8
+ 325              		.cfi_offset 14, -4
+ 326              		.loc 1 54 0
+ 327 00ac 1A68     		ldr	r2, [r3]
+ 328 00ae 1C00     		movs	r4, r3
+ 329 00b0 0132     		adds	r2, r2, #1
+ 330 00b2 1A60     		str	r2, [r3]
+  55:../../../device/systick.c **** 	/*Call timer irq handler*/
+  56:../../../device/systick.c **** 	if(timer_irq_handler)
+ 331              		.loc 1 56 0
+ 332 00b4 5A68     		ldr	r2, [r3, #4]
+ 333 00b6 002A     		cmp	r2, #0
+ 334 00b8 00D0     		beq	.L28
+  57:../../../device/systick.c **** 		timer_irq_handler();
+ 335              		.loc 1 57 0
+ 336 00ba 9047     		blx	r2
+ 337              	.LVL19:
+ 338              	.L28:
+  58:../../../device/systick.c **** 
+  59:../../../device/systick.c **** 	/*Call tick irq handler*/
+  60:../../../device/systick.c **** 	if(tick_irq_handler)
+ 339              		.loc 1 60 0
+ 340 00bc A368     		ldr	r3, [r4, #8]
+ 341 00be 002B     		cmp	r3, #0
+ 342 00c0 00D0     		beq	.L27
+  61:../../../device/systick.c **** 		tick_irq_handler();
+ 343              		.loc 1 61 0
+ 344 00c2 9847     		blx	r3
+ 345              	.LVL20:
+ 346              	.L27:
+  62:../../../device/systick.c **** 
+  63:../../../device/systick.c **** }...
+ 347              		.loc 1 63 0
+ 348              		@ sp needed
+ 349 00c4 10BD     		pop	{r4, pc}
+ 350              	.L37:
+ 351 00c6 C046     		.align	2
+ 352              	.L36:
+ 353 00c8 00000000 		.word	.LANCHOR0
+ 354              		.cfi_endproc
+ 355              	.LFE48:
+ 357              		.bss
+ 358              		.align	2
+ 359              		.set	.LANCHOR0,. + 0
+ 362              	tick_count:
+ 363 0000 00000000 		.space	4
+ 366              	timer_irq_handler:
+ 367 0004 00000000 		.space	4
+ 370              	tick_irq_handler:
+ 371 0008 00000000 		.space	4
+ 372              		.text
+ 373              	.Letext0:
+ 374              		.file 3 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 375              		.file 4 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 376              		.file 5 "../../../device/inc/bc62xx.h"
+ 377              		.file 6 "../../../device/inc/systick.h"

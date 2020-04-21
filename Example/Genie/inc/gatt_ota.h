@@ -9,6 +9,7 @@
 #define NOSTART 		(0x01)
 #define OTASTART		(0x02)
 #define OTAPROCESSING	(0x03)
+#define OTA_DOWNLOAD	(0x04)
 
 /*@brief OTA Character handle value*/
 #define OTA_WRITE_HANDLE 	0x0015

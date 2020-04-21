@@ -1039,7 +1039,7 @@
  775              		.loc 1 238 0
  776 02c6 142A     		cmp	r2, #20
  777 02c8 01D8     		bhi	.L53
- 778 02ca 00F0EBF9 		bl	Ble_SendDataSimple.part.0
+ 778 02ca 00F0EDF9 		bl	Ble_SendDataSimple.part.0
  779              	.LVL92:
  780              	.L53:
  239:../src/gatt_ota.c **** 		return;
@@ -1402,7 +1402,7 @@
  1047 03ce 6946     		mov	r1, sp
  1048 03d0 A738     		subs	r0, r0, #167
  1049              	.LVL117:
- 1050 03d2 00F067F9 		bl	Ble_SendDataSimple.part.0
+ 1050 03d2 00F069F9 		bl	Ble_SendDataSimple.part.0
  1051              	.LVL118:
  1052 03d6 0BE0     		b	.L69
  1053              	.LVL119:
@@ -1416,7 +1416,7 @@
  1061 03da 6946     		mov	r1, sp
  1062 03dc 1920     		movs	r0, #25
  1063              	.LVL121:
- 1064 03de 00F061F9 		bl	Ble_SendDataSimple.part.0
+ 1064 03de 00F063F9 		bl	Ble_SendDataSimple.part.0
  1065              	.LVL122:
  1066 03e2 05E0     		b	.L69
  1067              	.LVL123:
@@ -1441,7 +1441,7 @@
  1078              	.LVL125:
  1079 03ea 1920     		movs	r0, #25
  1080              	.LVL126:
- 1081 03ec 00F05AF9 		bl	Ble_SendDataSimple.part.0
+ 1081 03ec 00F05CF9 		bl	Ble_SendDataSimple.part.0
  1082              	.LVL127:
  1083              	.L69:
  1084              	.LBE17:
@@ -1504,12 +1504,12 @@
  1123 03fe 1FD1     		bne	.L76
  1124              		.loc 1 351 0 is_stmt 0 discriminator 1
  1125 0400 4778     		ldrb	r7, [r0, #1]
- 1126 0402 7B4C     		ldr	r4, .L105
+ 1126 0402 7C4C     		ldr	r4, .L105
  1127 0404 C12F     		cmp	r7, #193
  1128 0406 0ED1     		bne	.L77
  352:../src/gatt_ota.c **** 		&& dat[2] == (cur_packet_id&0xFF) 
  1129              		.loc 1 352 0 is_stmt 1
- 1130 0408 7A49     		ldr	r1, .L105+4
+ 1130 0408 7B49     		ldr	r1, .L105+4
  1131              	.LVL129:
  1132 040a 8078     		ldrb	r0, [r0, #2]
  1133              	.LVL130:
@@ -1517,7 +1517,7 @@
  1135 040e D3B2     		uxtb	r3, r2
  1136 0410 9842     		cmp	r0, r3
  1137 0412 00D0     		beq	.LCB1059
- 1138 0414 BCE0     		b	.L78	@long jump
+ 1138 0414 BEE0     		b	.L78	@long jump
  1139              	.LCB1059:
  353:../src/gatt_ota.c **** 		&& dat[3] == (cur_packet_id >> 8&0xFF)){
  1140              		.loc 1 353 0
@@ -1525,13 +1525,13 @@
  1142 0418 120A     		lsrs	r2, r2, #8
  1143 041a 9342     		cmp	r3, r2
  1144 041c 00D0     		beq	.LCB1064
- 1145 041e B7E0     		b	.L78	@long jump
+ 1145 041e B9E0     		b	.L78	@long jump
  1146              	.LCB1064:
  354:../src/gatt_ota.c **** 		data_retransmit_flag = 1;		
  1147              		.loc 1 354 0
  1148 0420 0123     		movs	r3, #1
  1149 0422 A380     		strh	r3, [r4, #4]
- 1150 0424 B4E0     		b	.L78
+ 1150 0424 B6E0     		b	.L78
  1151              	.LVL131:
  1152              	.L77:
  355:../src/gatt_ota.c **** 	}
@@ -1543,7 +1543,7 @@
  1155 0428 3DD0     		beq	.L87
  1156 042a FF2F     		cmp	r7, #255
  1157 042c 00D1     		bne	.LCB1078
- 1158 042e 89E0     		b	.L93	@long jump
+ 1158 042e 8BE0     		b	.L93	@long jump
  1159              	.LCB1078:
  1160 0430 C02F     		cmp	r7, #192
  1161 0432 05D1     		bne	.L76
@@ -1558,7 +1558,7 @@
  1167 0438 2378     		ldrb	r3, [r4]
  1168 043a 012B     		cmp	r3, #1
  1169 043c 00D1     		bne	.LCB1089
- 1170 043e 89E0     		b	.L102	@long jump
+ 1170 043e 8BE0     		b	.L102	@long jump
  1171              	.LCB1089:
  1172              	.LVL133:
  1173              	.L76:
@@ -1629,45 +1629,46 @@
  425:../src/gatt_ota.c **** 					m_printf(L_APP, "code crc status[%d]", status);
  426:../src/gatt_ota.c **** 					if(!status){
  427:../src/gatt_ota.c **** 						ota_cmd_to_app(CMD_OTA_END,PacketId,0x55);
- 428:../src/gatt_ota.c **** 						uint32_t count = 100000;
- 429:../src/gatt_ota.c **** 						while(count--)
- 430:../src/gatt_ota.c **** 							IPC_DealSingleStep();
- 431:../src/gatt_ota.c **** 						ota_prog_switch();
- 432:../src/gatt_ota.c **** 					}
- 433:../src/gatt_ota.c **** 					else{
- 434:../src/gatt_ota.c **** 						StartOtaFlag = NOSTART;
- 435:../src/gatt_ota.c **** 						ota_cmd_to_app(CMD_OTA_END,PacketId,0);
- 436:../src/gatt_ota.c **** 					}	
- 437:../src/gatt_ota.c **** 				}else{
- 438:../src/gatt_ota.c **** 					StartOtaFlag = NOSTART;
- 439:../src/gatt_ota.c **** 					ota_cmd_to_app(CMD_OTA_END,PacketId,0);
- 440:../src/gatt_ota.c **** 				}
- 441:../src/gatt_ota.c **** 		
- 442:../src/gatt_ota.c **** 				break;
- 443:../src/gatt_ota.c **** 			case CMD_OTA_RESET:
- 444:../src/gatt_ota.c **** 				if(StartOtaFlag != OTAPROCESSING)
- 445:../src/gatt_ota.c **** 					return;
- 446:../src/gatt_ota.c **** 				ota_prog_switch();
- 447:../src/gatt_ota.c **** 				StartOtaFlag = NOSTART;
- 448:../src/gatt_ota.c **** 				break; 
- 449:../src/gatt_ota.c **** 			default:
- 450:../src/gatt_ota.c **** 				break;
- 451:../src/gatt_ota.c **** 		
- 452:../src/gatt_ota.c **** 		}
- 453:../src/gatt_ota.c **** 	}
- 454:../src/gatt_ota.c **** 	if(data_start_flag == 1 && StartOtaFlag == OTAPROCESSING){
- 1175              		.loc 1 454 0
- 1176 0440 6B4C     		ldr	r4, .L105
+ 428:../src/gatt_ota.c **** 						StartOtaFlag = OTA_DOWNLOAD;
+ 429:../src/gatt_ota.c **** 						uint32_t count = 100000;
+ 430:../src/gatt_ota.c **** 						while(count--)
+ 431:../src/gatt_ota.c **** 							IPC_DealSingleStep();
+ 432:../src/gatt_ota.c **** 						ota_prog_switch();
+ 433:../src/gatt_ota.c **** 					}
+ 434:../src/gatt_ota.c **** 					else{
+ 435:../src/gatt_ota.c **** 						StartOtaFlag = NOSTART;
+ 436:../src/gatt_ota.c **** 						ota_cmd_to_app(CMD_OTA_END,PacketId,0);
+ 437:../src/gatt_ota.c **** 					}	
+ 438:../src/gatt_ota.c **** 				}else{
+ 439:../src/gatt_ota.c **** 					StartOtaFlag = NOSTART;
+ 440:../src/gatt_ota.c **** 					ota_cmd_to_app(CMD_OTA_END,PacketId,0);
+ 441:../src/gatt_ota.c **** 				}
+ 442:../src/gatt_ota.c **** 		
+ 443:../src/gatt_ota.c **** 				break;
+ 444:../src/gatt_ota.c **** 			case CMD_OTA_RESET:
+ 445:../src/gatt_ota.c **** 				if(StartOtaFlag != OTA_DOWNLOAD)
+ 446:../src/gatt_ota.c **** 					return;
+ 447:../src/gatt_ota.c **** 				ota_prog_switch();
+ 448:../src/gatt_ota.c **** 				StartOtaFlag = NOSTART;
+ 449:../src/gatt_ota.c **** 				break; 
+ 450:../src/gatt_ota.c **** 			default:
+ 451:../src/gatt_ota.c **** 				break;
+ 452:../src/gatt_ota.c **** 		
+ 453:../src/gatt_ota.c **** 		}
+ 454:../src/gatt_ota.c **** 	}
+ 455:../src/gatt_ota.c **** 	if(data_start_flag == 1 && StartOtaFlag == OTAPROCESSING){
+ 1175              		.loc 1 455 0
+ 1176 0440 6C4C     		ldr	r4, .L105
  1177 0442 6388     		ldrh	r3, [r4, #2]
  1178 0444 012B     		cmp	r3, #1
  1179 0446 00D0     		beq	.LCB1100
- 1180 0448 CFE0     		b	.L74	@long jump
+ 1180 0448 D1E0     		b	.L74	@long jump
  1181              	.LCB1100:
- 1182              		.loc 1 454 0 is_stmt 0 discriminator 1
+ 1182              		.loc 1 455 0 is_stmt 0 discriminator 1
  1183 044a 2378     		ldrb	r3, [r4]
  1184 044c 032B     		cmp	r3, #3
  1185 044e 00D0     		beq	.LCB1106
- 1186 0450 CBE0     		b	.L74	@long jump
+ 1186 0450 CDE0     		b	.L74	@long jump
  1187              	.LCB1106:
  1188 0452 3300     		movs	r3, r6
  1189 0454 0021     		movs	r1, #0
@@ -1676,16 +1677,16 @@
  1192              	.LVL134:
  1193              	.LBB22:
  1194              	.LBB23:
- 455:../src/gatt_ota.c **** 		//calc check sum
- 456:../src/gatt_ota.c **** 		for(int i = 0; i < length;  i++){	
- 1195              		.loc 1 456 0 is_stmt 1 discriminator 1
+ 456:../src/gatt_ota.c **** 		//calc check sum
+ 457:../src/gatt_ota.c **** 		for(int i = 0; i < length;  i++){	
+ 1195              		.loc 1 457 0 is_stmt 1 discriminator 1
  1196 0458 019D     		ldr	r5, [sp, #4]
  1197 045a 981B     		subs	r0, r3, r6
  1198              	.LVL135:
  1199 045c 8542     		cmp	r5, r0
  1200 045e 04DD     		ble	.L103
- 457:../src/gatt_ota.c **** 			packetSum += dataTmp[i];
- 1201              		.loc 1 457 0 discriminator 3
+ 458:../src/gatt_ota.c **** 			packetSum += dataTmp[i];
+ 1201              		.loc 1 458 0 discriminator 3
  1202 0460 1978     		ldrb	r1, [r3]
  1203 0462 0133     		adds	r3, r3, #1
  1204 0464 5218     		adds	r2, r2, r1
@@ -1700,60 +1701,60 @@
  1213              	.L96:
  1214              	.LVL138:
  1215              	.LBE23:
- 458:../src/gatt_ota.c **** 		}
- 459:../src/gatt_ota.c **** 		//write flash data
- 460:../src/gatt_ota.c **** 		uint8_t writeStatus = 0;
- 461:../src/gatt_ota.c **** 		writeStatus = OTA_WriteFlash(cflashaddr,(uint32_t)length, dataTmp);
- 1216              		.loc 1 461 0
+ 459:../src/gatt_ota.c **** 		}
+ 460:../src/gatt_ota.c **** 		//write flash data
+ 461:../src/gatt_ota.c **** 		uint8_t writeStatus = 0;
+ 462:../src/gatt_ota.c **** 		writeStatus = OTA_WriteFlash(cflashaddr,(uint32_t)length, dataTmp);
+ 1216              		.loc 1 462 0
  1217 0470 3200     		movs	r2, r6
  1218 0472 0199     		ldr	r1, [sp, #4]
  1219 0474 6069     		ldr	r0, [r4, #20]
  1220              	.LVL139:
  1221 0476 FFF7FEFF 		bl	OTA_WriteFlash
  1222              	.LVL140:
- 462:../src/gatt_ota.c **** 		//m_printf_hex(L_APP, "ota data crc", dataTmp, length);
- 463:../src/gatt_ota.c **** 		//M_PRINTF(L_APP, "writeStatus[%x]", writeStatus);
- 464:../src/gatt_ota.c **** 		cflashaddr += length;
- 1223              		.loc 1 464 0
+ 463:../src/gatt_ota.c **** 		//m_printf_hex(L_APP, "ota data crc", dataTmp, length);
+ 464:../src/gatt_ota.c **** 		//M_PRINTF(L_APP, "writeStatus[%x]", writeStatus);
+ 465:../src/gatt_ota.c **** 		cflashaddr += length;
+ 1223              		.loc 1 465 0
  1224 047a 6369     		ldr	r3, [r4, #20]
  1225 047c 0199     		ldr	r1, [sp, #4]
- 461:../src/gatt_ota.c **** 		//m_printf_hex(L_APP, "ota data crc", dataTmp, length);
- 1226              		.loc 1 461 0
+ 462:../src/gatt_ota.c **** 		//m_printf_hex(L_APP, "ota data crc", dataTmp, length);
+ 1226              		.loc 1 462 0
  1227 047e 0200     		movs	r2, r0
  1228              	.LVL141:
- 1229              		.loc 1 464 0
+ 1229              		.loc 1 465 0
  1230 0480 5B18     		adds	r3, r3, r1
  1231 0482 6361     		str	r3, [r4, #20]
- 465:../src/gatt_ota.c **** 		CurPacketLen += length;
- 1232              		.loc 1 465 0
+ 466:../src/gatt_ota.c **** 		CurPacketLen += length;
+ 1232              		.loc 1 466 0
  1233 0484 238D     		ldrh	r3, [r4, #40]
  1234 0486 5B18     		adds	r3, r3, r1
  1235 0488 9BB2     		uxth	r3, r3
  1236 048a 2385     		strh	r3, [r4, #40]
- 466:../src/gatt_ota.c **** 		if(writeStatus == 0){
- 1237              		.loc 1 466 0
+ 467:../src/gatt_ota.c **** 		if(writeStatus == 0){
+ 1237              		.loc 1 467 0
  1238 048c 0028     		cmp	r0, #0
  1239 048e 00D0     		beq	.LCB1157
- 1240 0490 ABE0     		b	.L74	@long jump
+ 1240 0490 ADE0     		b	.L74	@long jump
  1241              	.LCB1157:
- 467:../src/gatt_ota.c **** 			if(CurPacketLen == PacketLength){
- 1242              		.loc 1 467 0
+ 468:../src/gatt_ota.c **** 			if(CurPacketLen == PacketLength){
+ 1242              		.loc 1 468 0
  1243 0492 618C     		ldrh	r1, [r4, #34]
  1244 0494 9942     		cmp	r1, r3
  1245 0496 00D0     		beq	.LCB1160
- 1246 0498 A7E0     		b	.L74	@long jump
+ 1246 0498 A9E0     		b	.L74	@long jump
  1247              	.LCB1160:
- 468:../src/gatt_ota.c **** 				data_start_flag = 0;
- 1248              		.loc 1 468 0
+ 469:../src/gatt_ota.c **** 				data_start_flag = 0;
+ 1248              		.loc 1 469 0
  1249 049a 6080     		strh	r0, [r4, #2]
- 469:../src/gatt_ota.c **** 				ota_cmd_to_app(CMD_OTA_DATA,PacketId,0);//CMD_OTA_DATA_H
- 1250              		.loc 1 469 0
+ 470:../src/gatt_ota.c **** 				ota_cmd_to_app(CMD_OTA_DATA,PacketId,0);//CMD_OTA_DATA_H
+ 1250              		.loc 1 470 0
  1251 049c 218C     		ldrh	r1, [r4, #32]
  1252 049e C120     		movs	r0, #193
  1253              	.LVL142:
  1254 04a0 FFF7FEFF 		bl	ota_cmd_to_app
  1255              	.LVL143:
- 1256 04a4 A1E0     		b	.L74
+ 1256 04a4 A3E0     		b	.L74
  1257              	.LVL144:
  1258              	.L87:
  1259              	.LBE22:
@@ -1773,7 +1774,7 @@
  1269              		.loc 1 411 0
  1270 04b0 032A     		cmp	r2, #3
  1271 04b2 00D0     		beq	.LCB1186
- 1272 04b4 99E0     		b	.L74	@long jump
+ 1272 04b4 9BE0     		b	.L74	@long jump
  1273              	.LCB1186:
  1274              	.LVL145:
  422:../src/gatt_ota.c **** 				if(CheckSum == cSum){
@@ -1814,7 +1815,7 @@
  1302 04d2 0292     		str	r2, [sp, #8]
  422:../src/gatt_ota.c **** 				if(CheckSum == cSum){
  1303              		.loc 1 422 0
- 1304 04d4 4849     		ldr	r1, .L105+8
+ 1304 04d4 4949     		ldr	r1, .L105+8
  420:../src/gatt_ota.c **** 				
  1305              		.loc 1 420 0
  1306 04d6 2269     		ldr	r2, [r4, #16]
@@ -1836,7 +1837,7 @@
  1318              		.loc 1 423 0
  1319 04e4 A369     		ldr	r3, [r4, #24]
  1320 04e6 9D42     		cmp	r5, r3
- 1321 04e8 24D1     		bne	.L89
+ 1321 04e8 26D1     		bne	.L89
  1322              	.LBB19:
  424:../src/gatt_ota.c **** 					m_printf(L_APP, "code crc status[%d]", status);
  1323              		.loc 1 424 0
@@ -1856,7 +1857,7 @@
  1334              		.loc 1 425 0
  1335 04f8 8020     		movs	r0, #128
  1336              	.LVL156:
- 1337 04fa 3F49     		ldr	r1, .L105+8
+ 1337 04fa 4049     		ldr	r1, .L105+8
  1338 04fc 8001     		lsls	r0, r0, #6
  1339 04fe 5B31     		adds	r1, r1, #91
  1340 0500 FFF7FEFF 		bl	m_printf
@@ -1865,639 +1866,644 @@
  426:../src/gatt_ota.c **** 						ota_cmd_to_app(CMD_OTA_END,PacketId,0x55);
  1343              		.loc 1 426 0
  1344 0506 002D     		cmp	r5, #0
- 1345 0508 0DD1     		bne	.L90
+ 1345 0508 0FD1     		bne	.L90
  1346              	.LBB20:
- 427:../src/gatt_ota.c **** 						uint32_t count = 100000;
+ 427:../src/gatt_ota.c **** 						StartOtaFlag = OTA_DOWNLOAD;
  1347              		.loc 1 427 0
  1348 050a 5522     		movs	r2, #85
  1349 050c 3800     		movs	r0, r7
  1350 050e FFF7FEFF 		bl	ota_cmd_to_app
  1351              	.LVL158:
- 429:../src/gatt_ota.c **** 							IPC_DealSingleStep();
- 1352              		.loc 1 429 0
- 1353 0512 3A4C     		ldr	r4, .L105+12
- 1354              	.LVL159:
- 1355              	.L91:
- 1356 0514 013C     		subs	r4, r4, #1
- 1357              	.LVL160:
- 1358 0516 002C     		cmp	r4, #0
- 1359 0518 02D0     		beq	.L104
- 1360              	.LVL161:
- 430:../src/gatt_ota.c **** 						ota_prog_switch();
- 1361              		.loc 1 430 0
- 1362 051a FFF7FEFF 		bl	IPC_DealSingleStep
- 1363              	.LVL162:
- 1364 051e F9E7     		b	.L91
- 1365              	.LVL163:
- 1366              	.L104:
- 431:../src/gatt_ota.c **** 					}
- 1367              		.loc 1 431 0
- 1368 0520 FFF7FEFF 		bl	ota_prog_switch
+ 428:../src/gatt_ota.c **** 						uint32_t count = 100000;
+ 1352              		.loc 1 428 0
+ 1353 0512 0423     		movs	r3, #4
+ 1354 0514 2370     		strb	r3, [r4]
+ 1355              	.LVL159:
+ 430:../src/gatt_ota.c **** 							IPC_DealSingleStep();
+ 1356              		.loc 1 430 0
+ 1357 0516 3A4C     		ldr	r4, .L105+12
+ 1358              	.LVL160:
+ 1359              	.L91:
+ 1360 0518 013C     		subs	r4, r4, #1
+ 1361              	.LVL161:
+ 1362 051a 002C     		cmp	r4, #0
+ 1363 051c 02D0     		beq	.L104
+ 1364              	.LVL162:
+ 431:../src/gatt_ota.c **** 						ota_prog_switch();
+ 1365              		.loc 1 431 0
+ 1366 051e FFF7FEFF 		bl	IPC_DealSingleStep
+ 1367              	.LVL163:
+ 1368 0522 F9E7     		b	.L91
  1369              	.LVL164:
- 1370              	.LBE20:
- 1371 0524 8CE7     		b	.L76
- 1372              	.LVL165:
- 1373              	.L90:
- 434:../src/gatt_ota.c **** 						ota_cmd_to_app(CMD_OTA_END,PacketId,0);
- 1374              		.loc 1 434 0
- 1375 0526 0123     		movs	r3, #1
- 435:../src/gatt_ota.c **** 					}	
- 1376              		.loc 1 435 0
- 1377 0528 0022     		movs	r2, #0
- 1378 052a 3800     		movs	r0, r7
- 434:../src/gatt_ota.c **** 						ota_cmd_to_app(CMD_OTA_END,PacketId,0);
- 1379              		.loc 1 434 0
- 1380 052c 2370     		strb	r3, [r4]
- 435:../src/gatt_ota.c **** 					}	
- 1381              		.loc 1 435 0
- 1382 052e FFF7FEFF 		bl	ota_cmd_to_app
- 1383              	.LVL166:
- 1384 0532 85E7     		b	.L76
- 1385              	.LVL167:
- 1386              	.L89:
- 1387              	.LBE19:
- 438:../src/gatt_ota.c **** 					ota_cmd_to_app(CMD_OTA_END,PacketId,0);
- 1388              		.loc 1 438 0
- 1389 0534 0123     		movs	r3, #1
- 439:../src/gatt_ota.c **** 				}
- 1390              		.loc 1 439 0
- 1391 0536 218C     		ldrh	r1, [r4, #32]
- 1392 0538 0022     		movs	r2, #0
- 1393 053a 3800     		movs	r0, r7
- 438:../src/gatt_ota.c **** 					ota_cmd_to_app(CMD_OTA_END,PacketId,0);
- 1394              		.loc 1 438 0
- 1395 053c 2370     		strb	r3, [r4]
- 439:../src/gatt_ota.c **** 				}
- 1396              		.loc 1 439 0
- 1397 053e FFF7FEFF 		bl	ota_cmd_to_app
- 1398              	.LVL168:
- 1399 0542 7DE7     		b	.L76
- 1400              	.LVL169:
- 1401              	.L93:
- 444:../src/gatt_ota.c **** 					return;
- 1402              		.loc 1 444 0
- 1403 0544 2378     		ldrb	r3, [r4]
- 1404 0546 032B     		cmp	r3, #3
- 1405 0548 4FD1     		bne	.L74
- 446:../src/gatt_ota.c **** 				StartOtaFlag = NOSTART;
- 1406              		.loc 1 446 0
- 1407 054a FFF7FEFF 		bl	ota_prog_switch
- 1408              	.LVL170:
- 447:../src/gatt_ota.c **** 				break; 
- 1409              		.loc 1 447 0
- 1410 054e 0123     		movs	r3, #1
- 1411 0550 2370     		strb	r3, [r4]
- 448:../src/gatt_ota.c **** 			default:
- 1412              		.loc 1 448 0
- 1413 0552 75E7     		b	.L76
- 1414              	.L102:
- 1415              	.LBB21:
+ 1370              	.L104:
+ 432:../src/gatt_ota.c **** 					}
+ 1371              		.loc 1 432 0
+ 1372 0524 FFF7FEFF 		bl	ota_prog_switch
+ 1373              	.LVL165:
+ 1374              	.LBE20:
+ 1375 0528 8AE7     		b	.L76
+ 1376              	.LVL166:
+ 1377              	.L90:
+ 435:../src/gatt_ota.c **** 						ota_cmd_to_app(CMD_OTA_END,PacketId,0);
+ 1378              		.loc 1 435 0
+ 1379 052a 0123     		movs	r3, #1
+ 436:../src/gatt_ota.c **** 					}	
+ 1380              		.loc 1 436 0
+ 1381 052c 0022     		movs	r2, #0
+ 1382 052e 3800     		movs	r0, r7
+ 435:../src/gatt_ota.c **** 						ota_cmd_to_app(CMD_OTA_END,PacketId,0);
+ 1383              		.loc 1 435 0
+ 1384 0530 2370     		strb	r3, [r4]
+ 436:../src/gatt_ota.c **** 					}	
+ 1385              		.loc 1 436 0
+ 1386 0532 FFF7FEFF 		bl	ota_cmd_to_app
+ 1387              	.LVL167:
+ 1388 0536 83E7     		b	.L76
+ 1389              	.LVL168:
+ 1390              	.L89:
+ 1391              	.LBE19:
+ 439:../src/gatt_ota.c **** 					ota_cmd_to_app(CMD_OTA_END,PacketId,0);
+ 1392              		.loc 1 439 0
+ 1393 0538 0123     		movs	r3, #1
+ 440:../src/gatt_ota.c **** 				}
+ 1394              		.loc 1 440 0
+ 1395 053a 218C     		ldrh	r1, [r4, #32]
+ 1396 053c 0022     		movs	r2, #0
+ 1397 053e 3800     		movs	r0, r7
+ 439:../src/gatt_ota.c **** 					ota_cmd_to_app(CMD_OTA_END,PacketId,0);
+ 1398              		.loc 1 439 0
+ 1399 0540 2370     		strb	r3, [r4]
+ 440:../src/gatt_ota.c **** 				}
+ 1400              		.loc 1 440 0
+ 1401 0542 FFF7FEFF 		bl	ota_cmd_to_app
+ 1402              	.LVL169:
+ 1403 0546 7BE7     		b	.L76
+ 1404              	.LVL170:
+ 1405              	.L93:
+ 445:../src/gatt_ota.c **** 					return;
+ 1406              		.loc 1 445 0
+ 1407 0548 2378     		ldrb	r3, [r4]
+ 1408 054a 042B     		cmp	r3, #4
+ 1409 054c 4FD1     		bne	.L74
+ 447:../src/gatt_ota.c **** 				StartOtaFlag = NOSTART;
+ 1410              		.loc 1 447 0
+ 1411 054e FFF7FEFF 		bl	ota_prog_switch
+ 1412              	.LVL171:
+ 448:../src/gatt_ota.c **** 				break; 
+ 1413              		.loc 1 448 0
+ 1414 0552 0123     		movs	r3, #1
+ 1415 0554 2370     		strb	r3, [r4]
+ 449:../src/gatt_ota.c **** 			default:
+ 1416              		.loc 1 449 0
+ 1417 0556 73E7     		b	.L76
+ 1418              	.L102:
+ 1419              	.LBB21:
  362:../src/gatt_ota.c **** 					
- 1416              		.loc 1 362 0
- 1417 0554 0133     		adds	r3, r3, #1
- 1418 0556 2370     		strb	r3, [r4]
+ 1420              		.loc 1 362 0
+ 1421 0558 0133     		adds	r3, r3, #1
+ 1422 055a 2370     		strb	r3, [r4]
  364:../src/gatt_ota.c **** 					if(sts == APP_TWO){ //check out addr 0x1000 code
- 1419              		.loc 1 364 0
- 1420 0558 FFF7FEFF 		bl	ota_prog_addr
- 1421              	.LVL171:
+ 1423              		.loc 1 364 0
+ 1424 055c FFF7FEFF 		bl	ota_prog_addr
+ 1425              	.LVL172:
  365:../src/gatt_ota.c **** 						OTAStartAddr = CODE_START_ADDR+PAGE_SIZE;//0x2000;
- 1422              		.loc 1 365 0
- 1423 055c 0228     		cmp	r0, #2
- 1424 055e 03D1     		bne	.L81
+ 1426              		.loc 1 365 0
+ 1427 0560 0228     		cmp	r0, #2
+ 1428 0562 03D1     		bne	.L81
  366:../src/gatt_ota.c **** 					}
- 1425              		.loc 1 366 0
- 1426 0560 8023     		movs	r3, #128
- 1427 0562 5B00     		lsls	r3, r3, #1
- 1428 0564 2361     		str	r3, [r4, #16]
- 1429 0566 01E0     		b	.L82
- 1430              	.L81:
+ 1429              		.loc 1 366 0
+ 1430 0564 8023     		movs	r3, #128
+ 1431 0566 5B00     		lsls	r3, r3, #1
+ 1432 0568 2361     		str	r3, [r4, #16]
+ 1433 056a 01E0     		b	.L82
+ 1434              	.L81:
  369:../src/gatt_ota.c **** 					}
- 1431              		.loc 1 369 0
- 1432 0568 254B     		ldr	r3, .L105+16
- 1433 056a 2361     		str	r3, [r4, #16]
- 1434              	.L82:
+ 1435              		.loc 1 369 0
+ 1436 056c 254B     		ldr	r3, .L105+16
+ 1437 056e 2361     		str	r3, [r4, #16]
+ 1438              	.L82:
  372:../src/gatt_ota.c **** 					packetSum = 0;
- 1435              		.loc 1 372 0
- 1436 056c 0025     		movs	r5, #0
+ 1439              		.loc 1 372 0
+ 1440 0570 0025     		movs	r5, #0
  371:../src/gatt_ota.c **** 					cSum = 0;
- 1437              		.loc 1 371 0
- 1438 056e 2369     		ldr	r3, [r4, #16]
+ 1441              		.loc 1 371 0
+ 1442 0572 2369     		ldr	r3, [r4, #16]
  375:../src/gatt_ota.c **** 					ota_cmd_to_app(CMD_OTA_START,PACKETNUM,0);//CMD_OTA_START_H
- 1439              		.loc 1 375 0
- 1440 0570 1220     		movs	r0, #18
- 1441              	.LVL172:
+ 1443              		.loc 1 375 0
+ 1444 0574 1220     		movs	r0, #18
+ 1445              	.LVL173:
  371:../src/gatt_ota.c **** 					cSum = 0;
- 1442              		.loc 1 371 0
- 1443 0572 6361     		str	r3, [r4, #20]
+ 1446              		.loc 1 371 0
+ 1447 0576 6361     		str	r3, [r4, #20]
  372:../src/gatt_ota.c **** 					packetSum = 0;
- 1444              		.loc 1 372 0
- 1445 0574 A561     		str	r5, [r4, #24]
+ 1448              		.loc 1 372 0
+ 1449 0578 A561     		str	r5, [r4, #24]
  373:../src/gatt_ota.c **** 					//M_PRINTF(L_APP, "cflashaddr[%x]", cflashaddr);
- 1446              		.loc 1 373 0
- 1447 0576 E561     		str	r5, [r4, #28]
+ 1450              		.loc 1 373 0
+ 1451 057a E561     		str	r5, [r4, #28]
  375:../src/gatt_ota.c **** 					ota_cmd_to_app(CMD_OTA_START,PACKETNUM,0);//CMD_OTA_START_H
- 1448              		.loc 1 375 0
- 1449 0578 FFF7FEFF 		bl	IPC_TxControlCmd
- 1450              	.LVL173:
+ 1452              		.loc 1 375 0
+ 1453 057c FFF7FEFF 		bl	IPC_TxControlCmd
+ 1454              	.LVL174:
  376:../src/gatt_ota.c **** 					OTA_flash_init(OTAStartAddr);
- 1451              		.loc 1 376 0
- 1452 057c 8721     		movs	r1, #135
- 1453 057e 2A00     		movs	r2, r5
- 1454 0580 8900     		lsls	r1, r1, #2
- 1455 0582 C020     		movs	r0, #192
- 1456 0584 FFF7FEFF 		bl	ota_cmd_to_app
- 1457              	.LVL174:
- 377:../src/gatt_ota.c **** 				} 
- 1458              		.loc 1 377 0
- 1459 0588 2069     		ldr	r0, [r4, #16]
- 1460 058a FFF7FEFF 		bl	OTA_flash_init
+ 1455              		.loc 1 376 0
+ 1456 0580 8721     		movs	r1, #135
+ 1457 0582 2A00     		movs	r2, r5
+ 1458 0584 8900     		lsls	r1, r1, #2
+ 1459 0586 C020     		movs	r0, #192
+ 1460 0588 FFF7FEFF 		bl	ota_cmd_to_app
  1461              	.LVL175:
- 1462 058e 57E7     		b	.L76
- 1463              	.LVL176:
- 1464              	.L78:
- 1465              	.LBE21:
+ 377:../src/gatt_ota.c **** 				} 
+ 1462              		.loc 1 377 0
+ 1463 058c 2069     		ldr	r0, [r4, #16]
+ 1464 058e FFF7FEFF 		bl	OTA_flash_init
+ 1465              	.LVL176:
+ 1466 0592 55E7     		b	.L76
+ 1467              	.LVL177:
+ 1468              	.L78:
+ 1469              	.LBE21:
  381:../src/gatt_ota.c **** 					StartOtaFlag = OTAPROCESSING;
- 1466              		.loc 1 381 0
- 1467 0590 2378     		ldrb	r3, [r4]
- 1468 0592 022B     		cmp	r3, #2
- 1469 0594 01D1     		bne	.L98
+ 1470              		.loc 1 381 0
+ 1471 0594 2378     		ldrb	r3, [r4]
+ 1472 0596 022B     		cmp	r3, #2
+ 1473 0598 01D1     		bne	.L98
  382:../src/gatt_ota.c **** 				}
- 1470              		.loc 1 382 0
- 1471 0596 0323     		movs	r3, #3
- 1472 0598 2370     		strb	r3, [r4]
- 1473              	.L98:
+ 1474              		.loc 1 382 0
+ 1475 059a 0323     		movs	r3, #3
+ 1476 059c 2370     		strb	r3, [r4]
+ 1477              	.L98:
  384:../src/gatt_ota.c **** 					return;
- 1474              		.loc 1 384 0
- 1475 059a 2378     		ldrb	r3, [r4]
- 1476 059c 032B     		cmp	r3, #3
- 1477 059e 24D1     		bne	.L74
- 1478              	.LVL177:
+ 1478              		.loc 1 384 0
+ 1479 059e 2378     		ldrb	r3, [r4]
+ 1480 05a0 032B     		cmp	r3, #3
+ 1481 05a2 24D1     		bne	.L74
+ 1482              	.LVL178:
  389:../src/gatt_ota.c **** 
- 1479              		.loc 1 389 0
- 1480 05a0 7279     		ldrb	r2, [r6, #5]
- 1481 05a2 3579     		ldrb	r5, [r6, #4]
+ 1483              		.loc 1 389 0
+ 1484 05a4 7279     		ldrb	r2, [r6, #5]
+ 1485 05a6 3579     		ldrb	r5, [r6, #4]
  387:../src/gatt_ota.c **** 				PacketLength = *(dat++);
- 1482              		.loc 1 387 0
- 1483 05a4 F378     		ldrb	r3, [r6, #3]
+ 1486              		.loc 1 387 0
+ 1487 05a8 F378     		ldrb	r3, [r6, #3]
  389:../src/gatt_ota.c **** 
- 1484              		.loc 1 389 0
- 1485 05a6 1202     		lsls	r2, r2, #8
- 1486 05a8 2A43     		orrs	r2, r5
+ 1488              		.loc 1 389 0
+ 1489 05aa 1202     		lsls	r2, r2, #8
+ 1490 05ac 2A43     		orrs	r2, r5
  387:../src/gatt_ota.c **** 				PacketLength = *(dat++);
- 1487              		.loc 1 387 0
- 1488 05aa 1B02     		lsls	r3, r3, #8
+ 1491              		.loc 1 387 0
+ 1492 05ae 1B02     		lsls	r3, r3, #8
  389:../src/gatt_ota.c **** 
- 1489              		.loc 1 389 0
- 1490 05ac 6284     		strh	r2, [r4, #34]
+ 1493              		.loc 1 389 0
+ 1494 05b0 6284     		strh	r2, [r4, #34]
  391:../src/gatt_ota.c **** 					data_retransmit_flag = 0;
- 1491              		.loc 1 391 0
- 1492 05ae A288     		ldrh	r2, [r4, #4]
+ 1495              		.loc 1 391 0
+ 1496 05b2 A288     		ldrh	r2, [r4, #4]
  387:../src/gatt_ota.c **** 				PacketLength = *(dat++);
- 1493              		.loc 1 387 0
- 1494 05b0 0343     		orrs	r3, r0
- 1495 05b2 2384     		strh	r3, [r4, #32]
- 1496              	.LVL178:
+ 1497              		.loc 1 387 0
+ 1498 05b4 0343     		orrs	r3, r0
+ 1499 05b6 2384     		strh	r3, [r4, #32]
+ 1500              	.LVL179:
  389:../src/gatt_ota.c **** 
- 1497              		.loc 1 389 0
- 1498 05b4 B01D     		adds	r0, r6, #6
- 1499              	.LVL179:
+ 1501              		.loc 1 389 0
+ 1502 05b8 B01D     		adds	r0, r6, #6
+ 1503              	.LVL180:
  391:../src/gatt_ota.c **** 					data_retransmit_flag = 0;
- 1500              		.loc 1 391 0
- 1501 05b6 012A     		cmp	r2, #1
- 1502 05b8 05D1     		bne	.L85
- 392:../src/gatt_ota.c **** 					cflashaddr = flashaddrsaved;
- 1503              		.loc 1 392 0
- 1504 05ba 0022     		movs	r2, #0
- 393:../src/gatt_ota.c **** 					packetSum = 0;
- 1505              		.loc 1 393 0
- 1506 05bc 656A     		ldr	r5, [r4, #36]
+ 1504              		.loc 1 391 0
+ 1505 05ba 012A     		cmp	r2, #1
+ 1506 05bc 05D1     		bne	.L85
  392:../src/gatt_ota.c **** 					cflashaddr = flashaddrsaved;
  1507              		.loc 1 392 0
- 1508 05be A280     		strh	r2, [r4, #4]
+ 1508 05be 0022     		movs	r2, #0
  393:../src/gatt_ota.c **** 					packetSum = 0;
  1509              		.loc 1 393 0
- 1510 05c0 6561     		str	r5, [r4, #20]
+ 1510 05c0 656A     		ldr	r5, [r4, #36]
+ 392:../src/gatt_ota.c **** 					cflashaddr = flashaddrsaved;
+ 1511              		.loc 1 392 0
+ 1512 05c2 A280     		strh	r2, [r4, #4]
+ 393:../src/gatt_ota.c **** 					packetSum = 0;
+ 1513              		.loc 1 393 0
+ 1514 05c4 6561     		str	r5, [r4, #20]
  394:../src/gatt_ota.c **** 				}
- 1511              		.loc 1 394 0
- 1512 05c2 E261     		str	r2, [r4, #28]
- 1513 05c4 01E0     		b	.L86
- 1514              	.L85:
+ 1515              		.loc 1 394 0
+ 1516 05c6 E261     		str	r2, [r4, #28]
+ 1517 05c8 01E0     		b	.L86
+ 1518              	.L85:
  397:../src/gatt_ota.c **** 					
- 1515              		.loc 1 397 0
- 1516 05c6 6269     		ldr	r2, [r4, #20]
- 1517 05c8 6262     		str	r2, [r4, #36]
- 1518              	.L86:
+ 1519              		.loc 1 397 0
+ 1520 05ca 6269     		ldr	r2, [r4, #20]
+ 1521 05cc 6262     		str	r2, [r4, #36]
+ 1522              	.L86:
  400:../src/gatt_ota.c **** 				//M_PRINTF(L_APP, "PacketId[%x] PacketLength[%x] cflashaddr[%x]", PacketId, PacketLength, cflas
- 1519              		.loc 1 400 0
- 1520 05ca A269     		ldr	r2, [r4, #24]
- 1521 05cc E569     		ldr	r5, [r4, #28]
+ 1523              		.loc 1 400 0
+ 1524 05ce A269     		ldr	r2, [r4, #24]
+ 1525 05d0 E569     		ldr	r5, [r4, #28]
  402:../src/gatt_ota.c **** 				CurPacketLen = 0;
- 1522              		.loc 1 402 0
- 1523 05ce 0B80     		strh	r3, [r1]
+ 1526              		.loc 1 402 0
+ 1527 05d2 0B80     		strh	r3, [r1]
  400:../src/gatt_ota.c **** 				//M_PRINTF(L_APP, "PacketId[%x] PacketLength[%x] cflashaddr[%x]", PacketId, PacketLength, cflas
- 1524              		.loc 1 400 0
- 1525 05d0 5219     		adds	r2, r2, r5
- 1526 05d2 A261     		str	r2, [r4, #24]
- 404:../src/gatt_ota.c **** 				dataTmp = dat;
- 1527              		.loc 1 404 0
- 1528 05d4 0122     		movs	r2, #1
- 403:../src/gatt_ota.c **** 				data_start_flag = 1;
- 1529              		.loc 1 403 0
- 1530 05d6 0023     		movs	r3, #0
+ 1528              		.loc 1 400 0
+ 1529 05d4 5219     		adds	r2, r2, r5
+ 1530 05d6 A261     		str	r2, [r4, #24]
  404:../src/gatt_ota.c **** 				dataTmp = dat;
  1531              		.loc 1 404 0
- 1532 05d8 6280     		strh	r2, [r4, #2]
- 1533              	.LVL180:
- 406:../src/gatt_ota.c **** 				packetSum = 0;
- 1534              		.loc 1 406 0
- 1535 05da 019A     		ldr	r2, [sp, #4]
+ 1532 05d8 0122     		movs	r2, #1
  403:../src/gatt_ota.c **** 				data_start_flag = 1;
- 1536              		.loc 1 403 0
- 1537 05dc 2385     		strh	r3, [r4, #40]
+ 1533              		.loc 1 403 0
+ 1534 05da 0023     		movs	r3, #0
+ 404:../src/gatt_ota.c **** 				dataTmp = dat;
+ 1535              		.loc 1 404 0
+ 1536 05dc 6280     		strh	r2, [r4, #2]
+ 1537              	.LVL181:
  406:../src/gatt_ota.c **** 				packetSum = 0;
  1538              		.loc 1 406 0
- 1539 05de 063A     		subs	r2, r2, #6
- 1540 05e0 D2B2     		uxtb	r2, r2
- 1541 05e2 0192     		str	r2, [sp, #4]
- 1542              	.LVL181:
+ 1539 05de 019A     		ldr	r2, [sp, #4]
+ 403:../src/gatt_ota.c **** 				data_start_flag = 1;
+ 1540              		.loc 1 403 0
+ 1541 05e0 2385     		strh	r3, [r4, #40]
+ 406:../src/gatt_ota.c **** 				packetSum = 0;
+ 1542              		.loc 1 406 0
+ 1543 05e2 063A     		subs	r2, r2, #6
+ 1544 05e4 D2B2     		uxtb	r2, r2
+ 1545 05e6 0192     		str	r2, [sp, #4]
+ 1546              	.LVL182:
  407:../src/gatt_ota.c **** 				break;
- 1543              		.loc 1 407 0
- 1544 05e4 E361     		str	r3, [r4, #28]
+ 1547              		.loc 1 407 0
+ 1548 05e8 E361     		str	r3, [r4, #28]
  405:../src/gatt_ota.c **** 				length = length - 6;
- 1545              		.loc 1 405 0
- 1546 05e6 0600     		movs	r6, r0
+ 1549              		.loc 1 405 0
+ 1550 05ea 0600     		movs	r6, r0
  408:../src/gatt_ota.c **** 			case CMD_OTA_END:
- 1547              		.loc 1 408 0
- 1548 05e8 2AE7     		b	.L76
- 1549              	.LVL182:
- 1550              	.L74:
- 1551              	.LBE24:
- 470:../src/gatt_ota.c **** 			}
- 471:../src/gatt_ota.c **** 		}
- 472:../src/gatt_ota.c **** 		else{
- 473:../src/gatt_ota.c **** 			//indicate failed
- 474:../src/gatt_ota.c **** 			//ota_cmd_to_app(CMD_OTA_DATA,PacketId,0);//CMD_OTA_DATA_H
- 475:../src/gatt_ota.c **** 		}
- 476:../src/gatt_ota.c **** 		
- 477:../src/gatt_ota.c **** 		//M_PRINTF(L_APP, "writeStatus[%d] CurPacketLen[%x] PacketLength[%x]", writeStatus, CurPacketLen,
- 478:../src/gatt_ota.c **** 		return;
- 479:../src/gatt_ota.c **** 	}
- 480:../src/gatt_ota.c **** }
- 1552              		.loc 1 480 0
- 1553 05ea 05B0     		add	sp, sp, #20
- 1554              		@ sp needed
- 1555              	.LVL183:
- 1556 05ec F0BD     		pop	{r4, r5, r6, r7, pc}
- 1557              	.L106:
- 1558 05ee C046     		.align	2
- 1559              	.L105:
- 1560 05f0 00000000 		.word	.LANCHOR0
- 1561 05f4 00000000 		.word	.LANCHOR2
- 1562 05f8 00000000 		.word	.LANCHOR1
- 1563 05fc A1860100 		.word	100001
- 1564 0600 00E10300 		.word	254208
- 1565              		.cfi_endproc
- 1566              	.LFE58:
- 1568              		.align	1
- 1569              		.global	gatt_ota_init
- 1570              		.code	16
- 1571              		.thumb_func
- 1573              	gatt_ota_init:
- 1574              	.LFB59:
- 481:../src/gatt_ota.c **** 
- 482:../src/gatt_ota.c **** //static void _gatt_ota_adv_period_set(void *t)
- 483:../src/gatt_ota.c **** //{
- 484:../src/gatt_ota.c **** //	M_PRINTF(L_APP, "");
- 485:../src/gatt_ota.c **** //	
- 486:../src/gatt_ota.c **** //	/*Assemble adv packet with adv struct*/
- 487:../src/gatt_ota.c **** //	/*adv data 02 01 05 07 09 5a 58 2d 4f 54 41 ff BC6218 mac ver*/
- 488:../src/gatt_ota.c **** //	uint8_t data[13+6+6+5] = {0x02, 0x01, 0x05, 0x07, 0x09, 0x5a, 0x58, 0x2d, 0x4f, 0x54, 0x41, 0x0c
- 489:../src/gatt_ota.c **** //	ali_config_mac_read(data+19, 0);
- 490:../src/gatt_ota.c **** //	memcpy(data+25, MESH_VER, strlen(MESH_VER));
- 491:../src/gatt_ota.c **** //
- 492:../src/gatt_ota.c **** //	HWRITE(mem_le_adv_type, ADV_TYPE_NOMAL);
- 493:../src/gatt_ota.c **** //	HW_REG_16BIT(reg_map(mem_le_adv_interval_max), 1600);	
- 494:../src/gatt_ota.c **** //	memcpy((unsigned char*)reg_map(mem_le_adv_data),data,sizeof(data));
- 495:../src/gatt_ota.c **** //	HWRITE(mem_le_adv_data_len,sizeof(data));
- 496:../src/gatt_ota.c **** //	if(!HREAD(mem_le_adv_enable)){
- 497:../src/gatt_ota.c **** //		HWRITE(mem_le_adv_enable, 0x01);
- 498:../src/gatt_ota.c **** //	}
- 499:../src/gatt_ota.c **** //	
- 500:../src/gatt_ota.c **** //	/*send adv data*/
- 501:../src/gatt_ota.c **** //	//BLE_SendAdvData(ADV_TYPE_NOMAL, 1600, 4, sizeof(data), data);
- 502:../src/gatt_ota.c **** //}
- 503:../src/gatt_ota.c **** 
- 504:../src/gatt_ota.c **** void gatt_ota_init(void)
- 505:../src/gatt_ota.c **** {
- 1575              		.loc 1 505 0
- 1576              		.cfi_startproc
- 1577              		@ args = 0, pretend = 0, frame = 32
- 1578              		@ frame_needed = 0, uses_anonymous_args = 0
- 1579 0604 10B5     		push	{r4, lr}
- 1580              	.LCFI15:
- 1581              		.cfi_def_cfa_offset 8
- 1582              		.cfi_offset 4, -8
- 1583              		.cfi_offset 14, -4
+ 1551              		.loc 1 408 0
+ 1552 05ec 28E7     		b	.L76
+ 1553              	.LVL183:
+ 1554              	.L74:
+ 1555              	.LBE24:
+ 471:../src/gatt_ota.c **** 			}
+ 472:../src/gatt_ota.c **** 		}
+ 473:../src/gatt_ota.c **** 		else{
+ 474:../src/gatt_ota.c **** 			//indicate failed
+ 475:../src/gatt_ota.c **** 			//ota_cmd_to_app(CMD_OTA_DATA,PacketId,0);//CMD_OTA_DATA_H
+ 476:../src/gatt_ota.c **** 		}
+ 477:../src/gatt_ota.c **** 		
+ 478:../src/gatt_ota.c **** 		//M_PRINTF(L_APP, "writeStatus[%d] CurPacketLen[%x] PacketLength[%x]", writeStatus, CurPacketLen,
+ 479:../src/gatt_ota.c **** 		return;
+ 480:../src/gatt_ota.c **** 	}
+ 481:../src/gatt_ota.c **** }
+ 1556              		.loc 1 481 0
+ 1557 05ee 05B0     		add	sp, sp, #20
+ 1558              		@ sp needed
+ 1559              	.LVL184:
+ 1560 05f0 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1561              	.L106:
+ 1562 05f2 C046     		.align	2
+ 1563              	.L105:
+ 1564 05f4 00000000 		.word	.LANCHOR0
+ 1565 05f8 00000000 		.word	.LANCHOR2
+ 1566 05fc 00000000 		.word	.LANCHOR1
+ 1567 0600 A1860100 		.word	100001
+ 1568 0604 00E10300 		.word	254208
+ 1569              		.cfi_endproc
+ 1570              	.LFE58:
+ 1572              		.align	1
+ 1573              		.global	gatt_ota_init
+ 1574              		.code	16
+ 1575              		.thumb_func
+ 1577              	gatt_ota_init:
+ 1578              	.LFB59:
+ 482:../src/gatt_ota.c **** 
+ 483:../src/gatt_ota.c **** //static void _gatt_ota_adv_period_set(void *t)
+ 484:../src/gatt_ota.c **** //{
+ 485:../src/gatt_ota.c **** //	M_PRINTF(L_APP, "");
+ 486:../src/gatt_ota.c **** //	
+ 487:../src/gatt_ota.c **** //	/*Assemble adv packet with adv struct*/
+ 488:../src/gatt_ota.c **** //	/*adv data 02 01 05 07 09 5a 58 2d 4f 54 41 ff BC6218 mac ver*/
+ 489:../src/gatt_ota.c **** //	uint8_t data[13+6+6+5] = {0x02, 0x01, 0x05, 0x07, 0x09, 0x5a, 0x58, 0x2d, 0x4f, 0x54, 0x41, 0x0c
+ 490:../src/gatt_ota.c **** //	ali_config_mac_read(data+19, 0);
+ 491:../src/gatt_ota.c **** //	memcpy(data+25, MESH_VER, strlen(MESH_VER));
+ 492:../src/gatt_ota.c **** //
+ 493:../src/gatt_ota.c **** //	HWRITE(mem_le_adv_type, ADV_TYPE_NOMAL);
+ 494:../src/gatt_ota.c **** //	HW_REG_16BIT(reg_map(mem_le_adv_interval_max), 1600);	
+ 495:../src/gatt_ota.c **** //	memcpy((unsigned char*)reg_map(mem_le_adv_data),data,sizeof(data));
+ 496:../src/gatt_ota.c **** //	HWRITE(mem_le_adv_data_len,sizeof(data));
+ 497:../src/gatt_ota.c **** //	if(!HREAD(mem_le_adv_enable)){
+ 498:../src/gatt_ota.c **** //		HWRITE(mem_le_adv_enable, 0x01);
+ 499:../src/gatt_ota.c **** //	}
+ 500:../src/gatt_ota.c **** //	
+ 501:../src/gatt_ota.c **** //	/*send adv data*/
+ 502:../src/gatt_ota.c **** //	//BLE_SendAdvData(ADV_TYPE_NOMAL, 1600, 4, sizeof(data), data);
+ 503:../src/gatt_ota.c **** //}
+ 504:../src/gatt_ota.c **** 
+ 505:../src/gatt_ota.c **** void gatt_ota_init(void)
+ 506:../src/gatt_ota.c **** {
+ 1579              		.loc 1 506 0
+ 1580              		.cfi_startproc
+ 1581              		@ args = 0, pretend = 0, frame = 32
+ 1582              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1583 0608 10B5     		push	{r4, lr}
+ 1584              	.LCFI15:
+ 1585              		.cfi_def_cfa_offset 8
+ 1586              		.cfi_offset 4, -8
+ 1587              		.cfi_offset 14, -4
+ 507:../src/gatt_ota.c **** 	//set adv resp data
+ 508:../src/gatt_ota.c **** 	//uint8_t _data[] = {0x07, 0x09, 0x5a, 0x58, 0x2d, 0x4f, 0x54, 0x41, 0x07, 0xff, 'B', 'C', '6', '2
+ 509:../src/gatt_ota.c **** 	/*adv data 02 01 05 07 09 5a 58 2d 4f 54 41 ff BC6218 mac ver*/
+ 510:../src/gatt_ota.c **** 	uint8_t _data[13+6+6+5] = {0x02, 0x01, 0x02, 0x07, 0x09, 0x5a, 0x58, 0x2d, 0x4f, 0x54, 0x41, 0x0c+
+ 1588              		.loc 1 510 0
+ 1589 060a 1E24     		movs	r4, #30
  506:../src/gatt_ota.c **** 	//set adv resp data
- 507:../src/gatt_ota.c **** 	//uint8_t _data[] = {0x07, 0x09, 0x5a, 0x58, 0x2d, 0x4f, 0x54, 0x41, 0x07, 0xff, 'B', 'C', '6', '2
- 508:../src/gatt_ota.c **** 	/*adv data 02 01 05 07 09 5a 58 2d 4f 54 41 ff BC6218 mac ver*/
- 509:../src/gatt_ota.c **** 	uint8_t _data[13+6+6+5] = {0x02, 0x01, 0x02, 0x07, 0x09, 0x5a, 0x58, 0x2d, 0x4f, 0x54, 0x41, 0x0c+
- 1584              		.loc 1 509 0
- 1585 0606 1E24     		movs	r4, #30
- 505:../src/gatt_ota.c **** 	//set adv resp data
- 1586              		.loc 1 505 0
- 1587 0608 88B0     		sub	sp, sp, #32
- 1588              	.LCFI16:
- 1589              		.cfi_def_cfa_offset 40
- 1590              		.loc 1 509 0
- 1591 060a 2200     		movs	r2, r4
- 1592 060c 0021     		movs	r1, #0
- 1593 060e 6846     		mov	r0, sp
- 1594 0610 FFF7FEFF 		bl	memset
- 1595              	.LVL184:
- 1596 0614 0223     		movs	r3, #2
- 1597 0616 6A46     		mov	r2, sp
- 1598 0618 6946     		mov	r1, sp
- 1599 061a 1370     		strb	r3, [r2]
+ 1590              		.loc 1 506 0
+ 1591 060c 88B0     		sub	sp, sp, #32
+ 1592              	.LCFI16:
+ 1593              		.cfi_def_cfa_offset 40
+ 1594              		.loc 1 510 0
+ 1595 060e 2200     		movs	r2, r4
+ 1596 0610 0021     		movs	r1, #0
+ 1597 0612 6846     		mov	r0, sp
+ 1598 0614 FFF7FEFF 		bl	memset
+ 1599              	.LVL185:
+ 1600 0618 0223     		movs	r3, #2
+ 1601 061a 6A46     		mov	r2, sp
+ 1602 061c 6946     		mov	r1, sp
+ 1603 061e 1370     		strb	r3, [r2]
+ 511:../src/gatt_ota.c **** 	ali_config_mac_read(_data+19, 0);
+ 1604              		.loc 1 511 0
+ 1605 0620 1320     		movs	r0, #19
  510:../src/gatt_ota.c **** 	ali_config_mac_read(_data+19, 0);
- 1600              		.loc 1 510 0
- 1601 061c 1320     		movs	r0, #19
- 509:../src/gatt_ota.c **** 	ali_config_mac_read(_data+19, 0);
- 1602              		.loc 1 509 0
- 1603 061e 0122     		movs	r2, #1
- 1604 0620 8B70     		strb	r3, [r1, #2]
- 1605 0622 0533     		adds	r3, r3, #5
- 1606 0624 CB70     		strb	r3, [r1, #3]
- 1607 0626 0233     		adds	r3, r3, #2
- 1608 0628 0B71     		strb	r3, [r1, #4]
- 1609 062a 5133     		adds	r3, r3, #81
- 1610 062c 4B71     		strb	r3, [r1, #5]
- 1611 062e 023B     		subs	r3, r3, #2
- 1612 0630 8B71     		strb	r3, [r1, #6]
- 1613 0632 2B3B     		subs	r3, r3, #43
- 1614 0634 CB71     		strb	r3, [r1, #7]
- 1615 0636 2233     		adds	r3, r3, #34
- 1616 0638 0B72     		strb	r3, [r1, #8]
- 1617 063a 0533     		adds	r3, r3, #5
- 1618 063c 4B72     		strb	r3, [r1, #9]
- 1619 063e 133B     		subs	r3, r3, #19
- 1620 0640 8B72     		strb	r3, [r1, #10]
- 1621 0642 2F3B     		subs	r3, r3, #47
- 1622 0644 CB72     		strb	r3, [r1, #11]
- 1623 0646 ED33     		adds	r3, r3, #237
- 1624 0648 0B73     		strb	r3, [r1, #12]
- 1625 064a BD3B     		subs	r3, r3, #189
- 1626 064c 4B73     		strb	r3, [r1, #13]
- 1627 064e 0133     		adds	r3, r3, #1
- 1628 0650 8B73     		strb	r3, [r1, #14]
- 1629 0652 0D3B     		subs	r3, r3, #13
- 1630 0654 CB73     		strb	r3, [r1, #15]
- 1631 0656 043B     		subs	r3, r3, #4
- 1632 0658 0B74     		strb	r3, [r1, #16]
- 1633 065a 013B     		subs	r3, r3, #1
- 1634 065c 4B74     		strb	r3, [r1, #17]
- 1635 065e 0733     		adds	r3, r3, #7
- 1636 0660 8B74     		strb	r3, [r1, #18]
- 1637 0662 4A70     		strb	r2, [r1, #1]
- 1638              		.loc 1 510 0
- 1639 0664 6844     		add	r0, r0, sp
- 1640 0666 0021     		movs	r1, #0
- 1641 0668 FFF7FEFF 		bl	ali_config_mac_read
- 1642              	.LVL185:
- 511:../src/gatt_ota.c **** 	memcpy(_data+25, MESH_VER, strlen(MESH_VER));
- 1643              		.loc 1 511 0
- 1644 066c 1920     		movs	r0, #25
- 1645 066e 0749     		ldr	r1, .L108
- 1646 0670 0522     		movs	r2, #5
- 1647 0672 6F31     		adds	r1, r1, #111
- 1648 0674 6844     		add	r0, r0, sp
- 1649 0676 FFF7FEFF 		bl	memcpy
- 1650              	.LVL186:
- 512:../src/gatt_ota.c **** 	memcpy((unsigned char*)reg_map(mem_le_scan_data),_data,sizeof(_data));
- 1651              		.loc 1 512 0
- 1652 067a 2200     		movs	r2, r4
- 1653 067c 6946     		mov	r1, sp
- 1654 067e 0448     		ldr	r0, .L108+4
- 1655 0680 FFF7FEFF 		bl	memcpy
- 1656              	.LVL187:
- 513:../src/gatt_ota.c **** 	HWRITE(mem_le_scan_data_len,sizeof(_data));
- 1657              		.loc 1 513 0
- 1658 0684 034B     		ldr	r3, .L108+8
- 1659 0686 1C70     		strb	r4, [r3]
- 514:../src/gatt_ota.c **** 	//start timer for clear
- 515:../src/gatt_ota.c **** //	SYS_SetTimer(&stGattOtaAdvTimer, GATT_OTA_PERIOD_NUM, 
- 516:../src/gatt_ota.c **** //					TIMER_CYCLE, (Timer_Expire_CB)_gatt_ota_adv_period_set);
- 517:../src/gatt_ota.c **** }
- 1660              		.loc 1 517 0
- 1661 0688 08B0     		add	sp, sp, #32
- 1662              		@ sp needed
- 1663 068a 10BD     		pop	{r4, pc}
- 1664              	.L109:
- 1665              		.align	2
- 1666              	.L108:
- 1667 068c 00000000 		.word	.LANCHOR1
- 1668 0690 D3430010 		.word	268452819
- 1669 0694 D2430010 		.word	268452818
- 1670              		.cfi_endproc
- 1671              	.LFE59:
- 1673              		.align	1
- 1674              		.global	gatt_ota_deinit
- 1675              		.code	16
- 1676              		.thumb_func
- 1678              	gatt_ota_deinit:
- 1679              	.LFB60:
- 518:../src/gatt_ota.c **** void gatt_ota_deinit(void)
- 519:../src/gatt_ota.c **** {
- 1680              		.loc 1 519 0
- 1681              		.cfi_startproc
- 1682              		@ args = 0, pretend = 0, frame = 0
- 1683              		@ frame_needed = 0, uses_anonymous_args = 0
- 1684              		@ link register save eliminated.
- 520:../src/gatt_ota.c **** //	SYS_ReleaseTimer(&stGattOtaAdvTimer);
- 521:../src/gatt_ota.c **** 	HWRITE(mem_le_scan_data_len,0);
- 1685              		.loc 1 521 0
- 1686 0698 0022     		movs	r2, #0
- 1687 069a 014B     		ldr	r3, .L111
+ 1606              		.loc 1 510 0
+ 1607 0622 0122     		movs	r2, #1
+ 1608 0624 8B70     		strb	r3, [r1, #2]
+ 1609 0626 0533     		adds	r3, r3, #5
+ 1610 0628 CB70     		strb	r3, [r1, #3]
+ 1611 062a 0233     		adds	r3, r3, #2
+ 1612 062c 0B71     		strb	r3, [r1, #4]
+ 1613 062e 5133     		adds	r3, r3, #81
+ 1614 0630 4B71     		strb	r3, [r1, #5]
+ 1615 0632 023B     		subs	r3, r3, #2
+ 1616 0634 8B71     		strb	r3, [r1, #6]
+ 1617 0636 2B3B     		subs	r3, r3, #43
+ 1618 0638 CB71     		strb	r3, [r1, #7]
+ 1619 063a 2233     		adds	r3, r3, #34
+ 1620 063c 0B72     		strb	r3, [r1, #8]
+ 1621 063e 0533     		adds	r3, r3, #5
+ 1622 0640 4B72     		strb	r3, [r1, #9]
+ 1623 0642 133B     		subs	r3, r3, #19
+ 1624 0644 8B72     		strb	r3, [r1, #10]
+ 1625 0646 2F3B     		subs	r3, r3, #47
+ 1626 0648 CB72     		strb	r3, [r1, #11]
+ 1627 064a ED33     		adds	r3, r3, #237
+ 1628 064c 0B73     		strb	r3, [r1, #12]
+ 1629 064e BD3B     		subs	r3, r3, #189
+ 1630 0650 4B73     		strb	r3, [r1, #13]
+ 1631 0652 0133     		adds	r3, r3, #1
+ 1632 0654 8B73     		strb	r3, [r1, #14]
+ 1633 0656 0D3B     		subs	r3, r3, #13
+ 1634 0658 CB73     		strb	r3, [r1, #15]
+ 1635 065a 043B     		subs	r3, r3, #4
+ 1636 065c 0B74     		strb	r3, [r1, #16]
+ 1637 065e 013B     		subs	r3, r3, #1
+ 1638 0660 4B74     		strb	r3, [r1, #17]
+ 1639 0662 0733     		adds	r3, r3, #7
+ 1640 0664 8B74     		strb	r3, [r1, #18]
+ 1641 0666 4A70     		strb	r2, [r1, #1]
+ 1642              		.loc 1 511 0
+ 1643 0668 6844     		add	r0, r0, sp
+ 1644 066a 0021     		movs	r1, #0
+ 1645 066c FFF7FEFF 		bl	ali_config_mac_read
+ 1646              	.LVL186:
+ 512:../src/gatt_ota.c **** 	memcpy(_data+25, MESH_VER, strlen(MESH_VER));
+ 1647              		.loc 1 512 0
+ 1648 0670 1920     		movs	r0, #25
+ 1649 0672 0749     		ldr	r1, .L108
+ 1650 0674 0522     		movs	r2, #5
+ 1651 0676 6F31     		adds	r1, r1, #111
+ 1652 0678 6844     		add	r0, r0, sp
+ 1653 067a FFF7FEFF 		bl	memcpy
+ 1654              	.LVL187:
+ 513:../src/gatt_ota.c **** 	memcpy((unsigned char*)reg_map(mem_le_scan_data),_data,sizeof(_data));
+ 1655              		.loc 1 513 0
+ 1656 067e 2200     		movs	r2, r4
+ 1657 0680 6946     		mov	r1, sp
+ 1658 0682 0448     		ldr	r0, .L108+4
+ 1659 0684 FFF7FEFF 		bl	memcpy
+ 1660              	.LVL188:
+ 514:../src/gatt_ota.c **** 	HWRITE(mem_le_scan_data_len,sizeof(_data));
+ 1661              		.loc 1 514 0
+ 1662 0688 034B     		ldr	r3, .L108+8
+ 1663 068a 1C70     		strb	r4, [r3]
+ 515:../src/gatt_ota.c **** 	//start timer for clear
+ 516:../src/gatt_ota.c **** //	SYS_SetTimer(&stGattOtaAdvTimer, GATT_OTA_PERIOD_NUM, 
+ 517:../src/gatt_ota.c **** //					TIMER_CYCLE, (Timer_Expire_CB)_gatt_ota_adv_period_set);
+ 518:../src/gatt_ota.c **** }
+ 1664              		.loc 1 518 0
+ 1665 068c 08B0     		add	sp, sp, #32
+ 1666              		@ sp needed
+ 1667 068e 10BD     		pop	{r4, pc}
+ 1668              	.L109:
+ 1669              		.align	2
+ 1670              	.L108:
+ 1671 0690 00000000 		.word	.LANCHOR1
+ 1672 0694 D3430010 		.word	268452819
+ 1673 0698 D2430010 		.word	268452818
+ 1674              		.cfi_endproc
+ 1675              	.LFE59:
+ 1677              		.align	1
+ 1678              		.global	gatt_ota_deinit
+ 1679              		.code	16
+ 1680              		.thumb_func
+ 1682              	gatt_ota_deinit:
+ 1683              	.LFB60:
+ 519:../src/gatt_ota.c **** void gatt_ota_deinit(void)
+ 520:../src/gatt_ota.c **** {
+ 1684              		.loc 1 520 0
+ 1685              		.cfi_startproc
+ 1686              		@ args = 0, pretend = 0, frame = 0
+ 1687              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1688              		@ link register save eliminated.
+ 521:../src/gatt_ota.c **** //	SYS_ReleaseTimer(&stGattOtaAdvTimer);
+ 522:../src/gatt_ota.c **** 	HWRITE(mem_le_scan_data_len,0);
+ 1689              		.loc 1 522 0
+ 1690 069c 0022     		movs	r2, #0
+ 1691 069e 014B     		ldr	r3, .L111
+ 523:../src/gatt_ota.c **** }
+ 1692              		.loc 1 523 0
+ 1693              		@ sp needed
  522:../src/gatt_ota.c **** }
- 1688              		.loc 1 522 0
- 1689              		@ sp needed
- 521:../src/gatt_ota.c **** }
- 1690              		.loc 1 521 0
- 1691 069c 1A70     		strb	r2, [r3]
- 1692              		.loc 1 522 0
- 1693 069e 7047     		bx	lr
- 1694              	.L112:
- 1695              		.align	2
- 1696              	.L111:
- 1697 06a0 D2430010 		.word	268452818
- 1698              		.cfi_endproc
- 1699              	.LFE60:
- 1701              		.align	1
- 1702              		.code	16
- 1703              		.thumb_func
- 1705              	Ble_SendDataSimple.part.0:
- 1706              	.LFB61:
+ 1694              		.loc 1 522 0
+ 1695 06a0 1A70     		strb	r2, [r3]
+ 1696              		.loc 1 523 0
+ 1697 06a2 7047     		bx	lr
+ 1698              	.L112:
+ 1699              		.align	2
+ 1700              	.L111:
+ 1701 06a4 D2430010 		.word	268452818
+ 1702              		.cfi_endproc
+ 1703              	.LFE60:
+ 1705              		.align	1
+ 1706              		.code	16
+ 1707              		.thumb_func
+ 1709              	Ble_SendDataSimple.part.0:
+ 1710              	.LFB61:
  235:../src/gatt_ota.c **** {	
- 1707              		.loc 1 235 0
- 1708              		.cfi_startproc
- 1709              		@ args = 0, pretend = 0, frame = 32
- 1710              		@ frame_needed = 0, uses_anonymous_args = 0
- 1711              	.LVL188:
- 1712 06a4 70B5     		push	{r4, r5, r6, lr}
- 1713              	.LCFI17:
- 1714              		.cfi_def_cfa_offset 16
- 1715              		.cfi_offset 4, -16
- 1716              		.cfi_offset 5, -12
- 1717              		.cfi_offset 6, -8
- 1718              		.cfi_offset 14, -4
- 1719 06a6 88B0     		sub	sp, sp, #32
- 1720              	.LCFI18:
- 1721              		.cfi_def_cfa_offset 48
+ 1711              		.loc 1 235 0
+ 1712              		.cfi_startproc
+ 1713              		@ args = 0, pretend = 0, frame = 32
+ 1714              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1715              	.LVL189:
+ 1716 06a8 70B5     		push	{r4, r5, r6, lr}
+ 1717              	.LCFI17:
+ 1718              		.cfi_def_cfa_offset 16
+ 1719              		.cfi_offset 4, -16
+ 1720              		.cfi_offset 5, -12
+ 1721              		.cfi_offset 6, -8
+ 1722              		.cfi_offset 14, -4
+ 1723 06aa 88B0     		sub	sp, sp, #32
+ 1724              	.LCFI18:
+ 1725              		.cfi_def_cfa_offset 48
  235:../src/gatt_ota.c **** {	
- 1722              		.loc 1 235 0
- 1723 06a8 1400     		movs	r4, r2
- 1724 06aa 0600     		movs	r6, r0
+ 1726              		.loc 1 235 0
+ 1727 06ac 1400     		movs	r4, r2
+ 1728 06ae 0600     		movs	r6, r0
  240:../src/gatt_ota.c **** 	IPC_DATA_FORMAT* temp = (IPC_DATA_FORMAT*)BleSendData;
- 1725              		.loc 1 240 0
- 1726 06ac 1E22     		movs	r2, #30
- 1727              	.LVL189:
+ 1729              		.loc 1 240 0
+ 1730 06b0 1E22     		movs	r2, #30
+ 1731              	.LVL190:
  235:../src/gatt_ota.c **** {	
- 1728              		.loc 1 235 0
- 1729 06ae 0D00     		movs	r5, r1
+ 1732              		.loc 1 235 0
+ 1733 06b2 0D00     		movs	r5, r1
  240:../src/gatt_ota.c **** 	IPC_DATA_FORMAT* temp = (IPC_DATA_FORMAT*)BleSendData;
- 1730              		.loc 1 240 0
- 1731 06b0 6846     		mov	r0, sp
- 1732              	.LVL190:
- 1733 06b2 0021     		movs	r1, #0
- 1734              	.LVL191:
- 1735 06b4 FFF7FEFF 		bl	memset
- 1736              	.LVL192:
+ 1734              		.loc 1 240 0
+ 1735 06b4 6846     		mov	r0, sp
+ 1736              	.LVL191:
+ 1737 06b6 0021     		movs	r1, #0
+ 1738              	.LVL192:
+ 1739 06b8 FFF7FEFF 		bl	memset
+ 1740              	.LVL193:
  242:../src/gatt_ota.c **** 	temp->len = len+2;
- 1737              		.loc 1 242 0
- 1738 06b8 6A46     		mov	r2, sp
- 1739 06ba 0523     		movs	r3, #5
- 1740 06bc 1370     		strb	r3, [r2]
+ 1741              		.loc 1 242 0
+ 1742 06bc 6A46     		mov	r2, sp
+ 1743 06be 0523     		movs	r3, #5
+ 1744 06c0 1370     		strb	r3, [r2]
  243:../src/gatt_ota.c **** 	temp->ipcUnion.uBleData.mhandle = handle;
- 1741              		.loc 1 243 0
- 1742 06be A31C     		adds	r3, r4, #2
- 1743 06c0 5370     		strb	r3, [r2, #1]
+ 1745              		.loc 1 243 0
+ 1746 06c2 A31C     		adds	r3, r4, #2
+ 1747 06c4 5370     		strb	r3, [r2, #1]
  248:../src/gatt_ota.c **** 		*(dataAy+cnt) = *(data+cnt);
- 1744              		.loc 1 248 0
- 1745 06c2 0023     		movs	r3, #0
+ 1748              		.loc 1 248 0
+ 1749 06c6 0023     		movs	r3, #0
  244:../src/gatt_ota.c **** 	unsigned char *dataAy = (unsigned char *)&temp->ipcUnion.uBleData.data;
- 1746              		.loc 1 244 0
- 1747 06c4 5680     		strh	r6, [r2, #2]
- 1748              	.LVL193:
+ 1750              		.loc 1 244 0
+ 1751 06c8 5680     		strh	r6, [r2, #2]
+ 1752              	.LVL194:
  248:../src/gatt_ota.c **** 		*(dataAy+cnt) = *(data+cnt);
- 1749              		.loc 1 248 0
- 1750 06c6 0134     		adds	r4, r4, #1
- 1751              	.LVL194:
- 1752              	.L114:
- 1753 06c8 A342     		cmp	r3, r4
- 1754 06ca 05DC     		bgt	.L116
+ 1753              		.loc 1 248 0
+ 1754 06ca 0134     		adds	r4, r4, #1
+ 1755              	.LVL195:
+ 1756              	.L114:
+ 1757 06cc A342     		cmp	r3, r4
+ 1758 06ce 05DC     		bgt	.L116
  249:../src/gatt_ota.c **** 		
- 1755              		.loc 1 249 0
- 1756 06cc 1A00     		movs	r2, r3
- 1757 06ce E95C     		ldrb	r1, [r5, r3]
- 1758 06d0 6A44     		add	r2, r2, sp
- 1759 06d2 1171     		strb	r1, [r2, #4]
+ 1759              		.loc 1 249 0
+ 1760 06d0 1A00     		movs	r2, r3
+ 1761 06d2 E95C     		ldrb	r1, [r5, r3]
+ 1762 06d4 6A44     		add	r2, r2, sp
+ 1763 06d6 1171     		strb	r1, [r2, #4]
  248:../src/gatt_ota.c **** 		*(dataAy+cnt) = *(data+cnt);
- 1760              		.loc 1 248 0
- 1761 06d4 0133     		adds	r3, r3, #1
- 1762              	.LVL195:
- 1763 06d6 F7E7     		b	.L114
- 1764              	.L116:
+ 1764              		.loc 1 248 0
+ 1765 06d8 0133     		adds	r3, r3, #1
+ 1766              	.LVL196:
+ 1767 06da F7E7     		b	.L114
+ 1768              	.L116:
  251:../src/gatt_ota.c **** }
- 1765              		.loc 1 251 0
- 1766 06d8 6846     		mov	r0, sp
- 1767 06da FFF7FEFF 		bl	IPC_TxPacket
- 1768              	.LVL196:
+ 1769              		.loc 1 251 0
+ 1770 06dc 6846     		mov	r0, sp
+ 1771 06de FFF7FEFF 		bl	IPC_TxPacket
+ 1772              	.LVL197:
  252:../src/gatt_ota.c **** 
- 1769              		.loc 1 252 0
- 1770 06de 08B0     		add	sp, sp, #32
- 1771              	.LVL197:
- 1772              		@ sp needed
- 1773              	.LVL198:
- 1774 06e0 70BD     		pop	{r4, r5, r6, pc}
- 1775              		.cfi_endproc
- 1776              	.LFE61:
- 1778              		.section	.rodata
- 1779              		.set	.LANCHOR1,. + 0
- 1782              	lgs:
- 1783 0000 5B4D4C47 		.ascii	"[MLG]\000"
- 1783      5D00
- 1786              	lge:
- 1787 0006 0D0A00   		.ascii	"\015\012\000"
- 1788              	.LC5:
- 1789 0009 6C617374 		.ascii	"last crc addr= %lx\012\000"
- 1789      20637263 
- 1789      20616464 
- 1789      723D2025 
- 1789      6C780A00 
- 1790              	.LC9:
- 1791 001d 666C6173 		.ascii	"flashaddr[%x] otaErasePage[%x] tlen[%x]\000"
- 1791      68616464 
- 1791      725B2578 
- 1791      5D206F74 
- 1791      61457261 
- 1792              	.LC14:
- 1793 0045 43686563 		.ascii	"CheckSum[%x] cSum[%x]\000"
- 1793      6B53756D 
- 1793      5B25785D 
- 1793      20635375 
- 1793      6D5B2578 
- 1794              	.LC16:
- 1795 005b 636F6465 		.ascii	"code crc status[%d]\000"
- 1795      20637263 
- 1795      20737461 
- 1795      7475735B 
- 1795      25645D00 
- 1796              	.LC29:
- 1797 006f 312E302E 		.ascii	"1.0.3\000"
- 1797      3300
- 1798              		.data
- 1799              		.align	1
- 1800              		.set	.LANCHOR2,. + 0
- 1803              	cur_packet_id:
- 1804 0000 FFFF     		.short	-1
- 1805              		.bss
- 1806              		.align	2
- 1807              		.set	.LANCHOR0,. + 0
- 1810              	StartOtaFlag:
- 1811 0000 00       		.space	1
- 1812 0001 00       		.space	1
- 1815              	data_start_flag:
- 1816 0002 0000     		.space	2
- 1819              	data_retransmit_flag:
- 1820 0004 0000     		.space	2
- 1821 0006 0000     		.space	2
- 1824              	otaErasePage:
- 1825 0008 00000000 		.space	4
- 1828              	writeAddr:
- 1829 000c 00000000 		.space	4
- 1832              	OTAStartAddr.6512:
- 1833 0010 00000000 		.space	4
- 1836              	cflashaddr.6515:
- 1837 0014 00000000 		.space	4
- 1840              	cSum.6516:
- 1841 0018 00000000 		.space	4
- 1844              	packetSum.6517:
- 1845 001c 00000000 		.space	4
- 1848              	PacketId.6514:
- 1849 0020 0000     		.space	2
- 1852              	PacketLength.6518:
- 1853 0022 0000     		.space	2
- 1856              	flashaddrsaved.6513:
- 1857 0024 00000000 		.space	4
- 1860              	CurPacketLen.6519:
- 1861 0028 0000     		.space	2
- 1862              		.text
- 1863              	.Letext0:
- 1864              		.file 2 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 1865              		.file 3 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 1866              		.file 4 "../../../device/inc/bc62xx.h"
- 1867              		.file 5 "../../../drivers/hal/inc/bc62xx_ble.h"
- 1868              		.file 6 "../../../mesh/common/api/co_log.h"
- 1869              		.file 7 "../../../drivers/hal/inc/bc62xx_flash.h"
- 1870              		.file 8 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 1871              		.file 9 "../../../mesh/app/ali_config.h"
+ 1773              		.loc 1 252 0
+ 1774 06e2 08B0     		add	sp, sp, #32
+ 1775              	.LVL198:
+ 1776              		@ sp needed
+ 1777              	.LVL199:
+ 1778 06e4 70BD     		pop	{r4, r5, r6, pc}
+ 1779              		.cfi_endproc
+ 1780              	.LFE61:
+ 1782              		.section	.rodata
+ 1783              		.set	.LANCHOR1,. + 0
+ 1786              	lgs:
+ 1787 0000 5B4D4C47 		.ascii	"[MLG]\000"
+ 1787      5D00
+ 1790              	lge:
+ 1791 0006 0D0A00   		.ascii	"\015\012\000"
+ 1792              	.LC5:
+ 1793 0009 6C617374 		.ascii	"last crc addr= %lx\012\000"
+ 1793      20637263 
+ 1793      20616464 
+ 1793      723D2025 
+ 1793      6C780A00 
+ 1794              	.LC9:
+ 1795 001d 666C6173 		.ascii	"flashaddr[%x] otaErasePage[%x] tlen[%x]\000"
+ 1795      68616464 
+ 1795      725B2578 
+ 1795      5D206F74 
+ 1795      61457261 
+ 1796              	.LC14:
+ 1797 0045 43686563 		.ascii	"CheckSum[%x] cSum[%x]\000"
+ 1797      6B53756D 
+ 1797      5B25785D 
+ 1797      20635375 
+ 1797      6D5B2578 
+ 1798              	.LC16:
+ 1799 005b 636F6465 		.ascii	"code crc status[%d]\000"
+ 1799      20637263 
+ 1799      20737461 
+ 1799      7475735B 
+ 1799      25645D00 
+ 1800              	.LC29:
+ 1801 006f 312E302E 		.ascii	"1.0.4\000"
+ 1801      3400
+ 1802              		.data
+ 1803              		.align	1
+ 1804              		.set	.LANCHOR2,. + 0
+ 1807              	cur_packet_id:
+ 1808 0000 FFFF     		.short	-1
+ 1809              		.bss
+ 1810              		.align	2
+ 1811              		.set	.LANCHOR0,. + 0
+ 1814              	StartOtaFlag:
+ 1815 0000 00       		.space	1
+ 1816 0001 00       		.space	1
+ 1819              	data_start_flag:
+ 1820 0002 0000     		.space	2
+ 1823              	data_retransmit_flag:
+ 1824 0004 0000     		.space	2
+ 1825 0006 0000     		.space	2
+ 1828              	otaErasePage:
+ 1829 0008 00000000 		.space	4
+ 1832              	writeAddr:
+ 1833 000c 00000000 		.space	4
+ 1836              	OTAStartAddr.6515:
+ 1837 0010 00000000 		.space	4
+ 1840              	cflashaddr.6518:
+ 1841 0014 00000000 		.space	4
+ 1844              	cSum.6519:
+ 1845 0018 00000000 		.space	4
+ 1848              	packetSum.6520:
+ 1849 001c 00000000 		.space	4
+ 1852              	PacketId.6517:
+ 1853 0020 0000     		.space	2
+ 1856              	PacketLength.6521:
+ 1857 0022 0000     		.space	2
+ 1860              	flashaddrsaved.6516:
+ 1861 0024 00000000 		.space	4
+ 1864              	CurPacketLen.6522:
+ 1865 0028 0000     		.space	2
+ 1866              		.text
+ 1867              	.Letext0:
+ 1868              		.file 2 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 1869              		.file 3 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 1870              		.file 4 "../../../device/inc/bc62xx.h"
+ 1871              		.file 5 "../../../drivers/hal/inc/bc62xx_ble.h"
+ 1872              		.file 6 "../../../mesh/common/api/co_log.h"
+ 1873              		.file 7 "../../../drivers/hal/inc/bc62xx_flash.h"
+ 1874              		.file 8 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 1875              		.file 9 "../../../mesh/app/ali_config.h"

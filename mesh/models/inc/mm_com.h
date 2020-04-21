@@ -21,6 +21,17 @@ typedef struct
 
 extern uint8_t emmTid;
 
+/**
+ ****************************************************************************************
+ * @brief Check tid is valid
+ *
+ * @param[in] tid		model recvived tid value.
+ *
+ * @return true: valid.
+ *         false: invalid.
+ ****************************************************************************************
+ */
+bool bc_mm_check_tid(uint8_t tid);
 
 uint8_t bc_mm_com_get_tx_hdl(void);
 

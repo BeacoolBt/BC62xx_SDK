@@ -28,26 +28,30 @@
   29              	.LFB41:
   30              		.file 1 "../../../drivers/hal/bc62xx_timer.c"
    1:../../../drivers/hal/bc62xx_timer.c **** #include "bc62xx_timer.h"
-   2:../../../drivers/hal/bc62xx_timer.c **** 
-   3:../../../drivers/hal/bc62xx_timer.c **** SYS_TIMER_TYPE *pheader;
-   4:../../../drivers/hal/bc62xx_timer.c **** SYS_TIMER_TYPE header_Timer;
-   5:../../../drivers/hal/bc62xx_timer.c **** uint32_t sys_tick_count;
-   6:../../../drivers/hal/bc62xx_timer.c **** uint8_t  sys_Timer_Check_Flag;
-   7:../../../drivers/hal/bc62xx_timer.c **** 
-   8:../../../drivers/hal/bc62xx_timer.c **** static uint32_t tmpCnt;
-   9:../../../drivers/hal/bc62xx_timer.c **** 
-  10:../../../drivers/hal/bc62xx_timer.c **** void SYS_TimerExpireDefaultHandle(int params)
-  11:../../../drivers/hal/bc62xx_timer.c **** {
-  31              		.loc 1 11 0
+   2:../../../drivers/hal/bc62xx_timer.c **** #include "systick.h"
+   3:../../../drivers/hal/bc62xx_timer.c **** 
+   4:../../../drivers/hal/bc62xx_timer.c **** SYS_TIMER_TYPE *pheader;
+   5:../../../drivers/hal/bc62xx_timer.c **** SYS_TIMER_TYPE header_Timer;
+   6:../../../drivers/hal/bc62xx_timer.c **** uint32_t sys_tick_count;
+   7:../../../drivers/hal/bc62xx_timer.c **** uint8_t  sys_Timer_Check_Flag;
+   8:../../../drivers/hal/bc62xx_timer.c **** 
+   9:../../../drivers/hal/bc62xx_timer.c **** static uint32_t tmpCnt;
+  10:../../../drivers/hal/bc62xx_timer.c **** 
+  11:../../../drivers/hal/bc62xx_timer.c **** static void SYStick_handle(void);
+  12:../../../drivers/hal/bc62xx_timer.c **** 
+  13:../../../drivers/hal/bc62xx_timer.c **** 
+  14:../../../drivers/hal/bc62xx_timer.c **** void SYS_TimerExpireDefaultHandle(int params)
+  15:../../../drivers/hal/bc62xx_timer.c **** {
+  31              		.loc 1 15 0
   32              		.cfi_startproc
   33              		@ args = 0, pretend = 0, frame = 0
   34              		@ frame_needed = 0, uses_anonymous_args = 0
   35              		@ link register save eliminated.
   36              	.LVL0:
-  12:../../../drivers/hal/bc62xx_timer.c **** 	// YC_LOG_ERROR("default timer expire !\r\n");
-  13:../../../drivers/hal/bc62xx_timer.c **** 	while(0);
-  14:../../../drivers/hal/bc62xx_timer.c **** }
-  37              		.loc 1 14 0
+  16:../../../drivers/hal/bc62xx_timer.c **** 	// YC_LOG_ERROR("default timer expire !\r\n");
+  17:../../../drivers/hal/bc62xx_timer.c **** 	while(0);
+  18:../../../drivers/hal/bc62xx_timer.c **** }
+  37              		.loc 1 18 0
   38              		@ sp needed
   39 0000 7047     		bx	lr
   40              		.cfi_endproc
@@ -58,38 +62,38 @@
   46              		.thumb_func
   48              	SYS_TimerInit:
   49              	.LFB42:
-  15:../../../drivers/hal/bc62xx_timer.c **** 
-  16:../../../drivers/hal/bc62xx_timer.c **** void SYS_TimerInit()
-  17:../../../drivers/hal/bc62xx_timer.c **** {
-  50              		.loc 1 17 0
+  19:../../../drivers/hal/bc62xx_timer.c **** 
+  20:../../../drivers/hal/bc62xx_timer.c **** void SYS_TimerInit()
+  21:../../../drivers/hal/bc62xx_timer.c **** {
+  50              		.loc 1 21 0
   51              		.cfi_startproc
   52              		@ args = 0, pretend = 0, frame = 0
   53              		@ frame_needed = 0, uses_anonymous_args = 0
-  18:../../../drivers/hal/bc62xx_timer.c **** 	//initial timer lists
-  19:../../../drivers/hal/bc62xx_timer.c **** 	pheader = &header_Timer;
-  54              		.loc 1 19 0
-  55 0002 0D4B     		ldr	r3, .L3
-  56 0004 0D4A     		ldr	r2, .L3+4
-  17:../../../drivers/hal/bc62xx_timer.c **** 	//initial timer lists
-  57              		.loc 1 17 0
+  22:../../../drivers/hal/bc62xx_timer.c **** 	//initial timer lists
+  23:../../../drivers/hal/bc62xx_timer.c **** 	pheader = &header_Timer;
+  54              		.loc 1 23 0
+  55 0002 0E4B     		ldr	r3, .L3
+  56 0004 0E4A     		ldr	r2, .L3+4
+  21:../../../drivers/hal/bc62xx_timer.c **** 	//initial timer lists
+  57              		.loc 1 21 0
   58 0006 10B5     		push	{r4, lr}
   59              	.LCFI0:
   60              		.cfi_def_cfa_offset 8
   61              		.cfi_offset 4, -8
   62              		.cfi_offset 14, -4
-  63              		.loc 1 19 0
+  63              		.loc 1 23 0
   64 0008 1360     		str	r3, [r2]
-  20:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pNextTimer = NULL;
-  21:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pfExpireCb = SYS_TimerExpireDefaultHandle;
-  65              		.loc 1 21 0
-  66 000a 0D4A     		ldr	r2, .L3+8
-  20:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pNextTimer = NULL;
-  67              		.loc 1 20 0
+  24:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pNextTimer = NULL;
+  25:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pfExpireCb = SYS_TimerExpireDefaultHandle;
+  65              		.loc 1 25 0
+  66 000a 0E4A     		ldr	r2, .L3+8
+  24:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pNextTimer = NULL;
+  67              		.loc 1 24 0
   68 000c 0021     		movs	r1, #0
-  69              		.loc 1 21 0
+  69              		.loc 1 25 0
   70 000e DA60     		str	r2, [r3, #12]
-  22:../../../drivers/hal/bc62xx_timer.c **** 	pheader->mTimerStatus = TIMER_START;
-  71              		.loc 1 22 0
+  26:../../../drivers/hal/bc62xx_timer.c **** 	pheader->mTimerStatus = TIMER_START;
+  71              		.loc 1 26 0
   72 0010 0122     		movs	r2, #1
   73              	.LBB14:
   74              	.LBB15:
@@ -794,15 +798,16 @@
   81              	.LBE16:
   82              	.LBE15:
   83              	.LBE14:
-  84              		.loc 1 22 0
-  85 0014 1A72     		strb	r2, [r3, #8]
-  23:../../../drivers/hal/bc62xx_timer.c **** 	pheader->mTimerValue = 0;
-  86              		.loc 1 23 0
-  87 0016 1960     		str	r1, [r3]
-  88              	.LVL1:
-  20:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pfExpireCb = SYS_TimerExpireDefaultHandle;
-  89              		.loc 1 20 0
-  90 0018 1961     		str	r1, [r3, #16]
+  27:../../../drivers/hal/bc62xx_timer.c **** 	pheader->mTimerValue = 0;
+  84              		.loc 1 27 0
+  85 0014 1960     		str	r1, [r3]
+  86              	.LVL1:
+  24:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pfExpireCb = SYS_TimerExpireDefaultHandle;
+  87              		.loc 1 24 0
+  88 0016 1961     		str	r1, [r3, #16]
+  26:../../../drivers/hal/bc62xx_timer.c **** 	pheader->mTimerValue = 0;
+  89              		.loc 1 26 0
+  90 0018 1A72     		strb	r2, [r3, #8]
   91              	.LBB24:
   92              	.LBB22:
  693:../../../cmsis/core_cm0.h ****        (((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL) << _BIT_SHIFT(IRQn)));
@@ -890,13 +895,13 @@
  775:../../../cmsis/core_cm0.h **** 
  776:../../../cmsis/core_cm0.h ****   SysTick->LOAD  = (uint32_t)(ticks - 1UL);                         /* set reload register */
   93              		.loc 2 776 0
-  94 001a 0A4A     		ldr	r2, .L3+12
-  95 001c 0A4B     		ldr	r3, .L3+16
+  94 001a 0B4A     		ldr	r2, .L3+12
+  95 001c 0B4B     		ldr	r3, .L3+16
   96              	.LBB20:
   97              	.LBB18:
  692:../../../cmsis/core_cm0.h ****        (((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL) << _BIT_SHIFT(IRQn)));
   98              		.loc 2 692 0
-  99 001e 0B48     		ldr	r0, .L3+20
+  99 001e 0C48     		ldr	r0, .L3+20
  100              	.LBE18:
  101              	.LBE20:
  102              		.loc 2 776 0
@@ -925,88 +930,95 @@
  120 0030 9160     		str	r1, [r2, #8]
  121              	.LBE22:
  122              	.LBE24:
-  24:../../../drivers/hal/bc62xx_timer.c **** 
-  25:../../../drivers/hal/bc62xx_timer.c **** 	SysTick_Config(SYSTEM_CLOCK/1000); //each  systick interrupt is 1ms
-  26:../../../drivers/hal/bc62xx_timer.c **** }
- 123              		.loc 1 26 0
- 124              		@ sp needed
+  28:../../../drivers/hal/bc62xx_timer.c **** 
+  29:../../../drivers/hal/bc62xx_timer.c **** 	SysTick_Config(SYSTEM_CLOCK/1000); //each  systick interrupt is 1ms
+  30:../../../drivers/hal/bc62xx_timer.c **** 
+  31:../../../drivers/hal/bc62xx_timer.c **** 	systick_set_timer_irq_handler(SYStick_handle);
+ 123              		.loc 1 31 0
+ 124 0032 0848     		ldr	r0, .L3+24
  125              	.LBB25:
  126              	.LBB23:
  127              		.loc 2 779 0
- 128 0032 1360     		str	r3, [r2]
+ 128 0034 1360     		str	r3, [r2]
  129              	.LVL4:
  130              	.LBE23:
  131              	.LBE25:
- 132              		.loc 1 26 0
- 133 0034 10BD     		pop	{r4, pc}
- 134              	.L4:
- 135 0036 C046     		.align	2
- 136              	.L3:
- 137 0038 00000000 		.word	header_Timer
- 138 003c 00000000 		.word	pheader
- 139 0040 00000000 		.word	SYS_TimerExpireDefaultHandle
- 140 0044 10E000E0 		.word	-536813552
- 141 0048 BF5D0000 		.word	23999
- 142 004c 00ED00E0 		.word	-536810240
- 143              		.cfi_endproc
- 144              	.LFE42:
- 146              		.align	1
- 147              		.global	SYS_SetTimer
- 148              		.code	16
- 149              		.thumb_func
- 151              	SYS_SetTimer:
- 152              	.LFB43:
-  27:../../../drivers/hal/bc62xx_timer.c **** 
-  28:../../../drivers/hal/bc62xx_timer.c **** 
-  29:../../../drivers/hal/bc62xx_timer.c **** //union is 10ms
-  30:../../../drivers/hal/bc62xx_timer.c **** bool SYS_SetTimer(SYS_TIMER_TYPE *pTimer, int tick,TIMER_TYPE isSingle,Timer_Expire_CB pfExpire_CB)
-  31:../../../drivers/hal/bc62xx_timer.c **** {
- 153              		.loc 1 31 0
- 154              		.cfi_startproc
- 155              		@ args = 0, pretend = 0, frame = 0
- 156              		@ frame_needed = 0, uses_anonymous_args = 0
- 157              	.LVL5:
- 158 0050 70B5     		push	{r4, r5, r6, lr}
- 159              	.LCFI1:
- 160              		.cfi_def_cfa_offset 16
- 161              		.cfi_offset 4, -16
- 162              		.cfi_offset 5, -12
- 163              		.cfi_offset 6, -8
- 164              		.cfi_offset 14, -4
- 165              		.loc 1 31 0
- 166 0052 041E     		subs	r4, r0, #0
-  32:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
-  33:../../../drivers/hal/bc62xx_timer.c **** 	if(pTimer == NULL)
- 167              		.loc 1 33 0
- 168 0054 1CD0     		beq	.L6
-  34:../../../drivers/hal/bc62xx_timer.c **** 	{
-  35:../../../drivers/hal/bc62xx_timer.c **** 		return false;
-  36:../../../drivers/hal/bc62xx_timer.c **** 	}
-  37:../../../drivers/hal/bc62xx_timer.c **** 	
-  38:../../../drivers/hal/bc62xx_timer.c **** 	if (pfExpire_CB == NULL)
- 169              		.loc 1 38 0
- 170 0056 002B     		cmp	r3, #0
- 171 0058 02D1     		bne	.L7
-  39:../../../drivers/hal/bc62xx_timer.c **** 	{
-  40:../../../drivers/hal/bc62xx_timer.c **** 		pTimer->pfExpireCb = SYS_TimerExpireDefaultHandle;
- 172              		.loc 1 40 0
- 173 005a 0E4B     		ldr	r3, .L11
- 174              	.LVL6:
- 175 005c C360     		str	r3, [r0, #12]
- 176 005e 00E0     		b	.L8
- 177              	.LVL7:
- 178              	.L7:
-  41:../../../drivers/hal/bc62xx_timer.c **** 	}
-  42:../../../drivers/hal/bc62xx_timer.c **** 	else
-  43:../../../drivers/hal/bc62xx_timer.c **** 	{
-  44:../../../drivers/hal/bc62xx_timer.c **** 		pTimer->pfExpireCb = pfExpire_CB;
- 179              		.loc 1 44 0
- 180 0060 C360     		str	r3, [r0, #12]
- 181              	.LVL8:
- 182              	.L8:
- 183              	.LBB26:
- 184              	.LBB27:
- 185              		.file 3 "../../../cmsis/cmsis_gcc.h"
+ 132              		.loc 1 31 0
+ 133 0036 FFF7FEFF 		bl	systick_set_timer_irq_handler
+ 134              	.LVL5:
+  32:../../../drivers/hal/bc62xx_timer.c **** }
+ 135              		.loc 1 32 0
+ 136              		@ sp needed
+ 137 003a 10BD     		pop	{r4, pc}
+ 138              	.L4:
+ 139              		.align	2
+ 140              	.L3:
+ 141 003c 00000000 		.word	header_Timer
+ 142 0040 00000000 		.word	pheader
+ 143 0044 00000000 		.word	SYS_TimerExpireDefaultHandle
+ 144 0048 10E000E0 		.word	-536813552
+ 145 004c BF5D0000 		.word	23999
+ 146 0050 00ED00E0 		.word	-536810240
+ 147 0054 00000000 		.word	SYStick_handle
+ 148              		.cfi_endproc
+ 149              	.LFE42:
+ 151              		.align	1
+ 152              		.global	SYS_SetTimer
+ 153              		.code	16
+ 154              		.thumb_func
+ 156              	SYS_SetTimer:
+ 157              	.LFB43:
+  33:../../../drivers/hal/bc62xx_timer.c **** 
+  34:../../../drivers/hal/bc62xx_timer.c **** 
+  35:../../../drivers/hal/bc62xx_timer.c **** //union is 10ms
+  36:../../../drivers/hal/bc62xx_timer.c **** bool SYS_SetTimer(SYS_TIMER_TYPE *pTimer, int tick,TIMER_TYPE isSingle,Timer_Expire_CB pfExpire_CB)
+  37:../../../drivers/hal/bc62xx_timer.c **** {
+ 158              		.loc 1 37 0
+ 159              		.cfi_startproc
+ 160              		@ args = 0, pretend = 0, frame = 0
+ 161              		@ frame_needed = 0, uses_anonymous_args = 0
+ 162              	.LVL6:
+ 163 0058 70B5     		push	{r4, r5, r6, lr}
+ 164              	.LCFI1:
+ 165              		.cfi_def_cfa_offset 16
+ 166              		.cfi_offset 4, -16
+ 167              		.cfi_offset 5, -12
+ 168              		.cfi_offset 6, -8
+ 169              		.cfi_offset 14, -4
+ 170              		.loc 1 37 0
+ 171 005a 041E     		subs	r4, r0, #0
+  38:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
+  39:../../../drivers/hal/bc62xx_timer.c **** 	if(pTimer == NULL)
+ 172              		.loc 1 39 0
+ 173 005c 1CD0     		beq	.L6
+  40:../../../drivers/hal/bc62xx_timer.c **** 	{
+  41:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+  42:../../../drivers/hal/bc62xx_timer.c **** 	}
+  43:../../../drivers/hal/bc62xx_timer.c **** 	
+  44:../../../drivers/hal/bc62xx_timer.c **** 	if (pfExpire_CB == NULL)
+ 174              		.loc 1 44 0
+ 175 005e 002B     		cmp	r3, #0
+ 176 0060 02D1     		bne	.L7
+  45:../../../drivers/hal/bc62xx_timer.c **** 	{
+  46:../../../drivers/hal/bc62xx_timer.c **** 		pTimer->pfExpireCb = SYS_TimerExpireDefaultHandle;
+ 177              		.loc 1 46 0
+ 178 0062 0E4B     		ldr	r3, .L11
+ 179              	.LVL7:
+ 180 0064 C360     		str	r3, [r0, #12]
+ 181 0066 00E0     		b	.L8
+ 182              	.LVL8:
+ 183              	.L7:
+  47:../../../drivers/hal/bc62xx_timer.c **** 	}
+  48:../../../drivers/hal/bc62xx_timer.c **** 	else
+  49:../../../drivers/hal/bc62xx_timer.c **** 	{
+  50:../../../drivers/hal/bc62xx_timer.c **** 		pTimer->pfExpireCb = pfExpire_CB;
+ 184              		.loc 1 50 0
+ 185 0068 C360     		str	r3, [r0, #12]
+ 186              	.LVL9:
+ 187              	.L8:
+ 188              	.LBB26:
+ 189              	.LBB27:
+ 190              		.file 3 "../../../cmsis/cmsis_gcc.h"
    1:../../../cmsis/cmsis_gcc.h **** /**************************************************************************//**
    2:../../../cmsis/cmsis_gcc.h ****  * @file     cmsis_gcc.h
    3:../../../cmsis/cmsis_gcc.h ****  * @brief    CMSIS Cortex-M Core Function/Instruction Header File
@@ -1078,674 +1090,676 @@
   69:../../../cmsis/cmsis_gcc.h **** __attribute__( ( always_inline ) ) __STATIC_INLINE void __disable_irq(void)
   70:../../../cmsis/cmsis_gcc.h **** {
   71:../../../cmsis/cmsis_gcc.h ****   __ASM volatile ("cpsid i" : : : "memory");
- 186              		.loc 3 71 0
- 187              		.syntax divided
- 188              	@ 71 "../../../cmsis/cmsis_gcc.h" 1
- 189 0062 72B6     		cpsid i
- 190              	@ 0 "" 2
- 191              		.thumb
- 192              		.syntax unified
- 193              	.LBE27:
- 194              	.LBE26:
-  45:../../../drivers/hal/bc62xx_timer.c **** 	}
-  46:../../../drivers/hal/bc62xx_timer.c **** 	OS_ENTER_CRITICAL();
-  47:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTick = tick;
-  48:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerValue = sys_tick_count+tick;
-  49:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
- 195              		.loc 1 49 0
- 196 0064 0125     		movs	r5, #1
-  48:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
- 197              		.loc 1 48 0
- 198 0066 0C4B     		ldr	r3, .L11+4
-  47:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerValue = sys_tick_count+tick;
- 199              		.loc 1 47 0
- 200 0068 6160     		str	r1, [r4, #4]
-  48:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
- 201              		.loc 1 48 0
- 202 006a 1B68     		ldr	r3, [r3]
- 203              		.loc 1 49 0
- 204 006c 2572     		strb	r5, [r4, #8]
-  48:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
- 205              		.loc 1 48 0
- 206 006e 5918     		adds	r1, r3, r1
- 207              	.LVL9:
- 208 0070 2160     		str	r1, [r4]
-  50:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mIsCycle = isSingle;
- 209              		.loc 1 50 0
- 210 0072 6272     		strb	r2, [r4, #9]
-  51:../../../drivers/hal/bc62xx_timer.c **** 
-  52:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->cbParams = (int32_t)pTimer;
- 211              		.loc 1 52 0
- 212 0074 6461     		str	r4, [r4, #20]
- 213              	.LBB28:
- 214              	.LBB29:
+ 191              		.loc 3 71 0
+ 192              		.syntax divided
+ 193              	@ 71 "../../../cmsis/cmsis_gcc.h" 1
+ 194 006a 72B6     		cpsid i
+ 195              	@ 0 "" 2
+ 196              		.thumb
+ 197              		.syntax unified
+ 198              	.LBE27:
+ 199              	.LBE26:
+  51:../../../drivers/hal/bc62xx_timer.c **** 	}
+  52:../../../drivers/hal/bc62xx_timer.c **** 	OS_ENTER_CRITICAL();
+  53:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTick = tick;
+  54:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerValue = sys_tick_count+tick;
+  55:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
+ 200              		.loc 1 55 0
+ 201 006c 0125     		movs	r5, #1
+  54:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
+ 202              		.loc 1 54 0
+ 203 006e 0C4B     		ldr	r3, .L11+4
+  53:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerValue = sys_tick_count+tick;
+ 204              		.loc 1 53 0
+ 205 0070 6160     		str	r1, [r4, #4]
+  54:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
+ 206              		.loc 1 54 0
+ 207 0072 1B68     		ldr	r3, [r3]
+ 208              		.loc 1 55 0
+ 209 0074 2572     		strb	r5, [r4, #8]
+  54:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mTimerStatus = TIMER_START;
+ 210              		.loc 1 54 0
+ 211 0076 5918     		adds	r1, r3, r1
+ 212              	.LVL10:
+ 213 0078 2160     		str	r1, [r4]
+  56:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->mIsCycle = isSingle;
+ 214              		.loc 1 56 0
+ 215 007a 6272     		strb	r2, [r4, #9]
+  57:../../../drivers/hal/bc62xx_timer.c **** 
+  58:../../../drivers/hal/bc62xx_timer.c **** 	pTimer->cbParams = (int32_t)pTimer;
+ 216              		.loc 1 58 0
+ 217 007c 6461     		str	r4, [r4, #20]
+ 218              	.LBB28:
+ 219              	.LBB29:
   60:../../../cmsis/cmsis_gcc.h **** }
- 215              		.loc 3 60 0
- 216              		.syntax divided
- 217              	@ 60 "../../../cmsis/cmsis_gcc.h" 1
- 218 0076 62B6     		cpsie i
- 219              	@ 0 "" 2
- 220              		.thumb
- 221              		.syntax unified
- 222              	.LBE29:
- 223              	.LBE28:
-  53:../../../drivers/hal/bc62xx_timer.c **** 	OS_EXIT_CRITICAL();
-  54:../../../drivers/hal/bc62xx_timer.c **** 	if (SYS_TimerisExist(pTimer))
- 224              		.loc 1 54 0
- 225 0078 2000     		movs	r0, r4
- 226              	.LVL10:
- 227 007a FFF7FEFF 		bl	SYS_TimerisExist
- 228              	.LVL11:
- 229 007e 0028     		cmp	r0, #0
- 230 0080 06D1     		bne	.L6
- 231              	.LBB30:
- 232              	.LBB31:
- 233              		.loc 3 71 0
- 234              		.syntax divided
- 235              	@ 71 "../../../cmsis/cmsis_gcc.h" 1
- 236 0082 72B6     		cpsid i
- 237              	@ 0 "" 2
- 238              		.thumb
- 239              		.syntax unified
- 240              	.LBE31:
- 241              	.LBE30:
-  55:../../../drivers/hal/bc62xx_timer.c **** 	{
-  56:../../../drivers/hal/bc62xx_timer.c **** 		//printf("timer exised and set timer success\r\n");
-  57:../../../drivers/hal/bc62xx_timer.c **** 		return true;
-  58:../../../drivers/hal/bc62xx_timer.c **** 	}
-  59:../../../drivers/hal/bc62xx_timer.c **** 	OS_ENTER_CRITICAL();
-  60:../../../drivers/hal/bc62xx_timer.c **** 	//insert to list
-  61:../../../drivers/hal/bc62xx_timer.c **** 	pTemp = pheader;
- 242              		.loc 1 61 0
- 243 0084 054B     		ldr	r3, .L11+8
- 244 0086 1A68     		ldr	r2, [r3]
-  62:../../../drivers/hal/bc62xx_timer.c **** 	pheader = pTimer;
- 245              		.loc 1 62 0
- 246 0088 1C60     		str	r4, [r3]
-  61:../../../drivers/hal/bc62xx_timer.c **** 	pheader = pTimer;
- 247              		.loc 1 61 0
- 248 008a 2261     		str	r2, [r4, #16]
- 249              	.LVL12:
- 250              	.LBB32:
- 251              	.LBB33:
+ 220              		.loc 3 60 0
+ 221              		.syntax divided
+ 222              	@ 60 "../../../cmsis/cmsis_gcc.h" 1
+ 223 007e 62B6     		cpsie i
+ 224              	@ 0 "" 2
+ 225              		.thumb
+ 226              		.syntax unified
+ 227              	.LBE29:
+ 228              	.LBE28:
+  59:../../../drivers/hal/bc62xx_timer.c **** 	OS_EXIT_CRITICAL();
+  60:../../../drivers/hal/bc62xx_timer.c **** 	if (SYS_TimerisExist(pTimer))
+ 229              		.loc 1 60 0
+ 230 0080 2000     		movs	r0, r4
+ 231              	.LVL11:
+ 232 0082 FFF7FEFF 		bl	SYS_TimerisExist
+ 233              	.LVL12:
+ 234 0086 0028     		cmp	r0, #0
+ 235 0088 06D1     		bne	.L6
+ 236              	.LBB30:
+ 237              	.LBB31:
+ 238              		.loc 3 71 0
+ 239              		.syntax divided
+ 240              	@ 71 "../../../cmsis/cmsis_gcc.h" 1
+ 241 008a 72B6     		cpsid i
+ 242              	@ 0 "" 2
+ 243              		.thumb
+ 244              		.syntax unified
+ 245              	.LBE31:
+ 246              	.LBE30:
+  61:../../../drivers/hal/bc62xx_timer.c **** 	{
+  62:../../../drivers/hal/bc62xx_timer.c **** 		//printf("timer exised and set timer success\r\n");
+  63:../../../drivers/hal/bc62xx_timer.c **** 		return true;
+  64:../../../drivers/hal/bc62xx_timer.c **** 	}
+  65:../../../drivers/hal/bc62xx_timer.c **** 	OS_ENTER_CRITICAL();
+  66:../../../drivers/hal/bc62xx_timer.c **** 	//insert to list
+  67:../../../drivers/hal/bc62xx_timer.c **** 	pTemp = pheader;
+ 247              		.loc 1 67 0
+ 248 008c 054B     		ldr	r3, .L11+8
+ 249 008e 1A68     		ldr	r2, [r3]
+  68:../../../drivers/hal/bc62xx_timer.c **** 	pheader = pTimer;
+ 250              		.loc 1 68 0
+ 251 0090 1C60     		str	r4, [r3]
+  67:../../../drivers/hal/bc62xx_timer.c **** 	pheader = pTimer;
+ 252              		.loc 1 67 0
+ 253 0092 2261     		str	r2, [r4, #16]
+ 254              	.LVL13:
+ 255              	.LBB32:
+ 256              	.LBB33:
   60:../../../cmsis/cmsis_gcc.h **** }
- 252              		.loc 3 60 0
- 253              		.syntax divided
- 254              	@ 60 "../../../cmsis/cmsis_gcc.h" 1
- 255 008c 62B6     		cpsie i
- 256              	@ 0 "" 2
- 257              		.thumb
- 258              		.syntax unified
- 259              	.LBE33:
- 260              	.LBE32:
-  63:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pNextTimer = pTemp;
-  64:../../../drivers/hal/bc62xx_timer.c **** 	OS_EXIT_CRITICAL();
-  65:../../../drivers/hal/bc62xx_timer.c **** 	//printf("set timer success\n");
-  66:../../../drivers/hal/bc62xx_timer.c **** 	//YC_LOG_INFO("set timer %d \r\n",pTimer->cbParams);
-  67:../../../drivers/hal/bc62xx_timer.c **** 	return true;
- 261              		.loc 1 67 0
- 262 008e 2800     		movs	r0, r5
- 263              	.LVL13:
- 264              	.L6:
-  68:../../../drivers/hal/bc62xx_timer.c **** }
- 265              		.loc 1 68 0
- 266              		@ sp needed
- 267              	.LVL14:
- 268 0090 70BD     		pop	{r4, r5, r6, pc}
- 269              	.L12:
- 270 0092 C046     		.align	2
- 271              	.L11:
- 272 0094 00000000 		.word	SYS_TimerExpireDefaultHandle
- 273 0098 00000000 		.word	sys_tick_count
- 274 009c 00000000 		.word	pheader
- 275              		.cfi_endproc
- 276              	.LFE43:
- 278              		.align	1
- 279              		.global	SYS_TimerisExist
- 280              		.code	16
- 281              		.thumb_func
- 283              	SYS_TimerisExist:
- 284              	.LFB44:
-  69:../../../drivers/hal/bc62xx_timer.c **** 
-  70:../../../drivers/hal/bc62xx_timer.c **** bool SYS_TimerisExist(SYS_TIMER_TYPE *pTimer)
-  71:../../../drivers/hal/bc62xx_timer.c **** {
- 285              		.loc 1 71 0
- 286              		.cfi_startproc
- 287              		@ args = 0, pretend = 0, frame = 0
- 288              		@ frame_needed = 0, uses_anonymous_args = 0
- 289              		@ link register save eliminated.
- 290              	.LVL15:
- 291              		.loc 1 71 0
- 292 00a0 011E     		subs	r1, r0, #0
-  72:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
-  73:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == NULL)
- 293              		.loc 1 73 0
- 294 00a2 0BD0     		beq	.L14
-  74:../../../drivers/hal/bc62xx_timer.c **** 	{
-  75:../../../drivers/hal/bc62xx_timer.c **** 		return false;
-  76:../../../drivers/hal/bc62xx_timer.c **** 	}
-  77:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pheader; pTemp->pNextTimer != NULL; pTemp = pTemp->pNextTimer)
- 295              		.loc 1 77 0
- 296 00a4 064B     		ldr	r3, .L20
- 297 00a6 1A68     		ldr	r2, [r3]
- 298              	.LVL16:
- 299              	.L15:
- 300              		.loc 1 77 0 is_stmt 0 discriminator 1
- 301 00a8 1369     		ldr	r3, [r2, #16]
- 302 00aa 002B     		cmp	r3, #0
- 303 00ac 03D0     		beq	.L19
-  78:../../../drivers/hal/bc62xx_timer.c **** 	{
-  79:../../../drivers/hal/bc62xx_timer.c **** 		if (pTimer == pTemp)
- 304              		.loc 1 79 0 is_stmt 1
- 305 00ae 8A42     		cmp	r2, r1
- 306 00b0 03D0     		beq	.L18
- 307 00b2 1A00     		movs	r2, r3
- 308              	.LVL17:
- 309 00b4 F8E7     		b	.L15
- 310              	.LVL18:
- 311              	.L19:
-  75:../../../drivers/hal/bc62xx_timer.c **** 	}
- 312              		.loc 1 75 0
- 313 00b6 1800     		movs	r0, r3
- 314              	.LVL19:
- 315 00b8 00E0     		b	.L14
- 316              	.LVL20:
- 317              	.L18:
-  80:../../../drivers/hal/bc62xx_timer.c **** 		{
-  81:../../../drivers/hal/bc62xx_timer.c **** 			return true;
- 318              		.loc 1 81 0
- 319 00ba 0120     		movs	r0, #1
- 320              	.LVL21:
- 321              	.L14:
-  82:../../../drivers/hal/bc62xx_timer.c **** 		}
-  83:../../../drivers/hal/bc62xx_timer.c **** 	}
-  84:../../../drivers/hal/bc62xx_timer.c **** 	return false;
-  85:../../../drivers/hal/bc62xx_timer.c **** }
- 322              		.loc 1 85 0
- 323              		@ sp needed
- 324 00bc 7047     		bx	lr
- 325              	.L21:
- 326 00be C046     		.align	2
- 327              	.L20:
- 328 00c0 00000000 		.word	pheader
- 329              		.cfi_endproc
- 330              	.LFE44:
- 332              		.align	1
- 333              		.global	SYS_ResetTimer
- 334              		.code	16
- 335              		.thumb_func
- 337              	SYS_ResetTimer:
- 338              	.LFB45:
-  86:../../../drivers/hal/bc62xx_timer.c **** 
-  87:../../../drivers/hal/bc62xx_timer.c **** 
-  88:../../../drivers/hal/bc62xx_timer.c **** bool SYS_ResetTimer(SYS_TIMER_TYPE *pTimer)
-  89:../../../drivers/hal/bc62xx_timer.c **** {
- 339              		.loc 1 89 0
- 340              		.cfi_startproc
- 341              		@ args = 0, pretend = 0, frame = 0
- 342              		@ frame_needed = 0, uses_anonymous_args = 0
- 343              		@ link register save eliminated.
- 344              	.LVL22:
- 345              		.loc 1 89 0
- 346 00c4 011E     		subs	r1, r0, #0
-  90:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
-  91:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == NULL)
- 347              		.loc 1 91 0
- 348 00c6 10D0     		beq	.L23
-  92:../../../drivers/hal/bc62xx_timer.c **** 	{
-  93:../../../drivers/hal/bc62xx_timer.c **** 		return false;
-  94:../../../drivers/hal/bc62xx_timer.c **** 	}
-  95:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pheader; pTemp->pNextTimer != NULL; pTemp = pTemp->pNextTimer)
- 349              		.loc 1 95 0
- 350 00c8 084B     		ldr	r3, .L29
- 351 00ca 1A68     		ldr	r2, [r3]
- 352              	.LVL23:
- 353              	.L24:
- 354              		.loc 1 95 0 is_stmt 0 discriminator 1
- 355 00cc 1369     		ldr	r3, [r2, #16]
- 356 00ce 002B     		cmp	r3, #0
- 357 00d0 0AD0     		beq	.L28
-  96:../../../drivers/hal/bc62xx_timer.c **** 	{
-  97:../../../drivers/hal/bc62xx_timer.c **** 		if (pTimer == pTemp)
- 358              		.loc 1 97 0 is_stmt 1
- 359 00d2 8A42     		cmp	r2, r1
- 360 00d4 06D1     		bne	.L27
-  98:../../../drivers/hal/bc62xx_timer.c **** 		{
-  99:../../../drivers/hal/bc62xx_timer.c **** 			pTimer->mTimerValue = sys_tick_count+(pTimer->mTick);
- 361              		.loc 1 99 0
- 362 00d6 064B     		ldr	r3, .L29+4
- 363 00d8 5168     		ldr	r1, [r2, #4]
- 364 00da 1B68     		ldr	r3, [r3]
- 100:../../../drivers/hal/bc62xx_timer.c **** 			return true;
- 365              		.loc 1 100 0
- 366 00dc 0120     		movs	r0, #1
- 367              	.LVL24:
-  99:../../../drivers/hal/bc62xx_timer.c **** 			return true;
- 368              		.loc 1 99 0
- 369 00de CB18     		adds	r3, r1, r3
- 370 00e0 1360     		str	r3, [r2]
- 371              		.loc 1 100 0
- 372 00e2 02E0     		b	.L23
- 373              	.LVL25:
- 374              	.L27:
- 375 00e4 1A00     		movs	r2, r3
- 376              	.LVL26:
- 377 00e6 F1E7     		b	.L24
- 378              	.LVL27:
- 379              	.L28:
-  93:../../../drivers/hal/bc62xx_timer.c **** 	}
- 380              		.loc 1 93 0
- 381 00e8 1800     		movs	r0, r3
- 382              	.LVL28:
- 383              	.L23:
- 101:../../../drivers/hal/bc62xx_timer.c **** 		}
- 102:../../../drivers/hal/bc62xx_timer.c **** 	}
- 103:../../../drivers/hal/bc62xx_timer.c **** 	return false;
- 104:../../../drivers/hal/bc62xx_timer.c **** }
- 384              		.loc 1 104 0
- 385              		@ sp needed
- 386 00ea 7047     		bx	lr
- 387              	.L30:
- 388              		.align	2
- 389              	.L29:
- 390 00ec 00000000 		.word	pheader
- 391 00f0 00000000 		.word	sys_tick_count
- 392              		.cfi_endproc
- 393              	.LFE45:
- 395              		.align	1
- 396              		.global	SYS_TimerTest
- 397              		.code	16
- 398              		.thumb_func
- 400              	SYS_TimerTest:
- 401              	.LFB46:
- 105:../../../drivers/hal/bc62xx_timer.c **** 
- 106:../../../drivers/hal/bc62xx_timer.c **** 
- 107:../../../drivers/hal/bc62xx_timer.c **** void SYS_TimerTest()
- 108:../../../drivers/hal/bc62xx_timer.c **** {
- 402              		.loc 1 108 0
- 403              		.cfi_startproc
- 404              		@ args = 0, pretend = 0, frame = 0
- 405              		@ frame_needed = 0, uses_anonymous_args = 0
- 406              		@ link register save eliminated.
- 407              	.LVL29:
- 109:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTimer;
- 110:../../../drivers/hal/bc62xx_timer.c **** 	int i = 0;
- 111:../../../drivers/hal/bc62xx_timer.c **** 	for (pTimer = pheader; pTimer->pNextTimer != NULL; pTimer = pTimer->pNextTimer)
- 112:../../../drivers/hal/bc62xx_timer.c **** 	{
- 113:../../../drivers/hal/bc62xx_timer.c **** 		i++;
- 114:../../../drivers/hal/bc62xx_timer.c **** 	}
- 115:../../../drivers/hal/bc62xx_timer.c **** 	//YC_LOG_INFO("timer count %d \r\n",i);
- 116:../../../drivers/hal/bc62xx_timer.c **** }
- 408              		.loc 1 116 0
- 409              		@ sp needed
- 410 00f4 7047     		bx	lr
- 411              		.cfi_endproc
- 412              	.LFE46:
- 414              		.align	1
- 415              		.global	SYS_timerPolling
- 416              		.code	16
- 417              		.thumb_func
- 419              	SYS_timerPolling:
- 420              	.LFB47:
- 117:../../../drivers/hal/bc62xx_timer.c **** 
- 118:../../../drivers/hal/bc62xx_timer.c **** void SYS_timerPolling()
- 119:../../../drivers/hal/bc62xx_timer.c **** {
- 421              		.loc 1 119 0
- 422              		.cfi_startproc
- 423              		@ args = 0, pretend = 0, frame = 0
- 424              		@ frame_needed = 0, uses_anonymous_args = 0
- 425 00f6 10B5     		push	{r4, lr}
- 426              	.LCFI2:
- 427              		.cfi_def_cfa_offset 8
- 428              		.cfi_offset 4, -8
- 429              		.cfi_offset 14, -4
- 120:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTimer;
- 121:../../../drivers/hal/bc62xx_timer.c **** 	
- 122:../../../drivers/hal/bc62xx_timer.c **** 	if (sys_Timer_Check_Flag)
- 430              		.loc 1 122 0
- 431 00f8 114B     		ldr	r3, .L40
- 432 00fa 1A78     		ldrb	r2, [r3]
- 433 00fc 002A     		cmp	r2, #0
- 434 00fe 1DD0     		beq	.L32
- 123:../../../drivers/hal/bc62xx_timer.c **** 	{
- 124:../../../drivers/hal/bc62xx_timer.c **** 		sys_Timer_Check_Flag = false;
- 435              		.loc 1 124 0
- 436 0100 0022     		movs	r2, #0
- 437 0102 1A70     		strb	r2, [r3]
- 125:../../../drivers/hal/bc62xx_timer.c **** 		//SYS_TimerTest();
- 126:../../../drivers/hal/bc62xx_timer.c **** 	//	printf("2\n");
- 127:../../../drivers/hal/bc62xx_timer.c **** 		for (pTimer = pheader; pTimer->pNextTimer != NULL; pTimer = pTimer->pNextTimer)
- 438              		.loc 1 127 0
- 439 0104 0F4B     		ldr	r3, .L40+4
- 440 0106 1C68     		ldr	r4, [r3]
- 441              	.LVL30:
- 442              	.L34:
- 443              		.loc 1 127 0 is_stmt 0 discriminator 1
- 444 0108 2369     		ldr	r3, [r4, #16]
- 445 010a 002B     		cmp	r3, #0
- 446 010c 16D0     		beq	.L32
- 128:../../../drivers/hal/bc62xx_timer.c **** 		{
- 129:../../../drivers/hal/bc62xx_timer.c **** 	//		printf("3\n");
- 130:../../../drivers/hal/bc62xx_timer.c **** 			if (pTimer->mTimerStatus == TIMER_START)
- 447              		.loc 1 130 0 is_stmt 1
- 448 010e 237A     		ldrb	r3, [r4, #8]
- 449 0110 012B     		cmp	r3, #1
- 450 0112 11D1     		bne	.L35
- 131:../../../drivers/hal/bc62xx_timer.c **** 			{
- 132:../../../drivers/hal/bc62xx_timer.c **** 		//		printf("sys_tick_count = %d\n",sys_tick_count);
- 133:../../../drivers/hal/bc62xx_timer.c **** 		//		printf("pTimer->mTimerValue = %d\n",pTimer->mTimerValue);
- 134:../../../drivers/hal/bc62xx_timer.c **** 		//		printf("timer %d in\r\n",pTimer->cbParams);
- 135:../../../drivers/hal/bc62xx_timer.c **** 				if (pTimer->mTimerValue <= sys_tick_count)
- 451              		.loc 1 135 0
- 452 0114 0C4B     		ldr	r3, .L40+8
- 453 0116 2268     		ldr	r2, [r4]
- 454 0118 1B68     		ldr	r3, [r3]
- 455 011a 9A42     		cmp	r2, r3
- 456 011c 0CD8     		bhi	.L35
- 136:../../../drivers/hal/bc62xx_timer.c **** 				{
- 137:../../../drivers/hal/bc62xx_timer.c **** 		//			printf("5\n");
- 138:../../../drivers/hal/bc62xx_timer.c **** 					if (pTimer->mIsCycle == TIMER_SINGLE)
- 457              		.loc 1 138 0
- 458 011e 627A     		ldrb	r2, [r4, #9]
- 459 0120 002A     		cmp	r2, #0
- 460 0122 03D1     		bne	.L36
- 139:../../../drivers/hal/bc62xx_timer.c **** 					{
- 140:../../../drivers/hal/bc62xx_timer.c **** 				//		printf("timer release %d in\r\n",pTimer->cbParams);
- 141:../../../drivers/hal/bc62xx_timer.c **** 						SYS_ReleaseTimer(pTimer);
- 461              		.loc 1 141 0
- 462 0124 2000     		movs	r0, r4
- 463 0126 FFF7FEFF 		bl	SYS_ReleaseTimer
- 464              	.LVL31:
- 465 012a 02E0     		b	.L37
- 466              	.L36:
- 142:../../../drivers/hal/bc62xx_timer.c **** 					}
- 143:../../../drivers/hal/bc62xx_timer.c **** 					else
- 144:../../../drivers/hal/bc62xx_timer.c **** 					{					
- 145:../../../drivers/hal/bc62xx_timer.c **** 				//		printf("timer cycle in\r\n");
+ 257              		.loc 3 60 0
+ 258              		.syntax divided
+ 259              	@ 60 "../../../cmsis/cmsis_gcc.h" 1
+ 260 0094 62B6     		cpsie i
+ 261              	@ 0 "" 2
+ 262              		.thumb
+ 263              		.syntax unified
+ 264              	.LBE33:
+ 265              	.LBE32:
+  69:../../../drivers/hal/bc62xx_timer.c **** 	pheader->pNextTimer = pTemp;
+  70:../../../drivers/hal/bc62xx_timer.c **** 	OS_EXIT_CRITICAL();
+  71:../../../drivers/hal/bc62xx_timer.c **** 	//printf("set timer success\n");
+  72:../../../drivers/hal/bc62xx_timer.c **** 	//YC_LOG_INFO("set timer %d \r\n",pTimer->cbParams);
+  73:../../../drivers/hal/bc62xx_timer.c **** 	return true;
+ 266              		.loc 1 73 0
+ 267 0096 2800     		movs	r0, r5
+ 268              	.LVL14:
+ 269              	.L6:
+  74:../../../drivers/hal/bc62xx_timer.c **** }
+ 270              		.loc 1 74 0
+ 271              		@ sp needed
+ 272              	.LVL15:
+ 273 0098 70BD     		pop	{r4, r5, r6, pc}
+ 274              	.L12:
+ 275 009a C046     		.align	2
+ 276              	.L11:
+ 277 009c 00000000 		.word	SYS_TimerExpireDefaultHandle
+ 278 00a0 00000000 		.word	sys_tick_count
+ 279 00a4 00000000 		.word	pheader
+ 280              		.cfi_endproc
+ 281              	.LFE43:
+ 283              		.align	1
+ 284              		.global	SYS_TimerisExist
+ 285              		.code	16
+ 286              		.thumb_func
+ 288              	SYS_TimerisExist:
+ 289              	.LFB44:
+  75:../../../drivers/hal/bc62xx_timer.c **** 
+  76:../../../drivers/hal/bc62xx_timer.c **** bool SYS_TimerisExist(SYS_TIMER_TYPE *pTimer)
+  77:../../../drivers/hal/bc62xx_timer.c **** {
+ 290              		.loc 1 77 0
+ 291              		.cfi_startproc
+ 292              		@ args = 0, pretend = 0, frame = 0
+ 293              		@ frame_needed = 0, uses_anonymous_args = 0
+ 294              		@ link register save eliminated.
+ 295              	.LVL16:
+ 296              		.loc 1 77 0
+ 297 00a8 011E     		subs	r1, r0, #0
+  78:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
+  79:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == NULL)
+ 298              		.loc 1 79 0
+ 299 00aa 0BD0     		beq	.L14
+  80:../../../drivers/hal/bc62xx_timer.c **** 	{
+  81:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+  82:../../../drivers/hal/bc62xx_timer.c **** 	}
+  83:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pheader; pTemp->pNextTimer != NULL; pTemp = pTemp->pNextTimer)
+ 300              		.loc 1 83 0
+ 301 00ac 064B     		ldr	r3, .L20
+ 302 00ae 1A68     		ldr	r2, [r3]
+ 303              	.LVL17:
+ 304              	.L15:
+ 305              		.loc 1 83 0 is_stmt 0 discriminator 1
+ 306 00b0 1369     		ldr	r3, [r2, #16]
+ 307 00b2 002B     		cmp	r3, #0
+ 308 00b4 03D0     		beq	.L19
+  84:../../../drivers/hal/bc62xx_timer.c **** 	{
+  85:../../../drivers/hal/bc62xx_timer.c **** 		if (pTimer == pTemp)
+ 309              		.loc 1 85 0 is_stmt 1
+ 310 00b6 8A42     		cmp	r2, r1
+ 311 00b8 03D0     		beq	.L18
+ 312 00ba 1A00     		movs	r2, r3
+ 313              	.LVL18:
+ 314 00bc F8E7     		b	.L15
+ 315              	.LVL19:
+ 316              	.L19:
+  81:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 317              		.loc 1 81 0
+ 318 00be 1800     		movs	r0, r3
+ 319              	.LVL20:
+ 320 00c0 00E0     		b	.L14
+ 321              	.LVL21:
+ 322              	.L18:
+  86:../../../drivers/hal/bc62xx_timer.c **** 		{
+  87:../../../drivers/hal/bc62xx_timer.c **** 			return true;
+ 323              		.loc 1 87 0
+ 324 00c2 0120     		movs	r0, #1
+ 325              	.LVL22:
+ 326              	.L14:
+  88:../../../drivers/hal/bc62xx_timer.c **** 		}
+  89:../../../drivers/hal/bc62xx_timer.c **** 	}
+  90:../../../drivers/hal/bc62xx_timer.c **** 	return false;
+  91:../../../drivers/hal/bc62xx_timer.c **** }
+ 327              		.loc 1 91 0
+ 328              		@ sp needed
+ 329 00c4 7047     		bx	lr
+ 330              	.L21:
+ 331 00c6 C046     		.align	2
+ 332              	.L20:
+ 333 00c8 00000000 		.word	pheader
+ 334              		.cfi_endproc
+ 335              	.LFE44:
+ 337              		.align	1
+ 338              		.global	SYS_ResetTimer
+ 339              		.code	16
+ 340              		.thumb_func
+ 342              	SYS_ResetTimer:
+ 343              	.LFB45:
+  92:../../../drivers/hal/bc62xx_timer.c **** 
+  93:../../../drivers/hal/bc62xx_timer.c **** 
+  94:../../../drivers/hal/bc62xx_timer.c **** bool SYS_ResetTimer(SYS_TIMER_TYPE *pTimer)
+  95:../../../drivers/hal/bc62xx_timer.c **** {
+ 344              		.loc 1 95 0
+ 345              		.cfi_startproc
+ 346              		@ args = 0, pretend = 0, frame = 0
+ 347              		@ frame_needed = 0, uses_anonymous_args = 0
+ 348              		@ link register save eliminated.
+ 349              	.LVL23:
+ 350              		.loc 1 95 0
+ 351 00cc 011E     		subs	r1, r0, #0
+  96:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
+  97:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == NULL)
+ 352              		.loc 1 97 0
+ 353 00ce 10D0     		beq	.L23
+  98:../../../drivers/hal/bc62xx_timer.c **** 	{
+  99:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+ 100:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 101:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pheader; pTemp->pNextTimer != NULL; pTemp = pTemp->pNextTimer)
+ 354              		.loc 1 101 0
+ 355 00d0 084B     		ldr	r3, .L29
+ 356 00d2 1A68     		ldr	r2, [r3]
+ 357              	.LVL24:
+ 358              	.L24:
+ 359              		.loc 1 101 0 is_stmt 0 discriminator 1
+ 360 00d4 1369     		ldr	r3, [r2, #16]
+ 361 00d6 002B     		cmp	r3, #0
+ 362 00d8 0AD0     		beq	.L28
+ 102:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 103:../../../drivers/hal/bc62xx_timer.c **** 		if (pTimer == pTemp)
+ 363              		.loc 1 103 0 is_stmt 1
+ 364 00da 8A42     		cmp	r2, r1
+ 365 00dc 06D1     		bne	.L27
+ 104:../../../drivers/hal/bc62xx_timer.c **** 		{
+ 105:../../../drivers/hal/bc62xx_timer.c **** 			pTimer->mTimerValue = sys_tick_count+(pTimer->mTick);
+ 366              		.loc 1 105 0
+ 367 00de 064B     		ldr	r3, .L29+4
+ 368 00e0 5168     		ldr	r1, [r2, #4]
+ 369 00e2 1B68     		ldr	r3, [r3]
+ 106:../../../drivers/hal/bc62xx_timer.c **** 			return true;
+ 370              		.loc 1 106 0
+ 371 00e4 0120     		movs	r0, #1
+ 372              	.LVL25:
+ 105:../../../drivers/hal/bc62xx_timer.c **** 			return true;
+ 373              		.loc 1 105 0
+ 374 00e6 CB18     		adds	r3, r1, r3
+ 375 00e8 1360     		str	r3, [r2]
+ 376              		.loc 1 106 0
+ 377 00ea 02E0     		b	.L23
+ 378              	.LVL26:
+ 379              	.L27:
+ 380 00ec 1A00     		movs	r2, r3
+ 381              	.LVL27:
+ 382 00ee F1E7     		b	.L24
+ 383              	.LVL28:
+ 384              	.L28:
+  99:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 385              		.loc 1 99 0
+ 386 00f0 1800     		movs	r0, r3
+ 387              	.LVL29:
+ 388              	.L23:
+ 107:../../../drivers/hal/bc62xx_timer.c **** 		}
+ 108:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 109:../../../drivers/hal/bc62xx_timer.c **** 	return false;
+ 110:../../../drivers/hal/bc62xx_timer.c **** }
+ 389              		.loc 1 110 0
+ 390              		@ sp needed
+ 391 00f2 7047     		bx	lr
+ 392              	.L30:
+ 393              		.align	2
+ 394              	.L29:
+ 395 00f4 00000000 		.word	pheader
+ 396 00f8 00000000 		.word	sys_tick_count
+ 397              		.cfi_endproc
+ 398              	.LFE45:
+ 400              		.align	1
+ 401              		.global	SYS_TimerTest
+ 402              		.code	16
+ 403              		.thumb_func
+ 405              	SYS_TimerTest:
+ 406              	.LFB46:
+ 111:../../../drivers/hal/bc62xx_timer.c **** 
+ 112:../../../drivers/hal/bc62xx_timer.c **** 
+ 113:../../../drivers/hal/bc62xx_timer.c **** void SYS_TimerTest()
+ 114:../../../drivers/hal/bc62xx_timer.c **** {
+ 407              		.loc 1 114 0
+ 408              		.cfi_startproc
+ 409              		@ args = 0, pretend = 0, frame = 0
+ 410              		@ frame_needed = 0, uses_anonymous_args = 0
+ 411              		@ link register save eliminated.
+ 412              	.LVL30:
+ 115:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTimer;
+ 116:../../../drivers/hal/bc62xx_timer.c **** 	int i = 0;
+ 117:../../../drivers/hal/bc62xx_timer.c **** 	for (pTimer = pheader; pTimer->pNextTimer != NULL; pTimer = pTimer->pNextTimer)
+ 118:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 119:../../../drivers/hal/bc62xx_timer.c **** 		i++;
+ 120:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 121:../../../drivers/hal/bc62xx_timer.c **** 	//YC_LOG_INFO("timer count %d \r\n",i);
+ 122:../../../drivers/hal/bc62xx_timer.c **** }
+ 413              		.loc 1 122 0
+ 414              		@ sp needed
+ 415 00fc 7047     		bx	lr
+ 416              		.cfi_endproc
+ 417              	.LFE46:
+ 419              		.align	1
+ 420              		.global	SYS_timerPolling
+ 421              		.code	16
+ 422              		.thumb_func
+ 424              	SYS_timerPolling:
+ 425              	.LFB47:
+ 123:../../../drivers/hal/bc62xx_timer.c **** 
+ 124:../../../drivers/hal/bc62xx_timer.c **** void SYS_timerPolling()
+ 125:../../../drivers/hal/bc62xx_timer.c **** {
+ 426              		.loc 1 125 0
+ 427              		.cfi_startproc
+ 428              		@ args = 0, pretend = 0, frame = 0
+ 429              		@ frame_needed = 0, uses_anonymous_args = 0
+ 430 00fe 10B5     		push	{r4, lr}
+ 431              	.LCFI2:
+ 432              		.cfi_def_cfa_offset 8
+ 433              		.cfi_offset 4, -8
+ 434              		.cfi_offset 14, -4
+ 126:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTimer;
+ 127:../../../drivers/hal/bc62xx_timer.c **** 	
+ 128:../../../drivers/hal/bc62xx_timer.c **** 	if (sys_Timer_Check_Flag)
+ 435              		.loc 1 128 0
+ 436 0100 114B     		ldr	r3, .L40
+ 437 0102 1A78     		ldrb	r2, [r3]
+ 438 0104 002A     		cmp	r2, #0
+ 439 0106 1DD0     		beq	.L32
+ 129:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 130:../../../drivers/hal/bc62xx_timer.c **** 		sys_Timer_Check_Flag = false;
+ 440              		.loc 1 130 0
+ 441 0108 0022     		movs	r2, #0
+ 442 010a 1A70     		strb	r2, [r3]
+ 131:../../../drivers/hal/bc62xx_timer.c **** 		//SYS_TimerTest();
+ 132:../../../drivers/hal/bc62xx_timer.c **** 	//	printf("2\n");
+ 133:../../../drivers/hal/bc62xx_timer.c **** 		for (pTimer = pheader; pTimer->pNextTimer != NULL; pTimer = pTimer->pNextTimer)
+ 443              		.loc 1 133 0
+ 444 010c 0F4B     		ldr	r3, .L40+4
+ 445 010e 1C68     		ldr	r4, [r3]
+ 446              	.LVL31:
+ 447              	.L34:
+ 448              		.loc 1 133 0 is_stmt 0 discriminator 1
+ 449 0110 2369     		ldr	r3, [r4, #16]
+ 450 0112 002B     		cmp	r3, #0
+ 451 0114 16D0     		beq	.L32
+ 134:../../../drivers/hal/bc62xx_timer.c **** 		{
+ 135:../../../drivers/hal/bc62xx_timer.c **** 	//		printf("3\n");
+ 136:../../../drivers/hal/bc62xx_timer.c **** 			if (pTimer->mTimerStatus == TIMER_START)
+ 452              		.loc 1 136 0 is_stmt 1
+ 453 0116 237A     		ldrb	r3, [r4, #8]
+ 454 0118 012B     		cmp	r3, #1
+ 455 011a 11D1     		bne	.L35
+ 137:../../../drivers/hal/bc62xx_timer.c **** 			{
+ 138:../../../drivers/hal/bc62xx_timer.c **** 		//		printf("sys_tick_count = %d\n",sys_tick_count);
+ 139:../../../drivers/hal/bc62xx_timer.c **** 		//		printf("pTimer->mTimerValue = %d\n",pTimer->mTimerValue);
+ 140:../../../drivers/hal/bc62xx_timer.c **** 		//		printf("timer %d in\r\n",pTimer->cbParams);
+ 141:../../../drivers/hal/bc62xx_timer.c **** 				if (pTimer->mTimerValue <= sys_tick_count)
+ 456              		.loc 1 141 0
+ 457 011c 0C4B     		ldr	r3, .L40+8
+ 458 011e 2268     		ldr	r2, [r4]
+ 459 0120 1B68     		ldr	r3, [r3]
+ 460 0122 9A42     		cmp	r2, r3
+ 461 0124 0CD8     		bhi	.L35
+ 142:../../../drivers/hal/bc62xx_timer.c **** 				{
+ 143:../../../drivers/hal/bc62xx_timer.c **** 		//			printf("5\n");
+ 144:../../../drivers/hal/bc62xx_timer.c **** 					if (pTimer->mIsCycle == TIMER_SINGLE)
+ 462              		.loc 1 144 0
+ 463 0126 627A     		ldrb	r2, [r4, #9]
+ 464 0128 002A     		cmp	r2, #0
+ 465 012a 03D1     		bne	.L36
+ 145:../../../drivers/hal/bc62xx_timer.c **** 					{
  146:../../../drivers/hal/bc62xx_timer.c **** 				//		printf("timer release %d in\r\n",pTimer->cbParams);
- 147:../../../drivers/hal/bc62xx_timer.c **** 						pTimer->mTimerValue = sys_tick_count+(pTimer->mTick);
- 467              		.loc 1 147 0
- 468 012c 6268     		ldr	r2, [r4, #4]
- 469 012e D318     		adds	r3, r2, r3
- 470 0130 2360     		str	r3, [r4]
- 471              	.L37:
+ 147:../../../drivers/hal/bc62xx_timer.c **** 						SYS_ReleaseTimer(pTimer);
+ 466              		.loc 1 147 0
+ 467 012c 2000     		movs	r0, r4
+ 468 012e FFF7FEFF 		bl	SYS_ReleaseTimer
+ 469              	.LVL32:
+ 470 0132 02E0     		b	.L37
+ 471              	.L36:
  148:../../../drivers/hal/bc62xx_timer.c **** 					}
- 149:../../../drivers/hal/bc62xx_timer.c **** 			//		printf("6\n");
- 150:../../../drivers/hal/bc62xx_timer.c **** 					pTimer->pfExpireCb(pTimer->cbParams);
- 472              		.loc 1 150 0
- 473 0132 6069     		ldr	r0, [r4, #20]
- 474 0134 E368     		ldr	r3, [r4, #12]
- 475 0136 9847     		blx	r3
- 476              	.LVL32:
- 477              	.L35:
- 127:../../../drivers/hal/bc62xx_timer.c **** 		{
- 478              		.loc 1 127 0 discriminator 2
- 479 0138 2469     		ldr	r4, [r4, #16]
- 480              	.LVL33:
- 481 013a E5E7     		b	.L34
- 482              	.LVL34:
- 483              	.L32:
- 151:../../../drivers/hal/bc62xx_timer.c **** 				}
- 152:../../../drivers/hal/bc62xx_timer.c **** 			}
- 153:../../../drivers/hal/bc62xx_timer.c **** 		}
- 154:../../../drivers/hal/bc62xx_timer.c **** 	}
- 155:../../../drivers/hal/bc62xx_timer.c **** }
- 484              		.loc 1 155 0
- 485              		@ sp needed
- 486 013c 10BD     		pop	{r4, pc}
- 487              	.L41:
- 488 013e C046     		.align	2
- 489              	.L40:
- 490 0140 00000000 		.word	sys_Timer_Check_Flag
- 491 0144 00000000 		.word	pheader
- 492 0148 00000000 		.word	sys_tick_count
- 493              		.cfi_endproc
- 494              	.LFE47:
- 496              		.align	1
- 497              		.global	SYS_ReleaseTimer
- 498              		.code	16
- 499              		.thumb_func
- 501              	SYS_ReleaseTimer:
- 502              	.LFB48:
- 156:../../../drivers/hal/bc62xx_timer.c **** 
- 157:../../../drivers/hal/bc62xx_timer.c **** bool SYS_ReleaseTimer(SYS_TIMER_TYPE *pTimer)
- 158:../../../drivers/hal/bc62xx_timer.c **** {
- 503              		.loc 1 158 0
- 504              		.cfi_startproc
- 505              		@ args = 0, pretend = 0, frame = 0
- 506              		@ frame_needed = 0, uses_anonymous_args = 0
- 507              	.LVL35:
- 508 014c 10B5     		push	{r4, lr}
- 509              	.LCFI3:
- 510              		.cfi_def_cfa_offset 8
- 511              		.cfi_offset 4, -8
- 512              		.cfi_offset 14, -4
- 513              		.loc 1 158 0
- 514 014e 011E     		subs	r1, r0, #0
- 159:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp, *pPre;
- 160:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == NULL)
- 515              		.loc 1 160 0
- 516 0150 1AD0     		beq	.L43
- 161:../../../drivers/hal/bc62xx_timer.c **** 	{
- 162:../../../drivers/hal/bc62xx_timer.c **** 		return false;
- 163:../../../drivers/hal/bc62xx_timer.c **** 	}
- 164:../../../drivers/hal/bc62xx_timer.c **** 
- 165:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == &header_Timer)
- 517              		.loc 1 165 0
- 518 0152 0E4B     		ldr	r3, .L51
- 162:../../../drivers/hal/bc62xx_timer.c **** 	}
- 519              		.loc 1 162 0
- 520 0154 0020     		movs	r0, #0
- 521              	.LVL36:
- 522              		.loc 1 165 0
- 523 0156 9942     		cmp	r1, r3
- 524 0158 16D0     		beq	.L43
- 166:../../../drivers/hal/bc62xx_timer.c **** 	{
- 167:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+ 149:../../../drivers/hal/bc62xx_timer.c **** 					else
+ 150:../../../drivers/hal/bc62xx_timer.c **** 					{					
+ 151:../../../drivers/hal/bc62xx_timer.c **** 				//		printf("timer cycle in\r\n");
+ 152:../../../drivers/hal/bc62xx_timer.c **** 				//		printf("timer release %d in\r\n",pTimer->cbParams);
+ 153:../../../drivers/hal/bc62xx_timer.c **** 						pTimer->mTimerValue = sys_tick_count+(pTimer->mTick);
+ 472              		.loc 1 153 0
+ 473 0134 6268     		ldr	r2, [r4, #4]
+ 474 0136 D318     		adds	r3, r2, r3
+ 475 0138 2360     		str	r3, [r4]
+ 476              	.L37:
+ 154:../../../drivers/hal/bc62xx_timer.c **** 					}
+ 155:../../../drivers/hal/bc62xx_timer.c **** 			//		printf("6\n");
+ 156:../../../drivers/hal/bc62xx_timer.c **** 					pTimer->pfExpireCb(pTimer->cbParams);
+ 477              		.loc 1 156 0
+ 478 013a 6069     		ldr	r0, [r4, #20]
+ 479 013c E368     		ldr	r3, [r4, #12]
+ 480 013e 9847     		blx	r3
+ 481              	.LVL33:
+ 482              	.L35:
+ 133:../../../drivers/hal/bc62xx_timer.c **** 		{
+ 483              		.loc 1 133 0 discriminator 2
+ 484 0140 2469     		ldr	r4, [r4, #16]
+ 485              	.LVL34:
+ 486 0142 E5E7     		b	.L34
+ 487              	.LVL35:
+ 488              	.L32:
+ 157:../../../drivers/hal/bc62xx_timer.c **** 				}
+ 158:../../../drivers/hal/bc62xx_timer.c **** 			}
+ 159:../../../drivers/hal/bc62xx_timer.c **** 		}
+ 160:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 161:../../../drivers/hal/bc62xx_timer.c **** }
+ 489              		.loc 1 161 0
+ 490              		@ sp needed
+ 491 0144 10BD     		pop	{r4, pc}
+ 492              	.L41:
+ 493 0146 C046     		.align	2
+ 494              	.L40:
+ 495 0148 00000000 		.word	sys_Timer_Check_Flag
+ 496 014c 00000000 		.word	pheader
+ 497 0150 00000000 		.word	sys_tick_count
+ 498              		.cfi_endproc
+ 499              	.LFE47:
+ 501              		.align	1
+ 502              		.global	SYS_ReleaseTimer
+ 503              		.code	16
+ 504              		.thumb_func
+ 506              	SYS_ReleaseTimer:
+ 507              	.LFB48:
+ 162:../../../drivers/hal/bc62xx_timer.c **** 
+ 163:../../../drivers/hal/bc62xx_timer.c **** bool SYS_ReleaseTimer(SYS_TIMER_TYPE *pTimer)
+ 164:../../../drivers/hal/bc62xx_timer.c **** {
+ 508              		.loc 1 164 0
+ 509              		.cfi_startproc
+ 510              		@ args = 0, pretend = 0, frame = 0
+ 511              		@ frame_needed = 0, uses_anonymous_args = 0
+ 512              	.LVL36:
+ 513 0154 10B5     		push	{r4, lr}
+ 514              	.LCFI3:
+ 515              		.cfi_def_cfa_offset 8
+ 516              		.cfi_offset 4, -8
+ 517              		.cfi_offset 14, -4
+ 518              		.loc 1 164 0
+ 519 0156 011E     		subs	r1, r0, #0
+ 165:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp, *pPre;
+ 166:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == NULL)
+ 520              		.loc 1 166 0
+ 521 0158 1AD0     		beq	.L43
+ 167:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 168:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+ 169:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 170:../../../drivers/hal/bc62xx_timer.c **** 
+ 171:../../../drivers/hal/bc62xx_timer.c **** 	if (pTimer == &header_Timer)
+ 522              		.loc 1 171 0
+ 523 015a 0E4B     		ldr	r3, .L51
  168:../../../drivers/hal/bc62xx_timer.c **** 	}
- 169:../../../drivers/hal/bc62xx_timer.c **** 
- 170:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pPre = pheader; pTemp->pNextTimer != NULL; pPre = pTemp,pTemp = pTemp->pNextTimer)
- 525              		.loc 1 170 0
- 526 015a 0D4B     		ldr	r3, .L51+4
- 527 015c 1A68     		ldr	r2, [r3]
- 528              	.LVL37:
- 529 015e 1800     		movs	r0, r3
- 530 0160 1400     		movs	r4, r2
- 531              	.LVL38:
- 532              	.L44:
- 533              		.loc 1 170 0 is_stmt 0 discriminator 1
- 534 0162 1369     		ldr	r3, [r2, #16]
- 535 0164 002B     		cmp	r3, #0
- 536 0166 0ED0     		beq	.L50
- 171:../../../drivers/hal/bc62xx_timer.c **** 	{
- 172:../../../drivers/hal/bc62xx_timer.c **** 		if (pTimer == pTemp)
- 537              		.loc 1 172 0 is_stmt 1
- 538 0168 8A42     		cmp	r2, r1
- 539 016a 09D1     		bne	.L49
- 173:../../../drivers/hal/bc62xx_timer.c **** 		{
- 174:../../../drivers/hal/bc62xx_timer.c **** 			pTemp->mTimerStatus = TIMER_STOP;
- 540              		.loc 1 174 0
- 541 016c 0021     		movs	r1, #0
- 542              	.LVL39:
- 543 016e 1172     		strb	r1, [r2, #8]
- 175:../../../drivers/hal/bc62xx_timer.c **** 			if (pPre == pTemp) //delete the first one element
- 544              		.loc 1 175 0
- 545 0170 9442     		cmp	r4, r2
- 546 0172 02D1     		bne	.L45
- 176:../../../drivers/hal/bc62xx_timer.c **** 			{
- 177:../../../drivers/hal/bc62xx_timer.c **** 				pheader = pTemp->pNextTimer;
- 547              		.loc 1 177 0
- 548 0174 0360     		str	r3, [r0]
- 178:../../../drivers/hal/bc62xx_timer.c **** 			}
- 179:../../../drivers/hal/bc62xx_timer.c **** 			else
- 180:../../../drivers/hal/bc62xx_timer.c **** 			{
- 181:../../../drivers/hal/bc62xx_timer.c **** 				pPre->pNextTimer = pTemp->pNextTimer;
- 182:../../../drivers/hal/bc62xx_timer.c **** 			}
- 183:../../../drivers/hal/bc62xx_timer.c **** 
- 184:../../../drivers/hal/bc62xx_timer.c **** 			//YC_LOG_INFO("release timer %d,%d \r\n",pPre->cbParams,pTimer->cbParams);
- 185:../../../drivers/hal/bc62xx_timer.c **** 			return true;
- 549              		.loc 1 185 0
- 550 0176 0120     		movs	r0, #1
- 551 0178 06E0     		b	.L43
- 552              	.L45:
- 181:../../../drivers/hal/bc62xx_timer.c **** 			}
- 553              		.loc 1 181 0
- 554 017a 2361     		str	r3, [r4, #16]
- 555              		.loc 1 185 0
- 556 017c 0120     		movs	r0, #1
- 557 017e 03E0     		b	.L43
- 558              	.LVL40:
- 559              	.L49:
- 560 0180 1400     		movs	r4, r2
- 561              	.LVL41:
- 562 0182 1A00     		movs	r2, r3
- 563              	.LVL42:
- 564 0184 EDE7     		b	.L44
- 565              	.LVL43:
- 566              	.L50:
- 162:../../../drivers/hal/bc62xx_timer.c **** 	}
- 567              		.loc 1 162 0
- 568 0186 1800     		movs	r0, r3
- 569              	.LVL44:
- 570              	.L43:
- 186:../../../drivers/hal/bc62xx_timer.c **** 		}
- 187:../../../drivers/hal/bc62xx_timer.c **** 	}
- 188:../../../drivers/hal/bc62xx_timer.c **** 	return false;
- 189:../../../drivers/hal/bc62xx_timer.c **** }
- 571              		.loc 1 189 0
- 572              		@ sp needed
- 573 0188 10BD     		pop	{r4, pc}
- 574              	.L52:
- 575 018a C046     		.align	2
- 576              	.L51:
- 577 018c 00000000 		.word	header_Timer
- 578 0190 00000000 		.word	pheader
- 579              		.cfi_endproc
- 580              	.LFE48:
- 582              		.align	1
- 583              		.global	SYS_ReleaseAllTimer
- 584              		.code	16
- 585              		.thumb_func
- 587              	SYS_ReleaseAllTimer:
- 588              	.LFB49:
- 190:../../../drivers/hal/bc62xx_timer.c **** 
- 191:../../../drivers/hal/bc62xx_timer.c **** void SYS_ReleaseAllTimer()
- 192:../../../drivers/hal/bc62xx_timer.c **** {
- 589              		.loc 1 192 0
- 590              		.cfi_startproc
- 591              		@ args = 0, pretend = 0, frame = 0
- 592              		@ frame_needed = 0, uses_anonymous_args = 0
- 593              		@ link register save eliminated.
- 193:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
- 194:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pheader; pTemp->pNextTimer != NULL; pTemp = pTemp->pNextTimer)
- 195:../../../drivers/hal/bc62xx_timer.c **** 	{
- 196:../../../drivers/hal/bc62xx_timer.c **** 		pTemp->mTimerStatus = TIMER_STOP;
- 594              		.loc 1 196 0
- 595 0194 0020     		movs	r0, #0
- 194:../../../drivers/hal/bc62xx_timer.c **** 	{
- 596              		.loc 1 194 0
- 597 0196 054B     		ldr	r3, .L57
- 598 0198 1A68     		ldr	r2, [r3]
- 599              	.LVL45:
- 600              	.L54:
- 194:../../../drivers/hal/bc62xx_timer.c **** 	{
- 601              		.loc 1 194 0 is_stmt 0 discriminator 1
- 602 019a 1169     		ldr	r1, [r2, #16]
- 603 019c 0029     		cmp	r1, #0
- 604 019e 02D0     		beq	.L56
- 605              		.loc 1 196 0 is_stmt 1 discriminator 3
- 606 01a0 1072     		strb	r0, [r2, #8]
- 607              	.LVL46:
- 608 01a2 0A00     		movs	r2, r1
- 609 01a4 F9E7     		b	.L54
- 610              	.LVL47:
- 611              	.L56:
- 197:../../../drivers/hal/bc62xx_timer.c **** 	}
- 198:../../../drivers/hal/bc62xx_timer.c **** 	pheader = &header_Timer;
- 612              		.loc 1 198 0
- 613 01a6 024A     		ldr	r2, .L57+4
- 614              	.LVL48:
- 199:../../../drivers/hal/bc62xx_timer.c **** }
- 615              		.loc 1 199 0
- 616              		@ sp needed
- 198:../../../drivers/hal/bc62xx_timer.c **** }
- 617              		.loc 1 198 0
- 618 01a8 1A60     		str	r2, [r3]
- 619              		.loc 1 199 0
- 620 01aa 7047     		bx	lr
- 621              	.L58:
- 622              		.align	2
- 623              	.L57:
- 624 01ac 00000000 		.word	pheader
- 625 01b0 00000000 		.word	header_Timer
- 626              		.cfi_endproc
- 627              	.LFE49:
- 629              		.global	__aeabi_uidivmod
- 630              		.align	1
- 631              		.global	SYStick_handle
- 632              		.code	16
- 633              		.thumb_func
- 635              	SYStick_handle:
- 636              	.LFB50:
- 200:../../../drivers/hal/bc62xx_timer.c **** 
- 201:../../../drivers/hal/bc62xx_timer.c **** void SYStick_handle()
- 202:../../../drivers/hal/bc62xx_timer.c **** {
- 637              		.loc 1 202 0
- 638              		.cfi_startproc
- 639              		@ args = 0, pretend = 0, frame = 0
- 640              		@ frame_needed = 0, uses_anonymous_args = 0
- 203:../../../drivers/hal/bc62xx_timer.c **** 	if(++tmpCnt%10 == 0){//each	systick interrupt is 10ms
- 641              		.loc 1 203 0
- 642 01b4 084B     		ldr	r3, .L61
- 202:../../../drivers/hal/bc62xx_timer.c **** 	if(++tmpCnt%10 == 0){//each	systick interrupt is 10ms
- 643              		.loc 1 202 0
- 644 01b6 10B5     		push	{r4, lr}
- 645              	.LCFI4:
- 646              		.cfi_def_cfa_offset 8
- 647              		.cfi_offset 4, -8
- 648              		.cfi_offset 14, -4
- 649              		.loc 1 203 0
- 650 01b8 1A68     		ldr	r2, [r3]
- 651 01ba 0A21     		movs	r1, #10
- 652 01bc 501C     		adds	r0, r2, #1
- 653 01be 1860     		str	r0, [r3]
- 654 01c0 FFF7FEFF 		bl	__aeabi_uidivmod
- 655              	.LVL49:
- 656 01c4 0029     		cmp	r1, #0
- 657 01c6 06D1     		bne	.L59
- 204:../../../drivers/hal/bc62xx_timer.c **** 		sys_tick_count++; //10
- 658              		.loc 1 204 0
- 659 01c8 044A     		ldr	r2, .L61+4
- 660 01ca 1368     		ldr	r3, [r2]
- 661 01cc 0133     		adds	r3, r3, #1
- 662 01ce 1360     		str	r3, [r2]
- 205:../../../drivers/hal/bc62xx_timer.c **** 		sys_Timer_Check_Flag = true;
- 663              		.loc 1 205 0
- 664 01d0 0122     		movs	r2, #1
- 665 01d2 034B     		ldr	r3, .L61+8
- 666 01d4 1A70     		strb	r2, [r3]
- 667              	.L59:
- 206:../../../drivers/hal/bc62xx_timer.c **** 	}
- 207:../../../drivers/hal/bc62xx_timer.c **** }
- 668              		.loc 1 207 0
- 669              		@ sp needed
- 670 01d6 10BD     		pop	{r4, pc}
- 671              	.L62:
- 672              		.align	2
- 673              	.L61:
- 674 01d8 00000000 		.word	.LANCHOR0
- 675 01dc 00000000 		.word	sys_tick_count
- 676 01e0 00000000 		.word	sys_Timer_Check_Flag
- 677              		.cfi_endproc
- 678              	.LFE50:
- 680              		.bss
- 681              		.align	2
- 682              		.set	.LANCHOR0,. + 0
- 685              	tmpCnt:
- 686 0000 00000000 		.space	4
- 687              		.text
- 688              	.Letext0:
- 689              		.file 4 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 690              		.file 5 "d:\\mesh\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none
- 691              		.file 6 "../../../device/inc/bc62xx.h"
- 692              		.file 7 "../../../drivers/hal/inc/bc62xx_timer.h"
+ 524              		.loc 1 168 0
+ 525 015c 0020     		movs	r0, #0
+ 526              	.LVL37:
+ 527              		.loc 1 171 0
+ 528 015e 9942     		cmp	r1, r3
+ 529 0160 16D0     		beq	.L43
+ 172:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 173:../../../drivers/hal/bc62xx_timer.c **** 		return false;
+ 174:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 175:../../../drivers/hal/bc62xx_timer.c **** 
+ 176:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pPre = pheader; pTemp->pNextTimer != NULL; pPre = pTemp,pTemp = pTemp->pNextTimer)
+ 530              		.loc 1 176 0
+ 531 0162 0D4B     		ldr	r3, .L51+4
+ 532 0164 1A68     		ldr	r2, [r3]
+ 533              	.LVL38:
+ 534 0166 1800     		movs	r0, r3
+ 535 0168 1400     		movs	r4, r2
+ 536              	.LVL39:
+ 537              	.L44:
+ 538              		.loc 1 176 0 is_stmt 0 discriminator 1
+ 539 016a 1369     		ldr	r3, [r2, #16]
+ 540 016c 002B     		cmp	r3, #0
+ 541 016e 0ED0     		beq	.L50
+ 177:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 178:../../../drivers/hal/bc62xx_timer.c **** 		if (pTimer == pTemp)
+ 542              		.loc 1 178 0 is_stmt 1
+ 543 0170 8A42     		cmp	r2, r1
+ 544 0172 09D1     		bne	.L49
+ 179:../../../drivers/hal/bc62xx_timer.c **** 		{
+ 180:../../../drivers/hal/bc62xx_timer.c **** 			pTemp->mTimerStatus = TIMER_STOP;
+ 545              		.loc 1 180 0
+ 546 0174 0021     		movs	r1, #0
+ 547              	.LVL40:
+ 548 0176 1172     		strb	r1, [r2, #8]
+ 181:../../../drivers/hal/bc62xx_timer.c **** 			if (pPre == pTemp) //delete the first one element
+ 549              		.loc 1 181 0
+ 550 0178 9442     		cmp	r4, r2
+ 551 017a 02D1     		bne	.L45
+ 182:../../../drivers/hal/bc62xx_timer.c **** 			{
+ 183:../../../drivers/hal/bc62xx_timer.c **** 				pheader = pTemp->pNextTimer;
+ 552              		.loc 1 183 0
+ 553 017c 0360     		str	r3, [r0]
+ 184:../../../drivers/hal/bc62xx_timer.c **** 			}
+ 185:../../../drivers/hal/bc62xx_timer.c **** 			else
+ 186:../../../drivers/hal/bc62xx_timer.c **** 			{
+ 187:../../../drivers/hal/bc62xx_timer.c **** 				pPre->pNextTimer = pTemp->pNextTimer;
+ 188:../../../drivers/hal/bc62xx_timer.c **** 			}
+ 189:../../../drivers/hal/bc62xx_timer.c **** 
+ 190:../../../drivers/hal/bc62xx_timer.c **** 			//YC_LOG_INFO("release timer %d,%d \r\n",pPre->cbParams,pTimer->cbParams);
+ 191:../../../drivers/hal/bc62xx_timer.c **** 			return true;
+ 554              		.loc 1 191 0
+ 555 017e 0120     		movs	r0, #1
+ 556 0180 06E0     		b	.L43
+ 557              	.L45:
+ 187:../../../drivers/hal/bc62xx_timer.c **** 			}
+ 558              		.loc 1 187 0
+ 559 0182 2361     		str	r3, [r4, #16]
+ 560              		.loc 1 191 0
+ 561 0184 0120     		movs	r0, #1
+ 562 0186 03E0     		b	.L43
+ 563              	.LVL41:
+ 564              	.L49:
+ 565 0188 1400     		movs	r4, r2
+ 566              	.LVL42:
+ 567 018a 1A00     		movs	r2, r3
+ 568              	.LVL43:
+ 569 018c EDE7     		b	.L44
+ 570              	.LVL44:
+ 571              	.L50:
+ 168:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 572              		.loc 1 168 0
+ 573 018e 1800     		movs	r0, r3
+ 574              	.LVL45:
+ 575              	.L43:
+ 192:../../../drivers/hal/bc62xx_timer.c **** 		}
+ 193:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 194:../../../drivers/hal/bc62xx_timer.c **** 	return false;
+ 195:../../../drivers/hal/bc62xx_timer.c **** }
+ 576              		.loc 1 195 0
+ 577              		@ sp needed
+ 578 0190 10BD     		pop	{r4, pc}
+ 579              	.L52:
+ 580 0192 C046     		.align	2
+ 581              	.L51:
+ 582 0194 00000000 		.word	header_Timer
+ 583 0198 00000000 		.word	pheader
+ 584              		.cfi_endproc
+ 585              	.LFE48:
+ 587              		.align	1
+ 588              		.global	SYS_ReleaseAllTimer
+ 589              		.code	16
+ 590              		.thumb_func
+ 592              	SYS_ReleaseAllTimer:
+ 593              	.LFB49:
+ 196:../../../drivers/hal/bc62xx_timer.c **** 
+ 197:../../../drivers/hal/bc62xx_timer.c **** void SYS_ReleaseAllTimer()
+ 198:../../../drivers/hal/bc62xx_timer.c **** {
+ 594              		.loc 1 198 0
+ 595              		.cfi_startproc
+ 596              		@ args = 0, pretend = 0, frame = 0
+ 597              		@ frame_needed = 0, uses_anonymous_args = 0
+ 598              		@ link register save eliminated.
+ 199:../../../drivers/hal/bc62xx_timer.c **** 	SYS_TIMER_TYPE *pTemp;
+ 200:../../../drivers/hal/bc62xx_timer.c **** 	for(pTemp = pheader; pTemp->pNextTimer != NULL; pTemp = pTemp->pNextTimer)
+ 201:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 202:../../../drivers/hal/bc62xx_timer.c **** 		pTemp->mTimerStatus = TIMER_STOP;
+ 599              		.loc 1 202 0
+ 600 019c 0020     		movs	r0, #0
+ 200:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 601              		.loc 1 200 0
+ 602 019e 054B     		ldr	r3, .L57
+ 603 01a0 1A68     		ldr	r2, [r3]
+ 604              	.LVL46:
+ 605              	.L54:
+ 200:../../../drivers/hal/bc62xx_timer.c **** 	{
+ 606              		.loc 1 200 0 is_stmt 0 discriminator 1
+ 607 01a2 1169     		ldr	r1, [r2, #16]
+ 608 01a4 0029     		cmp	r1, #0
+ 609 01a6 02D0     		beq	.L56
+ 610              		.loc 1 202 0 is_stmt 1 discriminator 3
+ 611 01a8 1072     		strb	r0, [r2, #8]
+ 612              	.LVL47:
+ 613 01aa 0A00     		movs	r2, r1
+ 614 01ac F9E7     		b	.L54
+ 615              	.LVL48:
+ 616              	.L56:
+ 203:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 204:../../../drivers/hal/bc62xx_timer.c **** 	pheader = &header_Timer;
+ 617              		.loc 1 204 0
+ 618 01ae 024A     		ldr	r2, .L57+4
+ 619              	.LVL49:
+ 205:../../../drivers/hal/bc62xx_timer.c **** }
+ 620              		.loc 1 205 0
+ 621              		@ sp needed
+ 204:../../../drivers/hal/bc62xx_timer.c **** }
+ 622              		.loc 1 204 0
+ 623 01b0 1A60     		str	r2, [r3]
+ 624              		.loc 1 205 0
+ 625 01b2 7047     		bx	lr
+ 626              	.L58:
+ 627              		.align	2
+ 628              	.L57:
+ 629 01b4 00000000 		.word	pheader
+ 630 01b8 00000000 		.word	header_Timer
+ 631              		.cfi_endproc
+ 632              	.LFE49:
+ 634              		.global	__aeabi_uidivmod
+ 635              		.align	1
+ 636              		.code	16
+ 637              		.thumb_func
+ 639              	SYStick_handle:
+ 640              	.LFB50:
+ 206:../../../drivers/hal/bc62xx_timer.c **** 
+ 207:../../../drivers/hal/bc62xx_timer.c **** static void SYStick_handle(void)
+ 208:../../../drivers/hal/bc62xx_timer.c **** {
+ 641              		.loc 1 208 0
+ 642              		.cfi_startproc
+ 643              		@ args = 0, pretend = 0, frame = 0
+ 644              		@ frame_needed = 0, uses_anonymous_args = 0
+ 209:../../../drivers/hal/bc62xx_timer.c **** 	if(++tmpCnt%10 == 0){//each	systick interrupt is 10ms
+ 645              		.loc 1 209 0
+ 646 01bc 084B     		ldr	r3, .L61
+ 208:../../../drivers/hal/bc62xx_timer.c **** 	if(++tmpCnt%10 == 0){//each	systick interrupt is 10ms
+ 647              		.loc 1 208 0
+ 648 01be 10B5     		push	{r4, lr}
+ 649              	.LCFI4:
+ 650              		.cfi_def_cfa_offset 8
+ 651              		.cfi_offset 4, -8
+ 652              		.cfi_offset 14, -4
+ 653              		.loc 1 209 0
+ 654 01c0 1A68     		ldr	r2, [r3]
+ 655 01c2 0A21     		movs	r1, #10
+ 656 01c4 501C     		adds	r0, r2, #1
+ 657 01c6 1860     		str	r0, [r3]
+ 658 01c8 FFF7FEFF 		bl	__aeabi_uidivmod
+ 659              	.LVL50:
+ 660 01cc 0029     		cmp	r1, #0
+ 661 01ce 06D1     		bne	.L59
+ 662              	.LBB36:
+ 210:../../../drivers/hal/bc62xx_timer.c **** 		sys_tick_count++; //10
+ 663              		.loc 1 210 0
+ 664 01d0 044A     		ldr	r2, .L61+4
+ 665 01d2 1368     		ldr	r3, [r2]
+ 666 01d4 0133     		adds	r3, r3, #1
+ 667 01d6 1360     		str	r3, [r2]
+ 211:../../../drivers/hal/bc62xx_timer.c **** 		sys_Timer_Check_Flag = true;
+ 668              		.loc 1 211 0
+ 669 01d8 0122     		movs	r2, #1
+ 670 01da 034B     		ldr	r3, .L61+8
+ 671 01dc 1A70     		strb	r2, [r3]
+ 672              	.L59:
+ 673              	.LBE36:
+ 212:../../../drivers/hal/bc62xx_timer.c **** 	}
+ 213:../../../drivers/hal/bc62xx_timer.c **** }
+ 674              		.loc 1 213 0
+ 675              		@ sp needed
+ 676 01de 10BD     		pop	{r4, pc}
+ 677              	.L62:
+ 678              		.align	2
+ 679              	.L61:
+ 680 01e0 00000000 		.word	.LANCHOR0
+ 681 01e4 00000000 		.word	sys_tick_count
+ 682 01e8 00000000 		.word	sys_Timer_Check_Flag
+ 683              		.cfi_endproc
+ 684              	.LFE50:
+ 686              		.bss
+ 687              		.align	2
+ 688              		.set	.LANCHOR0,. + 0
+ 691              	tmpCnt:
+ 692 0000 00000000 		.space	4
+ 693              		.text
+ 694              	.Letext0:
+ 695              		.file 4 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 696              		.file 5 "d:\\meshstack\\bc6218\\tools\\gcc-arm-none-eabi-5_4-2016q3-20160926-win32\\arm-none-eabi\
+ 697              		.file 6 "../../../device/inc/bc62xx.h"
+ 698              		.file 7 "../../../drivers/hal/inc/bc62xx_timer.h"
+ 699              		.file 8 "../../../device/inc/systick.h"

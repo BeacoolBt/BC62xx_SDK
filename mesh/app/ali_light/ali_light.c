@@ -2,7 +2,6 @@
 #include "mm_defines.h"
 #include "meshTimer.h"
 
-#include "mm_ali.h"
 #include "bc_flash.h"
 #include "bc_sys.h"
 
@@ -12,7 +11,7 @@
 
 static ali_light_t* p_ali_light = NULL;
 
-static void ali_light_period_ind_timer_cb(void* param);
+static void ali_light_period_ind_timer_cb(int param);
 
 static void _ready_to_indicate(bool random)
 {
@@ -26,7 +25,7 @@ static void _ready_to_indicate(bool random)
 	//if bound
 	if(p_ali_light->provState){
 		SYS_SetTimer(&p_ali_light->periodIndTimer, (int)delay_time/10, 
-					TIMER_SINGLE, (Timer_Expire_CB)ali_light_period_ind_timer_cb);
+					TIMER_SINGLE, ali_light_period_ind_timer_cb);
 	}
 }
 
@@ -52,14 +51,18 @@ static void _light_cw_init(void)
 	t.tp = p_ali_light->tp;
 	t.ln = p_ali_light->ln;
 #if (LIGHT_CW_WITH_RGB)
+	t.onRgb = ALI_CW_OFF;
+	t.lnRgb = p_ali_light->ln;
 	t.rVal = p_ali_light->r;
 	t.gVal = p_ali_light->g;
 	t.bVal = p_ali_light->b;
+	t.lmode = p_ali_light->lmode;
 #endif
 	led_cw_init(&t);
 }
 void ali_light_cw_set_on_off(uint8_t on)
 {
+	M_PRINTF(L_APP, "on[%x]", on);
 #ifdef BREATH_CONFIG
 	p_ali_light->breath.mode = BREATH_MODE_FLOW;
 	p_ali_light->breath.rCnt = 1;
@@ -107,6 +110,11 @@ void ali_light_cw_set_temperature(uint16_t tp)
 	led_cw_set_temperature(tp, NULL);
 #endif
 	p_ali_light->tp = tp;
+
+#if (LIGHT_CW_WITH_RGB)
+	p_ali_light->lmode = 0;
+#endif
+
 	//do save 
 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
@@ -117,23 +125,6 @@ uint16_t ali_light_cw_get_temperature(void)
 	return led_cw_get_temperature();
 }
 
-void ali_light_ltn_set_on_off(uint8_t on)
-{
-	led_ltn_set_on_off(on);
-}
-uint8_t ali_light_ltn_get_on_off(void)
-{
-	return led_ltn_get_on_off();
-}
-
-void ali_light_ltn_set_lightness(uint16_t ln)
-{
-	led_ltn_set_lightness(ln);
-}
-uint16_t ali_light_ltn_get_lightness(void)
-{
-	return led_ltn_get_lightness();
-}
 int ali_light_rgb_get(uint16_t* l, uint16_t* h, uint16_t* s)
 {
 	*l = 0;
@@ -205,11 +196,14 @@ int ali_light_rgb_set(uint16_t l, uint16_t h, uint16_t s)
 		M_PRINTF(L_APP, "color error");
 		return 0;
 	}
-
-	led_cwrgb_set_color(r, g, b, NULL);
+	p_ali_light->breath.mode = BREATH_MODE_FLOW;
+	p_ali_light->breath.rCnt = 1;
+	p_ali_light->breath.pCnt = REPEAT_COUNTER;
+	led_cwrgb_set_color(r, g, b, &p_ali_light->breath);
 	p_ali_light->r = r;
 	p_ali_light->g = g;
 	p_ali_light->b = b;
+	p_ali_light->lmode = 1;
 	//do save
 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
@@ -217,7 +211,7 @@ int ali_light_rgb_set(uint16_t l, uint16_t h, uint16_t s)
 #endif
 	return 0;
 }
-static void ali_light_bind_timer_cb(void* param)
+static void ali_light_bind_timer_cb(int param)
 {
 	uint16_t status;
 
@@ -250,7 +244,7 @@ static void ali_light_bind_timer_cb(void* param)
 		mesh_model_t* t = &p_ali_light->model[i];
 		//status = bc_m_mio_add_subscription(t->lid, 0xF000);
 		bc_m_mio_add_subscription(t->lid, ALI_GROUP_ADDRESS_LIGHT);
-		bc_m_mio_add_subscription(t->lid, 0xCFFF);
+		bc_m_mio_add_subscription(t->lid, ALI_GROUP_ADDRESS1);
 		
 	}
 	mesh_model_t* t = &p_ali_light->model[p_ali_light->model_cnt-1];
@@ -270,10 +264,9 @@ static void ali_light_bind_timer_cb(void* param)
 #endif
 	_ready_to_indicate(true);
 
-	mesh_con_stop(0);//disconncet ble
 }
 
-static void ali_light_period_ind_timer_cb(void* param)
+static void ali_light_period_ind_timer_cb(int param)
 {
 	uint8_t data[12];
 	
@@ -312,11 +305,6 @@ uint8_t ali_light_quick_restore_init(void)
 	p_ali_light->breath.rCnt = 1;
 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
 	led_cw_set_on_off(ALI_CW_ON, &p_ali_light->breath);
-
-	p_ali_light->breath.mode = BREATH_MODE_H2L2H;
-	p_ali_light->breath.rCnt = 5;
-	p_ali_light->breath.pCnt = REPEAT_COUNTER;
-	led_cw_set_breath(&p_ali_light->breath);
 #else
 	//TODO: 1HZ flash 3 timers
 	uint8_t i = 6;
@@ -334,11 +322,7 @@ uint8_t ali_light_quick_restore_init(void)
 	}while(i-->1);
 #endif
 	//restore flash parameter
-	bc_m_clear_config();
-	//clear quick count
-	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
-
-	bc_sys_reset();
+	ali_light_factory_reset();
 	return 1;
 }
 
@@ -346,7 +330,7 @@ void ali_light_prov_state_cb(uint8_t state)
 {
 #ifdef APP_FOR_ALI
 	if(state == M_PROV_SUCCEED_APP){
-		SYS_SetTimer(&p_ali_light->bindDelayTimer, (int)50/10, 
+		SYS_SetTimer(&p_ali_light->bindDelayTimer, (int)500/10, 
 					TIMER_SINGLE, (Timer_Expire_CB)ali_light_bind_timer_cb);
 		return;
 	}
@@ -361,14 +345,16 @@ uint8_t ali_light_prov_state_get(void)
 
 void ali_light_factory_reset()
 {
-	bc_m_clear_config();
-	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
 #ifdef BREATH_CONFIG
 	p_ali_light->breath.mode = BREATH_MODE_H2L2H;
 	p_ali_light->breath.rCnt = 5;
 	p_ali_light->breath.pCnt = REPEAT_COUNTER;
 	led_cw_set_breath(&p_ali_light->breath);
 #endif
+
+	bc_m_clear_config();
+	bc_flash_erase(FLASH_ALI_START_ADDRRESS, FLASH_ALI_USED_PAGE_SIZE);
+	
 	bc_sys_reset();
 }
 #ifdef FOR_ALI_TEST
@@ -415,6 +401,7 @@ static void _reload_defalut_param()
 	p_ali_light->r = ALI_DEFAULT_R_VAL;
 	p_ali_light->g = ALI_DEFAULT_G_VAL;
 	p_ali_light->b = ALI_DEFAULT_B_VAL;
+	p_ali_light->lmode = 0;
 	#endif
 	p_ali_light->saveCfgCrc = bc_sys_check_sum((uint8_t*)p_ali_light, ALI_LIGHT_SAVE_LEN-1);
 	bc_flash_erase(FLASH_ALI_START_ADDRRESS, 1);
@@ -436,11 +423,7 @@ uint8_t ali_light_param_init()
 		}
 	}
 
-	if(p_ali_light->dType == PID_CW){
-		_light_cw_init();
-	}else{//PID_LTN
-		led_ltn_init(NULL);
-	}
+	_light_cw_init();
 	return 0;
 }
 
@@ -466,11 +449,13 @@ static void _ali_vendor_rx_cb(const m_lid_t model_lid, const uint8_t opcode, con
 				uint16_t s = data[7] + (data[8]<<8);
 				ali_light_rgb_set(l,h,s);
 			}
+			//do response
+			bc_mm_ali_vendor_send(model_lid, MM_MSG_ALIS_ATTR_STATUS, (uint8_t*)data, len);
 		}
-		//do response
-		bc_mm_ali_vendor_send(model_lid, MM_MSG_ALIS_ATTR_STATUS, (uint8_t*)data, len);
 	}break;
-	default:break;
+	default:
+		m_printf_hex(L_APP, "Ali recv other", data, len);
+	break;
 	}
 }
 
@@ -496,26 +481,18 @@ uint8_t ali_light_init(mesh_model_t** mdl, uint8_t* mcnt)
 	SYS_SetTimer(&p_ali_light->startDelayTimer, (int)ALI_QUICK_START_TIME/10, 
 					TIMER_SINGLE, (Timer_Expire_CB)ali_light_quick_restore_timer_cb);
 
-	if(p_ali_light->dType == PID_CW){
-		p_ali_light->oo_ctrl.set = ali_light_cw_set_on_off;
-		p_ali_light->oo_ctrl.get = ali_light_cw_get_on_off;
-	}else{//PID_LTN
-		p_ali_light->oo_ctrl.set = ali_light_ltn_set_on_off;
-		p_ali_light->oo_ctrl.get = ali_light_ltn_get_on_off;
-	}
+	p_ali_light->oo_ctrl.set = ali_light_cw_set_on_off;
+	p_ali_light->oo_ctrl.get = ali_light_cw_get_on_off;
 	mesh_model_t* tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
 	tmModel->offset = 0;//element num
+	/*Init generic on off model*/
 	bc_mm_gens_oo_init(tmModel, &p_ali_light->oo_ctrl);
 
-	if(p_ali_light->dType == PID_CW){
-		p_ali_light->light_ln_ctrl.set = ali_light_cw_set_lightness;
-		p_ali_light->light_ln_ctrl.get = ali_light_cw_get_lightness;
-	}else{//PID_LTN
-		p_ali_light->light_ln_ctrl.set = ali_light_ltn_set_lightness;
-		p_ali_light->light_ln_ctrl.get = ali_light_ltn_get_lightness;
-	}
+	p_ali_light->light_ln_ctrl.set = ali_light_cw_set_lightness;
+	p_ali_light->light_ln_ctrl.get = ali_light_cw_get_lightness;
 	tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
 	tmModel->offset = 0;//element num
+	/*Init light lightness model*/
 	bc_mm_light_ln_init(tmModel, &p_ali_light->light_ln_ctrl);
 
 	p_ali_light->light_ctl_ctrl.ctl_set = ali_light_cw_set_temperature;
@@ -524,11 +501,15 @@ uint8_t ali_light_init(mesh_model_t** mdl, uint8_t* mcnt)
 	p_ali_light->light_ctl_ctrl.ln_get = ali_light_cw_get_lightness;
 	tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
 	tmModel->offset = 0;//element num
+	/*Init light control model*/
 	bc_mm_light_ctl_init(tmModel, &p_ali_light->light_ctl_ctrl);
 
 	tmModel = &p_ali_light->model[p_ali_light->model_cnt++];
 	tmModel->offset = 0;//element num
-	bc_mm_alis_vendor_init(tmModel, _ali_vendor_rx_cb);
+	
+	/*Init Ali vendor model*/
+	p_ali_light->timer_ctrl.oo_ctrl = &p_ali_light->oo_ctrl;
+	bc_mm_alis_vendor_init(tmModel, _ali_vendor_rx_cb, &p_ali_light->timer_ctrl);
 	
 	*mdl = p_ali_light->model;
 	*mcnt = p_ali_light->model_cnt;

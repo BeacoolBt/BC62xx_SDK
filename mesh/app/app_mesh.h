@@ -23,15 +23,25 @@ typedef uint8_t (*ali_app_prov_state_get)(void);
 typedef uint8_t (*ali_app_init)(mesh_model_t** mdl, uint8_t* mcnt);
 typedef uint8_t (*ali_app_deinit)(mesh_model_t** mdl);
 typedef void (*ali_app_hal_rx)(const HAL_TYPE type, const uint8_t *data , uint8_t len);
+/*define systick function for application */
+typedef void (*ali_app_tick_handler)(void);
 
 typedef struct
 {
+	/*Do factory reset*/
 	ali_app_factory_reset factory_reset;
+	/*When providion status changed, use the function to indicate application*/
 	ali_app_prov_state_cb prov_state_cb;
+	/*Get application saved provinsion status*/
 	ali_app_prov_state_get prov_state_get;
+	/*Application init*/
 	ali_app_init app_init;
+	/*Application deinit*/
 	ali_app_deinit app_deinit;
+	/*When received data from hardware, transmit date to application*/
 	ali_app_hal_rx hal_rx;
+	/*when systick is arrived, call this function*/
+	ali_app_tick_handler tick_handler;
 }app_t;
 
 

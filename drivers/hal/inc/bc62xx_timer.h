@@ -115,7 +115,6 @@ void SYS_ReleaseAllTimer();
   *@retval false the timer is not exist.  
   */
 bool SYS_TimerisExist(SYS_TIMER_TYPE *pTimer);
-void SYStick_handle();
 
 #endif/*__BC62XX_TIMER_H__*/
 
