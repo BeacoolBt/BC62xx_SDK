@@ -20,3 +20,4 @@ ExampLe Description:
 6、\BC62xx_SDK\Example\btScan\uart_protocol
     uart serial protocol resolution example 
   
+
