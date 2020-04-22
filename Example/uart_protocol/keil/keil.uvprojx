@@ -285,6 +285,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\device\bc_sys.c</FilePath>
             </File>
+            <File>
+              <FileName>systick.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\device\systick.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

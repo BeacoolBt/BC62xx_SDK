@@ -23,6 +23,7 @@ SRC_FILES = ../src/main.c \
 			$(SDK_ROOT)/drivers/ProtocolResolution/ProtocolRln.c \
 			$(SDK_ROOT)/device/system.c \
 			$(SDK_ROOT)/device/bc_sys.c \
+			$(SDK_ROOT)/device/systick.c \
            
 OBJ = ${patsubst %.c, %.o, ${SRC_FILES}} 
 

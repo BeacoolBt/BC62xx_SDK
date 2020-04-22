@@ -27,6 +27,7 @@
 #define M_ALI_PUBLISH_TTL		(6)
 #define M_ALI_PUBLISH_PERIOD	(0x28)
 #define M_ALI_PUBLISH_RETX		(0x82) //400ms(8) & 2+1 times   01000 011
+								//(0x25) //250ms(4) & 5 times retransmit   00100 101
 
 
 // List of 3-byte opcodes for the VENDOR Server model
