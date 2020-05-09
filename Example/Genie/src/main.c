@@ -8,7 +8,7 @@
 
 #include "bc62xx_uart.h"
 #include "bc62xx_ble.h" 
-//#include "bc62xx_wdt.h"
+#include "bc62xx_wdt.h"
 #include "gatt_ota.h"
 #include "portBle.h"
 
@@ -204,7 +204,7 @@ int main()
 		app_mesh_start();
 	}
 #endif/*BLE_MESH*/
-	//WDT_Enable();
+	WDT_Enable();
 	/*Init gatt ota*/
 	gatt_ota_init();
 	/*Uart protocol init*/
@@ -217,7 +217,7 @@ int main()
 			bc_m_mesh_loop();
 		}
 		#endif/*BLE_MESH*/
-		//WDT_Kick();
+		WDT_Kick();
 
 		/*ble process*/
 		mesh_ble_process();

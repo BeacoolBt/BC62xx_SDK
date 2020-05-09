@@ -8,6 +8,11 @@
 void WDT_Enable(void);
 
 /**
+ *@brief Get watch dog status.   
+ */ 
+bool WDT_Is_Enabled(void);
+
+/**
  *@brief disable watch dog.   
  */ 
 void WDT_Disable(void);

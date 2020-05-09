@@ -6,6 +6,7 @@
 #include "co_com.h"
 #include "flash_config.h"
 #include "portBle.h"
+#include "bc62xx_wdt.h"
 
 #if (BLE_MESH)
 
@@ -437,7 +438,16 @@ extern void mesh_pub_key_read(bool renew, mesh_sec_pub_key_res_cb res_cb);
 
 __INLINE_S__ void mesh_sec_pub_key_read(bool renew, mesh_sec_pub_key_res_cb res_cb)
 {
+	//if wdt is enable, then disable it
+	bool wdt_enable = WDT_Is_Enabled();
+	if(wdt_enable){
+		WDT_Disable();
+	}
 	mesh_pub_key_read(renew, res_cb);
+	//if wdt is enable, then enable it
+	if(wdt_enable){
+		WDT_Enable();
+	}
 }
 
 /**
@@ -451,8 +461,17 @@ __INLINE_S__ void mesh_sec_pub_key_read(bool renew, mesh_sec_pub_key_res_cb res_
  */
 __INLINE_S__ void mesh_sec_ecdh_secret(const uint8_t* p_pub_key_x, const uint8_t* p_pub_key_y, mesh_sec_ecdh_secret_res_cb res_cb)
 {
+	//if wdt is enable, then disable it
+	bool wdt_enable = WDT_Is_Enabled();
+	if(wdt_enable){
+		WDT_Disable();
+	}
 	extern void mesh_ecdh_secret(const uint8_t* p_pub_key_x, const uint8_t* p_pub_key_y, mesh_sec_ecdh_secret_res_cb res_cb);
 	mesh_ecdh_secret(p_pub_key_x, p_pub_key_y, res_cb);
+	//if wdt is enable, then enable it
+	if(wdt_enable){
+		WDT_Enable();
+	}
 }
 
 #endif // (BLE_MESH)
