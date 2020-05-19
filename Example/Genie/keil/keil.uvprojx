@@ -340,6 +340,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\drivers\ProtocolResolution\ProtocolRln.c</FilePath>
             </File>
+            <File>
+              <FileName>bc62xx_wdt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\hal\bc62xx_wdt.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
